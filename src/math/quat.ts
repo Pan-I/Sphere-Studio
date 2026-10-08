@@ -4,11 +4,17 @@ import type { Rng } from './random'
 export type Vec3 = readonly [number, number, number]
 export type Quat = readonly [number, number, number, number] // x, y, z, w
 
-const cross = (a: Vec3, b: Vec3): Vec3 => [
+export const cross = (a: Vec3, b: Vec3): Vec3 => [
     a[1] * b[2] - a[2] * b[1],
     a[2] * b[0] - a[0] * b[2],
     a[0] * b[1] - a[1] * b[0],
 ]
+
+export const dot = (a: Vec3, b: Vec3): number =>
+    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+/** Inverse of a unit quaternion. */
+export const conjugate = (q: Quat): Quat => [-q[0], -q[1], -q[2], q[3]]
 
 /** Uniformly distributed random rotation (Shoemake's method). */
 export function randomQuat(rand: Rng): Quat {
