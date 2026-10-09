@@ -2,7 +2,7 @@
 import { rotate } from '../../math/quat'
 import { sectorOf } from '../../math/sphere'
 import {
-    MAX_SEED, buildShareUrl, parseSeed, quatFromSeed, randomSeed, readSeedFromUrl,
+    MAX_SEED, buildShareUrl, parseSeed, quatFromSeed, randomSeed, readSeedFromUrl, poseFromSeed
 } from './seed'
 
 describe('parseSeed', () => {
@@ -58,6 +58,39 @@ describe('quatFromSeed', () => {
         for (const c of counts) {
             expect(c / n).toBeGreaterThan(0.09) // expected 0.125
             expect(c / n).toBeLessThan(0.16)
+        }
+    })
+})
+
+describe('poseFromSeed', () => {
+    it('keeps orientations stable, so links shared earlier still show the same pose', () => {
+        const q = quatFromSeed(48213)
+        const expected = [-0.8120907672079867, 0.07716419578870304, -0.35791537029873954, -0.4543686393312621]
+        expected.forEach((v, i) => expect(q[i]).toBeCloseTo(v, 10))
+    })
+
+    it('uses the same orientation as quatFromSeed', () => {
+        for (const seed of [0, 7, 1234, MAX_SEED]) {
+            expect(poseFromSeed(seed).q).toEqual(quatFromSeed(seed))
+        }
+    })
+
+    it('is deterministic and keeps the marker pick in [0, 1)', () => {
+        expect(poseFromSeed(99)).toEqual(poseFromSeed(99))
+        for (let seed = 0; seed < 1000; seed++) {
+            const { markerPick } = poseFromSeed(seed)
+            expect(markerPick).toBeGreaterThanOrEqual(0)
+            expect(markerPick).toBeLessThan(1)
+        }
+    })
+
+    it('spreads marker picks evenly across consecutive seeds', () => {
+        const thirds = [0, 0, 0]
+        const n = 6000
+        for (let seed = 0; seed < n; seed++) thirds[Math.floor(poseFromSeed(seed).markerPick * 3)]++
+        for (const c of thirds) {
+            expect(c / n).toBeGreaterThan(0.29) // expected 0.333
+            expect(c / n).toBeLessThan(0.38)
         }
     })
 })

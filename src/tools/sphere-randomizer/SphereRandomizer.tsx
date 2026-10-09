@@ -1,8 +1,11 @@
 ﻿import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { pickMarker } from '../../math/sphere'
 import { drawSphere } from './drawSphere'
+import { DisplayControls } from './DisplayControls'
+import { loadOptions, saveOptions } from './displayOptions'
 import { MAX_SECONDS, MIN_SECONDS, parseInterval, tick, type Countdown } from './countdown'
 import {
-    MAX_SEED, buildShareUrl, parseSeed, quatFromSeed, randomSeed, readSeedFromUrl,
+    MAX_SEED, buildShareUrl, parseSeed, poseFromSeed, randomSeed, readSeedFromUrl,
 } from './seed'
 
 const SIZE = 480
@@ -16,13 +19,17 @@ export function SphereRandomizer() {
     const [seed, setSeed] = useState<number>(
         () => readSeedFromUrl(window.location.search) ?? randomSeed(),
     )
-    const q = useMemo(() => quatFromSeed(seed), [seed])
+    const pose = useMemo(() => {
+        const { q, markerPick } = poseFromSeed(seed)
+        return { q, marker: pickMarker(q, markerPick) }
+    }, [seed])
 
     const [seedText, setSeedText] = useState('')
     const [copyState, setCopyState] = useState<CopyState>('idle')
     const [intervalText, setIntervalText] = useState('30')
     const [running, setRunning] = useState(false)
     const [countdown, setCountdown] = useState<Countdown | null>(null)
+    const [options, setOptions] = useState(loadOptions)
 
     const seconds = parseInterval(intervalText)
     const parsedSeed = parseSeed(seedText)
@@ -37,8 +44,13 @@ export function SphereRandomizer() {
         canvas.width = SIZE * dpr
         canvas.height = SIZE * dpr
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-        drawSphere(ctx, SIZE, q)
-    }, [q])
+        drawSphere(ctx, SIZE, pose.q, options, pose.marker)
+    }, [pose, options])
+
+    // Remember display preferences between visits.
+    useEffect(() => {
+        saveOptions(options)
+    }, [options])
 
     // Keep the address bar in sync, so the current URL is always a shareable link.
     useEffect(() => {
@@ -159,6 +171,7 @@ export function SphereRandomizer() {
                 </form>
             </div>
             {seedInvalid && <p>Seeds are whole numbers from 0 to {MAX_SEED}.</p>}
+            <DisplayControls options={options} onChange={setOptions} />
         </div>
     )
 }
