@@ -54,7 +54,7 @@ export function SphereRandomizer() {
 
     // Keep the address bar in sync, so the current URL is always a shareable link.
     useEffect(() => {
-        window.history.replaceState(null, '', buildShareUrl(window.location.href, seed))
+        window.history.replaceState(window.history.state, '', buildShareUrl(window.location.href, seed))
     }, [seed])
 
     // Tick once per second while running.
