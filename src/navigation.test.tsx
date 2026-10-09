@@ -84,4 +84,12 @@ describe('navigation with seeded poses', () => {
         expect(container.querySelector('canvas')).not.toBeNull()
         expect(document.title).toContain('Sphere Randomizer')
     })
+
+    it('lets the canvas scale to the screen instead of pinning it to a pixel size', async () => {
+        await mount('/sphere-randomizer?seed=48213')
+        const canvas = container.querySelector('canvas')!
+        expect(canvas.style.width).toBe('')
+        expect(canvas.style.height).toBe('')
+        expect(canvas.className).toContain('sphere-canvas')
+    })
 })

@@ -1,5 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { pickMarker } from '../../math/sphere'
+import { bufferScale } from './canvasScale'
 import { drawSphere } from './drawSphere'
 import { DisplayControls } from './DisplayControls'
 import { loadOptions, saveOptions } from './displayOptions'
@@ -7,6 +8,7 @@ import { MAX_SECONDS, MIN_SECONDS, parseInterval, tick, type Countdown } from '.
 import {
     MAX_SEED, buildShareUrl, parseSeed, poseFromSeed, randomSeed, readSeedFromUrl,
 } from './seed'
+import './SphereRandomizer.css'
 
 const SIZE = 480
 
@@ -40,10 +42,12 @@ export function SphereRandomizer() {
         const canvas = canvasRef.current
         const ctx = canvas?.getContext('2d')
         if (!canvas || !ctx) return
-        const dpr = window.devicePixelRatio || 1
-        canvas.width = SIZE * dpr
-        canvas.height = SIZE * dpr
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+        // Size the drawing buffer for the screen, capped at 2x (see bufferScale).
+        const pixels = Math.round(SIZE * bufferScale(window.devicePixelRatio))
+        canvas.width = pixels
+        canvas.height = pixels
+        const scale = pixels / SIZE
+        ctx.setTransform(scale, 0, 0, scale, 0, 0)
         drawSphere(ctx, SIZE, pose.q, options, pose.marker)
     }, [pose, options])
 
@@ -121,13 +125,24 @@ export function SphereRandomizer() {
     const startLabel = countdown ? 'Resume' : 'Start'
 
     return (
-        <div>
-            <canvas ref={canvasRef} style={{ width: SIZE, height: SIZE }} />
+        <div className="sphere-tool">
+            <canvas
+                ref={canvasRef}
+                className="sphere-canvas"
+                role="img"
+                aria-label={`Sphere divided into eight sectors, pose ${seed}`}
+            />
 
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                <button onClick={randomize}>Randomize</button>
-                <label>
-                    Interval (seconds){' '}
+            <div className="sphere-actions">
+                <button className="primary" onClick={randomize}>Randomize</button>
+                <button onClick={toggle} disabled={!running && seconds === null}>
+                    {running ? 'Pause' : startLabel}
+                </button>
+            </div>
+
+            <div className="sphere-timer-row">
+                <label className="sphere-field">
+                    Interval (seconds)
                     <input
                         type="number"
                         min={MIN_SECONDS}
@@ -136,41 +151,40 @@ export function SphereRandomizer() {
                         value={intervalText}
                         disabled={running}
                         onChange={(e) => onIntervalChange(e.target.value)}
-                        style={{ width: '5rem' }}
                     />
                 </label>
-                <button onClick={toggle} disabled={!running && seconds === null}>
-                    {running ? 'Pause' : startLabel}
-                </button>
-                <span role="timer">{shown === null ? '–' : `${shown}s`}</span>
+                <span role="timer" className="sphere-timer">{shown === null ? '–' : `${shown}s`}</span>
             </div>
             {seconds === null && (
-                <p>Enter a whole number of seconds from {MIN_SECONDS} to {MAX_SECONDS}.</p>
+                <p className="sphere-hint">
+                    Enter a whole number of seconds from {MIN_SECONDS} to {MAX_SECONDS}.
+                </p>
             )}
 
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '0.75rem' }}>
+            <div className="sphere-seed-row">
         <span>
           Seed: <strong>{seed}</strong>
         </span>
                 <button onClick={copyLink}>Copy link</button>
-                <span role="status" aria-live="polite">
+                <span className="sphere-status" role="status" aria-live="polite">
           {copyState === 'copied' && 'Link copied!'}
                     {copyState === 'failed' && 'Could not copy. Copy the address bar instead.'}
         </span>
-                <form onSubmit={loadSeed} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <input
-                        type="text"
-                        inputMode="numeric"
-                        placeholder={`Load seed (0–${MAX_SEED})`}
-                        aria-label="Seed to load"
-                        value={seedText}
-                        onChange={(e) => setSeedText(e.target.value)}
-                        style={{ width: '9rem' }}
-                    />
-                    <button type="submit" disabled={parsedSeed === null}>Load</button>
-                </form>
             </div>
-            {seedInvalid && <p>Seeds are whole numbers from 0 to {MAX_SEED}.</p>}
+
+            <form className="sphere-seed-form" onSubmit={loadSeed}>
+                <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder={`Load seed (0–${MAX_SEED})`}
+                    aria-label="Seed to load"
+                    value={seedText}
+                    onChange={(e) => setSeedText(e.target.value)}
+                />
+                <button type="submit" disabled={parsedSeed === null}>Load</button>
+            </form>
+            {seedInvalid && <p className="sphere-hint">Seeds are whole numbers from 0 to {MAX_SEED}.</p>}
+
             <DisplayControls options={options} onChange={setOptions} />
         </div>
     )

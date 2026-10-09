@@ -80,3 +80,52 @@ a {
 .tool-card p {
   margin: 0;
 }
+
+/* Form controls: comfortable touch targets, and 16px text so iOS doesn't zoom in on focus. */
+button,
+input[type='text'],
+input[type='number'],
+select {
+  box-sizing: border-box;
+  min-height: 44px;
+  font: inherit;
+  font-size: 1rem;
+  touch-action: manipulation;
+}
+
+button {
+  padding: 0 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: inherit;
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+input[type='text'],
+input[type='number'],
+select {
+  padding: 0 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+}
+
+@media (max-width: 30rem) {
+  .site-main {
+    padding: 1rem 0.75rem;
+  }
+}

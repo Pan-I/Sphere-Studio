@@ -22,11 +22,11 @@ export function DisplayControls({ options, onChange }: Props) {
     const set = (patch: Partial<DisplayOptions>) => onChange({ ...options, ...patch })
 
     return (
-        <fieldset style={{ marginTop: '1rem', display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <fieldset className="sphere-display">
             <legend>Display</legend>
 
-            <label>
-                Shading{' '}
+            <label className="sphere-option">
+                <span>Shading</span>
                 <select
                     value={options.shading}
                     onChange={(e) => {
@@ -40,35 +40,37 @@ export function DisplayControls({ options, onChange }: Props) {
                 </select>
             </label>
 
-            <label>
-                Line thickness{' '}
-                <input
-                    type="range"
-                    min={LINE_WIDTH_MIN}
-                    max={LINE_WIDTH_MAX}
-                    step={1}
-                    value={options.lineWidth}
-                    onChange={(e) => set({ lineWidth: clampLineWidth(Number(e.target.value)) })}
-                />{' '}
-                {options.lineWidth}px
+            <label className="sphere-option">
+                <span>Line thickness</span>
+                <span className="sphere-range">
+          <input
+              type="range"
+              min={LINE_WIDTH_MIN}
+              max={LINE_WIDTH_MAX}
+              step={1}
+              value={options.lineWidth}
+              onChange={(e) => set({ lineWidth: clampLineWidth(Number(e.target.value)) })}
+          />
+          <output>{options.lineWidth}px</output>
+        </span>
             </label>
 
-            <label>
+            <label className="sphere-option">
+                <span>Show far-side lines</span>
                 <input
                     type="checkbox"
                     checked={options.showFarSide}
                     onChange={(e) => set({ showFarSide: e.target.checked })}
-                />{' '}
-                Show far-side lines
+                />
             </label>
 
-            <label>
-            <input
-                type="checkbox"
-                checked={options.showMarker}
-                onChange={(e) => set({ showMarker: e.target.checked })}
-            />{' '}
-            Show center marker
+            <label className="sphere-option">
+                <span>Show center marker</span>
+                <input
+                    type="checkbox"
+                    checked={options.showMarker}
+                    onChange={(e) => set({ showMarker: e.target.checked })}
+                />
             </label>
         </fieldset>
     )

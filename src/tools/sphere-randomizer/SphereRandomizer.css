@@ -1,0 +1,130 @@
+﻿/* One column on every screen size: canvas first, then controls in the order you reach for them. */
+.sphere-tool {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 30rem;
+}
+
+/* Scales down to fit narrow screens. aspect-ratio keeps it square, and also reserves the space
+   before the first draw so the page doesn't jump. */
+.sphere-canvas {
+    display: block;
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    aspect-ratio: 1;
+}
+
+.sphere-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.sphere-actions button {
+    flex: 1;
+}
+
+.sphere-timer-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.sphere-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.sphere-field input {
+    width: 7rem;
+}
+
+.sphere-timer {
+    font-size: 1.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.sphere-seed-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+}
+
+/* Own line with reserved height, so "Link copied!" doesn't shift the layout. */
+.sphere-status {
+    flex-basis: 100%;
+    min-height: 1.5em;
+}
+
+.sphere-seed-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.sphere-seed-form input {
+    flex: 1;
+    min-width: 0;
+}
+
+.sphere-hint {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.sphere-display {
+    margin: 0;
+    padding: 0.5rem 1rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+}
+
+.sphere-display legend {
+    padding: 0 0.4rem;
+    font-weight: 600;
+}
+
+.sphere-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 44px;
+}
+
+.sphere-option select {
+    min-width: 9rem;
+}
+
+.sphere-option input[type='checkbox'] {
+    width: 1.4rem;
+    height: 1.4rem;
+    margin: 0;
+    accent-color: var(--accent);
+}
+
+.sphere-range {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.sphere-range input {
+    flex: 1;
+    min-width: 6rem;
+    max-width: 12rem;
+    height: 44px;
+    accent-color: var(--accent);
+}
+
+.sphere-range output {
+    min-width: 3ch;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
