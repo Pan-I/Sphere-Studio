@@ -1,11 +1,11 @@
-﻿// @vitest-environment jsdom
+// @vitest-environment jsdom
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import App from './App'
+import App from '../App'
 
-    ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
 let container: HTMLDivElement
 let root: Root
@@ -13,7 +13,11 @@ let root: Root
 const mount = async (url: string) => {
     window.history.replaceState(null, '', url)
     await act(async () => {
-        root.render(<BrowserRouter><App /></BrowserRouter>)
+        root.render(
+            <BrowserRouter>
+                <App />
+            </BrowserRouter>,
+        )
     })
 }
 const click = async (el: Element | null) => {
@@ -28,7 +32,8 @@ const seedInUrl = () => new URLSearchParams(window.location.search).get('seed')
 
 beforeEach(() => {
     // jsdom has no canvas; this keeps its "not implemented" warnings out of the test output.
-    HTMLCanvasElement.prototype.getContext = (() => null) as typeof HTMLCanvasElement.prototype.getContext
+    HTMLCanvasElement.prototype.getContext = (() =>
+        null) as typeof HTMLCanvasElement.prototype.getContext
     container = document.createElement('div')
     document.body.appendChild(container)
     root = createRoot(container)

@@ -1,4 +1,4 @@
-﻿/* One column on every screen size: canvas first, then controls in the order you reach for them. */
+/* One column on every screen size: canvas first, then controls in the order you reach for them. */
 .sphere-tool {
     display: flex;
     flex-direction: column;

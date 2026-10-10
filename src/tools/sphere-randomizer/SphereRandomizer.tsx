@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { pickMarker } from '../../math/sphere'
 import { bufferScale } from './canvasScale'
 import { drawSphere } from './drawSphere'
@@ -6,7 +6,12 @@ import { DisplayControls } from './DisplayControls'
 import { loadOptions, saveOptions } from './displayOptions'
 import { MAX_SECONDS, MIN_SECONDS, parseInterval, tick, type Countdown } from './countdown'
 import {
-    MAX_SEED, buildShareUrl, parseSeed, poseFromSeed, randomSeed, readSeedFromUrl,
+    MAX_SEED,
+    buildShareUrl,
+    parseSeed,
+    poseFromSeed,
+    randomSeed,
+    readSeedFromUrl,
 } from './seed'
 import './SphereRandomizer.css'
 
@@ -58,7 +63,11 @@ export function SphereRandomizer() {
 
     // Keep the address bar in sync, so the current URL is always a shareable link.
     useEffect(() => {
-        window.history.replaceState(window.history.state, '', buildShareUrl(window.location.href, seed))
+        window.history.replaceState(
+            window.history.state,
+            '',
+            buildShareUrl(window.location.href, seed),
+        )
     }, [seed])
 
     // Tick once per second while running.
@@ -134,7 +143,9 @@ export function SphereRandomizer() {
             />
 
             <div className="sphere-actions">
-                <button className="primary" onClick={randomize}>Randomize</button>
+                <button className="primary" onClick={randomize}>
+                    Randomize
+                </button>
                 <button onClick={toggle} disabled={!running && seconds === null}>
                     {running ? 'Pause' : startLabel}
                 </button>
@@ -153,7 +164,9 @@ export function SphereRandomizer() {
                         onChange={(e) => onIntervalChange(e.target.value)}
                     />
                 </label>
-                <span role="timer" className="sphere-timer">{shown === null ? '–' : `${shown}s`}</span>
+                <span role="timer" className="sphere-timer">
+                    {shown === null ? '–' : `${shown}s`}
+                </span>
             </div>
             {seconds === null && (
                 <p className="sphere-hint">
@@ -162,14 +175,14 @@ export function SphereRandomizer() {
             )}
 
             <div className="sphere-seed-row">
-        <span>
-          Seed: <strong>{seed}</strong>
-        </span>
+                <span>
+                    Seed: <strong>{seed}</strong>
+                </span>
                 <button onClick={copyLink}>Copy link</button>
                 <span className="sphere-status" role="status" aria-live="polite">
-          {copyState === 'copied' && 'Link copied!'}
+                    {copyState === 'copied' && 'Link copied!'}
                     {copyState === 'failed' && 'Could not copy. Copy the address bar instead.'}
-        </span>
+                </span>
             </div>
 
             <form className="sphere-seed-form" onSubmit={loadSeed}>
@@ -181,9 +194,13 @@ export function SphereRandomizer() {
                     value={seedText}
                     onChange={(e) => setSeedText(e.target.value)}
                 />
-                <button type="submit" disabled={parsedSeed === null}>Load</button>
+                <button type="submit" disabled={parsedSeed === null}>
+                    Load
+                </button>
             </form>
-            {seedInvalid && <p className="sphere-hint">Seeds are whole numbers from 0 to {MAX_SEED}.</p>}
+            {seedInvalid && (
+                <p className="sphere-hint">Seeds are whole numbers from 0 to {MAX_SEED}.</p>
+            )}
 
             <DisplayControls options={options} onChange={setOptions} />
         </div>

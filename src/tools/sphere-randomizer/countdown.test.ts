@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { MAX_SECONDS, parseInterval, tick, type Countdown } from './countdown'
 
 describe('parseInterval', () => {

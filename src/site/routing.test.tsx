@@ -1,9 +1,9 @@
-﻿import { renderToString } from 'react-dom/server'
+import { renderToString } from 'react-dom/server'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
-import App from './App'
-import { SITE_NAME } from './site/config'
-import { TOOLS } from './tools/registry'
+import App from '../App'
+import { SITE_NAME } from './config'
+import { TOOLS } from '../tools/registry'
 
 const render = (path: string) =>
     renderToString(

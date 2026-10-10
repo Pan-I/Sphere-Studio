@@ -1,4 +1,4 @@
-﻿export type Shading = 'color' | 'grayscale' | 'none'
+export type Shading = 'color' | 'grayscale' | 'none'
 
 export interface DisplayOptions {
     shading: Shading
@@ -39,7 +39,9 @@ export function parseOptions(raw: string | null): DisplayOptions {
         return {
             shading: SHADINGS.find((s) => s === d.shading) ?? DEFAULT_OPTIONS.shading,
             lineWidth:
-                typeof d.lineWidth === 'number' ? clampLineWidth(d.lineWidth) : DEFAULT_OPTIONS.lineWidth,
+                typeof d.lineWidth === 'number'
+                    ? clampLineWidth(d.lineWidth)
+                    : DEFAULT_OPTIONS.lineWidth,
             showFarSide:
                 typeof d.showFarSide === 'boolean' ? d.showFarSide : DEFAULT_OPTIONS.showFarSide,
             showMarker:

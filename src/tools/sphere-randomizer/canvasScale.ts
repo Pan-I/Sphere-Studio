@@ -1,4 +1,4 @@
-﻿/**
+/**
  * The drawing buffer is capped at 2x the displayed size. Shading runs per pixel, and a
  * 3x phone screen would need 2.25 times as many pixels as 2x for almost no visible gain.
  */

@@ -1,4 +1,4 @@
-﻿// src/math/quat.test.ts
+// src/math/quat.test.ts
 import { describe, expect, it } from 'vitest'
 import { randomQuat, rotate, type Quat, type Vec3 } from './quat'
 import { mulberry32 } from './random'

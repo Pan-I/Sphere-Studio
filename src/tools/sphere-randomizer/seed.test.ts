@@ -1,8 +1,14 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { rotate } from '../../math/quat'
 import { sectorOf } from '../../math/sphere'
 import {
-    MAX_SEED, buildShareUrl, parseSeed, quatFromSeed, randomSeed, readSeedFromUrl, poseFromSeed
+    MAX_SEED,
+    buildShareUrl,
+    parseSeed,
+    quatFromSeed,
+    randomSeed,
+    readSeedFromUrl,
+    poseFromSeed,
 } from './seed'
 
 describe('parseSeed', () => {
@@ -65,7 +71,9 @@ describe('quatFromSeed', () => {
 describe('poseFromSeed', () => {
     it('keeps orientations stable, so links shared earlier still show the same pose', () => {
         const q = quatFromSeed(48213)
-        const expected = [-0.8120907672079867, 0.07716419578870304, -0.35791537029873954, -0.4543686393312621]
+        const expected = [
+            -0.8120907672079867, 0.07716419578870304, -0.35791537029873954, -0.4543686393312621,
+        ]
         expected.forEach((v, i) => expect(q[i]).toBeCloseTo(v, 10))
     })
 

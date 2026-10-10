@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { SECTOR_COLORS, SECTOR_GRAYS, paletteFor } from './palettes'
 
 // Sectors on either side of a single line differ by exactly one bit of their index.

@@ -1,4 +1,4 @@
-﻿import type { ComponentType } from 'react'
+import type { ComponentType } from 'react'
 import { SphereRandomizer } from './sphere-randomizer/SphereRandomizer'
 
 export interface Tool {

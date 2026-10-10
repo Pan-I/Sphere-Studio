@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router'
+import { Link } from 'react-router'
 import { SITE_NAME } from './config'
 import { useDocumentTitle } from './useDocumentTitle'
 

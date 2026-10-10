@@ -1,4 +1,4 @@
-﻿import type { Tool } from '../tools/registry'
+import type { Tool } from '../tools/registry'
 import { SITE_NAME } from './config'
 import { useDocumentTitle } from './useDocumentTitle'
 

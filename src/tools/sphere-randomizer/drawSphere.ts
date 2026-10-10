@@ -1,4 +1,4 @@
-﻿import { conjugate, rotate, type Quat, type Vec3 } from '../../math/quat'
+import { conjugate, rotate, type Quat, type Vec3 } from '../../math/quat'
 import {
     GREAT_CIRCLES,
     circlePoints,
@@ -106,7 +106,13 @@ export function drawSphere(
     if (options.showMarker && marker) {
         ctx.fillStyle = MARKER_COLOR
         ctx.beginPath()
-        ctx.arc(c + marker[0] * r, c - marker[1] * r, markerRadius(options.lineWidth), 0, Math.PI * 2)
+        ctx.arc(
+            c + marker[0] * r,
+            c - marker[1] * r,
+            markerRadius(options.lineWidth),
+            0,
+            Math.PI * 2,
+        )
         ctx.fill()
     }
 }

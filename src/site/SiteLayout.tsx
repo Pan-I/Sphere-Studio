@@ -1,4 +1,4 @@
-﻿import { Link, NavLink, Outlet, useMatch } from 'react-router'
+import { Link, NavLink, Outlet, useMatch } from 'react-router'
 import { TOOLS, type Tool } from '../tools/registry'
 import { SITE_NAME } from './config'
 
@@ -22,7 +22,9 @@ export function SiteLayout() {
     return (
         <>
             <header className="site-header">
-                <Link to="/" className="site-title">{SITE_NAME}</Link>
+                <Link to="/" className="site-title">
+                    {SITE_NAME}
+                </Link>
                 <nav className="site-nav" aria-label="Tools">
                     {TOOLS.map((tool) => (
                         <ToolLink key={tool.slug} tool={tool} />

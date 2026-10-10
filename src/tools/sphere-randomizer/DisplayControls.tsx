@@ -1,4 +1,4 @@
-﻿import {
+import {
     LINE_WIDTH_MAX,
     LINE_WIDTH_MIN,
     SHADINGS,
@@ -35,7 +35,9 @@ export function DisplayControls({ options, onChange }: Props) {
                     }}
                 >
                     {SHADINGS.map((s) => (
-                        <option key={s} value={s}>{SHADING_LABELS[s]}</option>
+                        <option key={s} value={s}>
+                            {SHADING_LABELS[s]}
+                        </option>
                     ))}
                 </select>
             </label>
@@ -43,16 +45,16 @@ export function DisplayControls({ options, onChange }: Props) {
             <label className="sphere-option">
                 <span>Line thickness</span>
                 <span className="sphere-range">
-          <input
-              type="range"
-              min={LINE_WIDTH_MIN}
-              max={LINE_WIDTH_MAX}
-              step={1}
-              value={options.lineWidth}
-              onChange={(e) => set({ lineWidth: clampLineWidth(Number(e.target.value)) })}
-          />
-          <output>{options.lineWidth}px</output>
-        </span>
+                    <input
+                        type="range"
+                        min={LINE_WIDTH_MIN}
+                        max={LINE_WIDTH_MAX}
+                        step={1}
+                        value={options.lineWidth}
+                        onChange={(e) => set({ lineWidth: clampLineWidth(Number(e.target.value)) })}
+                    />
+                    <output>{options.lineWidth}px</output>
+                </span>
             </label>
 
             <label className="sphere-option">

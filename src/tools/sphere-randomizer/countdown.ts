@@ -1,4 +1,4 @@
-﻿export const MIN_SECONDS = 1
+export const MIN_SECONDS = 1
 export const MAX_SECONDS = 3600
 
 export interface Countdown {

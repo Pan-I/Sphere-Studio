@@ -1,4 +1,4 @@
-﻿import type { Shading } from './displayOptions'
+import type { Shading } from './displayOptions'
 
 export type RGB = readonly [number, number, number]
 

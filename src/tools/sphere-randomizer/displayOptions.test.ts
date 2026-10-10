@@ -1,6 +1,10 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
-    DEFAULT_OPTIONS, LINE_WIDTH_MAX, LINE_WIDTH_MIN, clampLineWidth, parseOptions,
+    DEFAULT_OPTIONS,
+    LINE_WIDTH_MAX,
+    LINE_WIDTH_MIN,
+    clampLineWidth,
+    parseOptions,
 } from './displayOptions'
 
 describe('clampLineWidth', () => {
@@ -25,7 +29,12 @@ describe('parseOptions', () => {
     })
 
     it('round-trips valid options', () => {
-        const opts = { shading: 'grayscale', lineWidth: 5, showFarSide: false, showMarker: false } as const
+        const opts = {
+            shading: 'grayscale',
+            lineWidth: 5,
+            showFarSide: false,
+            showMarker: false,
+        } as const
         expect(parseOptions(JSON.stringify(opts))).toEqual(opts)
     })
 
@@ -45,7 +54,9 @@ describe('parseOptions', () => {
 
     it('turns the marker on by default, including for older stored options without it', () => {
         expect(DEFAULT_OPTIONS.showMarker).toBe(true)
-        expect(parseOptions('{"shading":"color","lineWidth":2,"showFarSide":true}').showMarker).toBe(true)
+        expect(
+            parseOptions('{"shading":"color","lineWidth":2,"showFarSide":true}').showMarker,
+        ).toBe(true)
     })
 
     it('never hands out the shared default object', () => {

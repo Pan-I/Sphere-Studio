@@ -1,4 +1,4 @@
-﻿// src/math/random.ts
+// src/math/random.ts
 export type Rng = () => number
 
 /** Small seeded PRNG so results are reproducible in tests. */

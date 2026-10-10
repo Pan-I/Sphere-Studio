@@ -1,4 +1,4 @@
-﻿import { randomQuat, type Quat } from '../../math/quat'
+import { randomQuat, type Quat } from '../../math/quat'
 import { mulberry32, type Rng } from '../../math/random'
 
 /** Seeds are 0 to 999,999: plenty of distinct poses, and short enough to type or read aloud. */

@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { TOOLS } from './registry'
 
 describe('TOOLS registry', () => {

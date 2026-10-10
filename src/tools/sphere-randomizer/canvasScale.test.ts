@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { MAX_BUFFER_SCALE, bufferScale } from './canvasScale'
 
 describe('bufferScale', () => {
