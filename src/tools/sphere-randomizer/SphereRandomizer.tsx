@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent } from 'react'
 import { pickMarker } from '../../math/sphere'
 import { bufferScale } from './canvasScale'
 import { drawSphere } from './drawSphere'
 import { DisplayControls } from './DisplayControls'
 import { loadOptions, saveOptions } from './displayOptions'
-import { MAX_SECONDS, MIN_SECONDS, parseInterval, tick, type Countdown } from './countdown'
+import { MAX_SECONDS, MIN_SECONDS, parseInterval } from './countdown'
 import {
     MAX_SEED,
     buildShareUrl,
@@ -13,6 +13,7 @@ import {
     randomSeed,
     readSeedFromUrl,
 } from './seed'
+import { initialTimerState, timerReducer } from './timerState'
 import './SphereRandomizer.css'
 
 const SIZE = 480
@@ -23,8 +24,9 @@ export function SphereRandomizer() {
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
     // The seed is the single source of truth for the pose. A ?seed= link wins on first load.
-    const [seed, setSeed] = useState<number>(
-        () => readSeedFromUrl(window.location.search) ?? randomSeed(),
+    // It lives with the timer so a tick that runs out can swap the pose in the same update.
+    const [{ seed, running, countdown }, dispatch] = useReducer(timerReducer, undefined, () =>
+        initialTimerState(readSeedFromUrl(window.location.search) ?? randomSeed()),
     )
     const pose = useMemo(() => {
         const { q, markerPick } = poseFromSeed(seed)
@@ -34,8 +36,6 @@ export function SphereRandomizer() {
     const [seedText, setSeedText] = useState('')
     const [copyState, setCopyState] = useState<CopyState>('idle')
     const [intervalText, setIntervalText] = useState('30')
-    const [running, setRunning] = useState(false)
-    const [countdown, setCountdown] = useState<Countdown | null>(null)
     const [options, setOptions] = useState(loadOptions)
 
     const seconds = parseInterval(intervalText)
@@ -70,19 +70,14 @@ export function SphereRandomizer() {
         )
     }, [seed])
 
-    // Tick once per second while running.
+    // Tick once per second while running. Each tick carries the pose to show if time is up.
     useEffect(() => {
         if (!running || seconds === null) return
         const id = window.setInterval(() => {
-            setCountdown((c) => (c ? tick(c, seconds) : c))
+            dispatch({ type: 'tick', interval: seconds, nextSeed: randomSeed() })
         }, 1000)
         return () => window.clearInterval(id)
     }, [running, seconds])
-
-    // Pick a new pose whenever a tick says time is up.
-    useEffect(() => {
-        if (countdown?.fired) setSeed(randomSeed())
-    }, [countdown])
 
     // Clear the "Copied!" message after a moment.
     useEffect(() => {
@@ -92,10 +87,7 @@ export function SphereRandomizer() {
     }, [copyState])
 
     // Any manual pose change restarts the countdown while the timer is running.
-    const showSeed = (next: number) => {
-        setSeed(next)
-        if (running && seconds !== null) setCountdown({ remaining: seconds, fired: false })
-    }
+    const showSeed = (next: number) => dispatch({ type: 'showSeed', seed: next, interval: seconds })
 
     const randomize = () => showSeed(randomSeed())
 
@@ -117,17 +109,16 @@ export function SphereRandomizer() {
 
     const toggle = () => {
         if (running) {
-            setRunning(false)
+            dispatch({ type: 'pause' })
             return
         }
         if (seconds === null) return
-        setCountdown((c) => c ?? { remaining: seconds, fired: false })
-        setRunning(true)
+        dispatch({ type: 'start', interval: seconds })
     }
 
     const onIntervalChange = (text: string) => {
         setIntervalText(text)
-        setCountdown(null) // a new interval means a fresh countdown
+        dispatch({ type: 'intervalChanged' }) // a new interval means a fresh countdown
     }
 
     const shown = countdown ? countdown.remaining : seconds
