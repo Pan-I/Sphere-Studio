@@ -1,10 +1,6 @@
 import type { Circle } from '../../math/circles'
 import { outlinesShown, type CircleOptions, type Fill } from './displayOptions'
 
-const PAPER_COLOR = '#fff'
-const LINE_COLOR = '#222'
-const CENTER_COLOR = '#000'
-
 /** Fill colours for the large circles and the small one, in draw order. */
 const FILL_COLORS: Record<Exclude<Fill, 'none'>, readonly [string, string, string]> = {
     color: ['#3d74b8', '#d0663a', '#3f9a6e'],
@@ -24,6 +20,7 @@ export function drawCircles(
     circles: readonly Circle[],
     options: CircleOptions,
 ) {
+    const ink = getComputedStyle(ctx.canvas).color
     const half = size / 2
     const toX = (x: number) => half + x * half
     const toY = (y: number) => half - y * half // canvas y points down
@@ -32,10 +29,8 @@ export function drawCircles(
         ctx.arc(toX(c.center[0]), toY(c.center[1]), c.radius * half, 0, Math.PI * 2)
     }
 
-    // Paper first, so translucent fills look the same on any page theme.
     ctx.globalAlpha = 1
-    ctx.fillStyle = PAPER_COLOR
-    ctx.fillRect(0, 0, size, size)
+    ctx.clearRect(0, 0, size, size) // transparent, so the page background shows through
 
     // Fills: each one blends over what's already drawn, so overlaps darken on their own.
     if (options.fill !== 'none') {
@@ -52,7 +47,7 @@ export function drawCircles(
     // Outlines at full strength, so every edge stays crisp to draw from.
     if (outlinesShown(options)) {
         ctx.lineWidth = options.lineWidth
-        ctx.strokeStyle = LINE_COLOR
+        ctx.strokeStyle = ink
         for (const c of circles) {
             path(c)
             ctx.stroke()
@@ -60,7 +55,7 @@ export function drawCircles(
     }
 
     if (options.showCenters) {
-        ctx.fillStyle = CENTER_COLOR
+        ctx.fillStyle = ink
         for (const c of circles) {
             ctx.beginPath()
             ctx.arc(
