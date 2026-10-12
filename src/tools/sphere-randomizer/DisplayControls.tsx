@@ -22,10 +22,10 @@ export function DisplayControls({ options, onChange }: Props) {
     const set = (patch: Partial<DisplayOptions>) => onChange({ ...options, ...patch })
 
     return (
-        <fieldset className="sphere-display">
+        <fieldset className="tool-display">
             <legend>Display</legend>
 
-            <label className="sphere-option">
+            <label className="tool-option">
                 <span>Shading</span>
                 <select
                     value={options.shading}
@@ -42,9 +42,9 @@ export function DisplayControls({ options, onChange }: Props) {
                 </select>
             </label>
 
-            <label className="sphere-option">
+            <label className="tool-option">
                 <span>Line thickness</span>
-                <span className="sphere-range">
+                <span className="tool-range">
                     <input
                         type="range"
                         min={LINE_WIDTH_MIN}
@@ -57,7 +57,7 @@ export function DisplayControls({ options, onChange }: Props) {
                 </span>
             </label>
 
-            <label className="sphere-option">
+            <label className="tool-option">
                 <span>Show far-side lines</span>
                 <input
                     type="checkbox"
@@ -66,7 +66,7 @@ export function DisplayControls({ options, onChange }: Props) {
                 />
             </label>
 
-            <label className="sphere-option">
+            <label className="tool-option">
                 <span>Show center marker</span>
                 <input
                     type="checkbox"

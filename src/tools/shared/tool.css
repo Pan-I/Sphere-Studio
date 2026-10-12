@@ -1,5 +1,5 @@
 /* One column on every screen size: canvas first, then controls in the order you reach for them. */
-.sphere-tool {
+.tool-layout {
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -8,7 +8,7 @@
 
 /* Scales down to fit narrow screens. aspect-ratio keeps it square, and also reserves the space
    before the first draw so the page doesn't jump. */
-.sphere-canvas {
+.tool-canvas {
     display: block;
     width: 100%;
     max-width: 480px;
@@ -16,7 +16,7 @@
     aspect-ratio: 1;
 }
 
-.sphere-actions {
+.tool-actions {
     display: flex;
     gap: 0.75rem;
 }
@@ -25,14 +25,14 @@
     flex: 1;
 }
 
-.sphere-timer-row {
+.tool-timer-row {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     gap: 1rem;
 }
 
-.sphere-field {
+.tool-field {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
@@ -42,13 +42,13 @@
     width: 7rem;
 }
 
-.sphere-timer {
+.tool-timer {
     font-size: 1.75rem;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
 
-.sphere-seed-row {
+.tool-seed-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -56,12 +56,12 @@
 }
 
 /* Own line with reserved height, so "Link copied!" doesn't shift the layout. */
-.sphere-status {
+.tool-status {
     flex-basis: 100%;
     min-height: 1.5em;
 }
 
-.sphere-seed-form {
+.tool-seed-form {
     display: flex;
     gap: 0.5rem;
 }
@@ -71,12 +71,12 @@
     min-width: 0;
 }
 
-.sphere-hint {
+.tool-hint {
     margin: 0;
     font-size: 0.9rem;
 }
 
-.sphere-display {
+.tool-display {
     margin: 0;
     padding: 0.5rem 1rem 0.75rem;
     border: 1px solid var(--line);
@@ -88,7 +88,7 @@
     font-weight: 600;
 }
 
-.sphere-option {
+.tool-option {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -107,7 +107,7 @@
     accent-color: var(--accent);
 }
 
-.sphere-range {
+.tool-range {
     display: flex;
     align-items: center;
     gap: 0.75rem;

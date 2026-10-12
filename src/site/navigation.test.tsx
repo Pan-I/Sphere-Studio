@@ -95,6 +95,6 @@ describe('navigation with seeded poses', () => {
         const canvas = container.querySelector('canvas')!
         expect(canvas.style.width).toBe('')
         expect(canvas.style.height).toBe('')
-        expect(canvas.className).toContain('sphere-canvas')
+        expect(canvas.className).toContain('tool-canvas')
     })
 })
