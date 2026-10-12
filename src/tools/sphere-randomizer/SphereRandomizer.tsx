@@ -1,19 +1,20 @@
 import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent } from 'react'
 import { pickMarker } from '../../math/sphere'
-import { bufferScale } from './canvasScale'
+import { bufferScale } from '../shared/canvasScale.ts'
 import { drawSphere } from './drawSphere'
 import { DisplayControls } from './DisplayControls'
 import { loadOptions, saveOptions } from './displayOptions'
-import { MAX_SECONDS, MIN_SECONDS, parseInterval } from './countdown'
+import { MAX_SECONDS, MIN_SECONDS, parseInterval } from '../shared/countdown.ts'
+import { poseFromSeed } from './pose.ts'
 import {
     MAX_SEED,
     buildShareUrl,
     parseSeed,
-    poseFromSeed,
     randomSeed,
-    readSeedFromUrl,
-} from './seed'
-import { initialTimerState, timerReducer } from './timerState'
+    readSeedFromUrl
+} from '../shared/seed.ts'
+
+import { initialTimerState, timerReducer } from '../shared/timerState.ts'
 import './SphereRandomizer.css'
 
 const SIZE = 480

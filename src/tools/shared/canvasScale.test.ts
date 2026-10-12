@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_BUFFER_SCALE, bufferScale } from './canvasScale'
+import { MAX_BUFFER_SCALE, bufferScale } from './canvasScale.ts'
 
 describe('bufferScale', () => {
     it('uses the screen pixel ratio up to the cap', () => {

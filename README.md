@@ -132,7 +132,7 @@ The canvas buffer matches the screen's pixel ratio, capped at 2× (`canvasScale.
 
 ### Seeds and shareable poses
 
-Every pose comes from a single integer **seed** from 0 to 999,999 (`seed.ts`), short enough to type or read aloud. The seed is the single source of truth for what's on screen.
+Every pose comes from a single integer **seed** from 0 to 999,999 (`pose.ts`), short enough to type or read aloud. The seed is the single source of truth for what's on screen.
 
 ```
 seed ──► mulberry32(seed) ──► draws 1–3 ──► randomQuat ──► orientation q
@@ -146,7 +146,7 @@ seed ──► mulberry32(seed) ──► draws 1–3 ──► randomQuat ─�
 - **Links.** The current seed is written to `?seed=…` with `history.replaceState`, keeping other URL parameters and the hash. On load, a valid `?seed=` takes priority over a random one. Invalid seeds (not a whole number, or out of range) are ignored.
 - **What a seed doesn't include.** Display options (shading, line thickness, far-side lines, marker visibility) are personal preferences stored in `localStorage`, not part of the link, so a shared pose opens in each viewer's own style.
 
-Tests in `seed.test.ts` check parsing, determinism, unit length, that consecutive seeds spread evenly across all eight sectors and marker picks spread evenly, and that share URLs round-trip.
+Tests in `pose.test.ts` check parsing, determinism, unit length, that consecutive seeds spread evenly across all eight sectors and marker picks spread evenly, and that share URLs round-trip.
 
 ---
 
