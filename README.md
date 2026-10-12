@@ -1,5 +1,7 @@
 # Sphere Studio
 
+[![CI](https://github.com/Pan-I/Sphere-Studio/actions/workflows/ci.yaml/badge.svg)](https://github.com/Pan-I/Sphere-Studio/actions/workflows/ci.yaml)
+
 Simple, browser-based drawing tools for art practice.
 
 Sphere Studio is a small React + TypeScript site built with Vite. Each tool lives on its own page and is listed on the home page and in the site navigation. Everything runs in the browser: there is no backend, and nothing leaves the page except the links you choose to share.
@@ -19,6 +21,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
 - [Deployment](#deployment)
+- [Continuous integration](#continuous-integration)
 
 ---
 
@@ -193,6 +196,7 @@ Drawing (`drawCircles.ts`) fills a white background, then each circle at the cho
 ## Project structure
 
 ```
+.github/workflows/ci.yaml CI: lint, tests and build on every push and pull request
 index.html                HTML shell; Vite's entry point
 public/
   favicon.svg             Browser tab icon
@@ -228,3 +232,9 @@ npm run preview   # serve the production build locally
 ## Deployment
 
 The site is a static single-page app. `vercel.json` rewrites every path to `index.html` so routes such as `/sphere-randomizer?seed=123` work when opened directly.
+
+## Continuous integration
+
+GitHub Actions runs lint, tests and the build on every push to `master` and on every pull request (`.github/workflows/ci.yaml`). The badge at the top of this README shows the latest result on `master`, and each pull request shows its own check, with the full log under **Details**.
+
+Vercel deploys separately and doesn't wait for CI, so a red check is a warning rather than a block. Run the same checks locally before pushing with `npm run lint`, `npm test -- --run` and `npm run build`.
