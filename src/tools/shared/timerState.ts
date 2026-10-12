@@ -1,4 +1,4 @@
-import { tick, type Countdown } from './countdown'
+import { tick, type Countdown } from './countdown.ts'
 
 /** The pose seed together with the auto-randomize timer that can replace it. */
 export interface TimerState {

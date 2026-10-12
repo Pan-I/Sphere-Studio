@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import { CircleTrio } from './circle-trio/CircleTrio'
 import { SphereRandomizer } from './sphere-randomizer/SphereRandomizer'
 
 export interface Tool {
@@ -11,6 +12,13 @@ export interface Tool {
 
 /** Every tool on the site. Adding an entry here adds its route, nav link, and home-page card. */
 export const TOOLS: readonly Tool[] = [
+    {
+        slug: 'circle-trio',
+        name: 'Circle Trio',
+        description:
+            'Two large translucent circles and a smaller one between them, in a new arrangement each time, for practicing overlapping forms.',
+        component: CircleTrio,
+    },
     {
         slug: 'sphere-randomizer',
         name: 'Sphere Randomizer',

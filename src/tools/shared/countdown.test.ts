@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_SECONDS, parseInterval, tick, type Countdown } from './countdown'
+import { MAX_SECONDS, parseInterval, tick, type Countdown } from './countdown.ts'
 
 describe('parseInterval', () => {
     it('accepts whole numbers in range, ignoring surrounding spaces', () => {

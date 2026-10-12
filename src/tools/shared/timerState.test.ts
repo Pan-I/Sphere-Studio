@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { initialTimerState, timerReducer, type TimerState } from './timerState'
+import { initialTimerState, timerReducer, type TimerState } from './timerState.ts'
 
 const running = (remaining: number, seed = 7): TimerState => ({
     seed,
