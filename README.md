@@ -8,12 +8,14 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 
 - [Tools](#tools)
   - [Sphere Randomizer](#sphere-randomizer)
+  - [Circle Trio](#circle-trio)
   - [Adding a tool](#adding-a-tool)
 - [How the Sphere Randomizer works](#how-the-sphere-randomizer-works)
   - [Random rotations with quaternions](#random-rotations-with-quaternions)
   - [The sphere and its eight sectors](#the-sphere-and-its-eight-sectors)
   - [Drawing](#drawing)
   - [Seeds and shareable poses](#seeds-and-shareable-poses)
+- [How Circle Trio works](#how-circle-trio-works)
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
 - [Deployment](#deployment)
@@ -24,9 +26,11 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 
 | Tool | Route | What it's for |
 | --- | --- | --- |
-| [Sphere Randomizer](#sphere-randomizer) | `/sphere-randomizer` | Practice drawing a sphere in any orientation |
+| [Sphere Randomizer](#sphere-randomizer) | `/sphere-randomizer` | Generate a sphere to practice drawing a random face. |
+| [Circle Trio](#circle-trio) | `/circle-trio` | Generate three circles to practice drawing a randome face.|
 <!-- Add one row per new tool. -->
 
+---
 ### Sphere Randomizer
 
 **Route:** `/sphere-randomizer` · **Source:** `src/tools/sphere-randomizer/`
@@ -46,6 +50,26 @@ A randomly rotated sphere split into eight sectors by three perpendicular great 
 
 How it works is covered in detail [below](#how-the-sphere-randomizer-works).
 
+---
+
+### Circle Trio
+
+**Route:** `/circle-trio` · **Source:** `src/tools/circle-trio/`
+
+Two large translucent circles and a smaller one roughly between them, in a new arrangement each time, for practicing overlapping forms.
+
+**Features**
+
+- **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer, with their own `?seed=` links.
+- **Display options** (saved in your browser between visits):
+  - Fill: color, grayscale, or none (outlines only)
+  - Opacity: 15% to 60%
+  - Line thickness: 1 to 8 px
+  - Show outlines (always on when there is no fill)
+  - Show centers: a dot at the middle of each circle
+
+How the arrangement is chosen is covered [below](#how-circle-trio-works).
+
 <!--
 ### Tool name
 
@@ -60,6 +84,8 @@ One or two sentences on what the tool is for.
 If the tool has non-obvious internals, add a "How <Tool name> works" section
 further down and link to it from here.
 -->
+
+---
 
 ### Adding a tool
 
@@ -148,6 +174,20 @@ seed ──► mulberry32(seed) ──► draws 1–3 ──► randomQuat ─�
 
 Tests in `pose.test.ts` check parsing, determinism, unit length, that consecutive seeds spread evenly across all eight sectors and marker picks spread evenly, and that share URLs round-trip.
 
+## How Circle Trio works
+
+The canvas spans −1 to 1 on both axes, with y pointing up. `layoutFromSeed` (`src/tools/circle-trio/layout.ts`) draws numbers from `mulberry32(seed)` in a fixed order:
+
+1. **Sizes.** Large circle A has a radius from 0.38 to 0.48 and B from 0.28 to 0.38, so they are rarely the same size. The small circle is 35% to 55% of their average.
+2. **Direction.** A random angle sets the line from A to B.
+3. **Gap.** The centres are 0.55× to 1.10× the sum of the radii apart. Below 1× they overlap, which happens about 82% of the time.
+4. **Small circle.** Its centre starts 30% to 70% of the way from A to B, then moves sideways off that line. In 65% of layouts it moves up to 0.6× its radius; in the other 35% it drifts 0.6× to 1.4×, to a random side.
+5. **Placement.** The group is centred, then shifted randomly within the room left inside a 0.9 frame.
+
+New draws are only ever added at the end, so existing seeds keep their layout. A test pins seed 48213.
+
+Drawing (`drawCircles.ts`) fills a white background, then each circle at the chosen opacity, large ones first. The canvas blends each fill over what's below, so overlaps darken without any extra maths. Outlines and center dots are drawn on top at full strength.
+
 ---
 
 ## Project structure
@@ -161,7 +201,9 @@ src/
   site/                   Site shell: layout and nav, home page, tool page, 404, site name
   tools/
     registry.ts           The list of tools; drives routes, nav and home-page cards
+    shared/               Shared components and utilities
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
+    circle-trio/          Circle Trio component, drawing, seeds, palettes, options, timer
   math/                   Reusable math with no UI dependencies
     quat.ts               Vectors, quaternions, Shoemake random rotation
     random.ts             mulberry32 seeded PRNG
