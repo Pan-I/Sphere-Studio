@@ -59,7 +59,7 @@ describe('navigation with seeded poses', () => {
 
     it('ignores a click on the link for the page you are already on', async () => {
         await mount('/sphere-randomizer?seed=48213')
-        await click(document.querySelector('.site-nav a'))
+        await click(byText('.site-nav a', 'Sphere Randomizer'))
         expect(window.location.search).toBe('?seed=48213')
         expect(container.textContent).toContain('Seed: 48213')
     })
@@ -84,7 +84,7 @@ describe('navigation with seeded poses', () => {
 
     it('navigates from home to the tool through its card link', async () => {
         await mount('/')
-        await click(document.querySelector('.tool-card a'))
+        await click(byText('.tool-card a', 'Sphere Randomizer'))
         expect(window.location.pathname).toBe('/sphere-randomizer')
         expect(container.querySelector('canvas')).not.toBeNull()
         expect(document.title).toContain('Sphere Randomizer')
@@ -96,5 +96,19 @@ describe('navigation with seeded poses', () => {
         expect(canvas.style.width).toBe('')
         expect(canvas.style.height).toBe('')
         expect(canvas.className).toContain('tool-canvas')
+    })
+
+    it('opens a shared Circle Trio link on the right layout', async () => {
+        await mount('/circle-trio?seed=48213')
+        expect(document.title).toContain('Circle Trio')
+        expect(container.textContent).toContain('Seed: 48213')
+    })
+
+    it('gives each tool its own seed when you switch between them', async () => {
+        await mount('/sphere-randomizer?seed=48213')
+        await click(byText('.site-nav a', 'Circle Trio'))
+        expect(window.location.pathname).toBe('/circle-trio')
+        expect(seedInUrl()).not.toBeNull()
+        expect(container.textContent).toContain(`Seed: ${seedInUrl()}`)
     })
 })
