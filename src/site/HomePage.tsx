@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { TOOLS } from '../tools/registry'
 import { SITE_NAME } from './config'
+import { ToolThumbnail } from './ToolThumbnail'
 import { useDocumentTitle } from './useDocumentTitle'
 
 export function HomePage() {
@@ -12,6 +13,7 @@ export function HomePage() {
             <ul className="tool-list">
                 {TOOLS.map((tool) => (
                     <li key={tool.slug} className="tool-card">
+                        <ToolThumbnail tool={tool} />
                         <h2>
                             <Link to={`/${tool.slug}`}>{tool.name}</Link>
                         </h2>
