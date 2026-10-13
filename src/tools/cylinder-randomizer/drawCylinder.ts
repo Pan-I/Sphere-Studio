@@ -5,9 +5,11 @@ import {
     frontArc,
     makeCylinder,
     rimPoint,
+    UNIFORM_PROPORTION,
     type Cylinder,
 } from '../../math/cylinder'
 import type { Quat, Vec3 } from '../../math/quat'
+import { rimCircle, strokeEllipseAxes } from '../shared/ellipseAxes'
 import type { CylinderOptions, Shading } from './displayOptions'
 
 const HIDDEN_ALPHA = 0.2
@@ -44,9 +46,10 @@ const along = (p: Vec3, d: Vec3, k: number): Vec3 => [
 ]
 
 /**
- * Draws the cylinder rotated by `q`, with length / diameter = `proportion`, on a square canvas
- * `size` units wide. The curved side and the cap facing the viewer are filled; the parts of the
- * rims behind are drawn faintly.
+ * Draws the cylinder rotated by `q`, with length / diameter = `proportion` (or 2 with uniform
+ * size on), on a square canvas `size` units wide. The curved side and the cap facing the viewer
+ * are filled; the parts of the rims behind, and the axes of an ellipse facing away, are drawn
+ * faintly.
  */
 export function drawCylinder(
     ctx: CanvasRenderingContext2D,
@@ -58,11 +61,14 @@ export function drawCylinder(
     const camera = options.perspective ? CAMERA_DISTANCE : null
     const c = size / 2
     const r = size * SCALE
-    const cyl: Cylinder = makeCylinder(q, proportion)
+    // Projected coordinates to canvas ones. Canvas y points down.
+    const toCanvas = (x: number, y: number): [number, number] => [c + x * r, c - y * r]
+    // With uniform size on, the seed's proportions give way to a fixed 2:1.
+    const cyl: Cylinder = makeCylinder(q, options.uniformSize ? UNIFORM_PROPORTION : proportion)
 
     const toScreen = (p: Vec3): [number, number] => {
         const [x, y] = project(p, camera)
-        return [c + x * r, c - y * r] // canvas y points down
+        return toCanvas(x, y)
     }
     const line = (a: Vec3, b: Vec3) => {
         ctx.moveTo(...toScreen(a))
@@ -144,6 +150,16 @@ export function drawCylinder(
         ctx.globalAlpha = 1
     }
 
+    // The major and minor axes of each ellipse: faint for a cap that faces away, like its
+    // hidden rim, and at full strength for the cap you see.
+    const ellipseAxes = (cap: 0 | 1) =>
+        strokeEllipseAxes(ctx, rimCircle(cyl, cyl.caps[cap]), camera, toCanvas, options.lineWidth)
+    if (options.showEllipseAxes && options.showHiddenEdges) {
+        ctx.globalAlpha = HIDDEN_ALPHA
+        for (const cap of [0, 1] as const) if (cap !== seenCap) ellipseAxes(cap)
+        ctx.globalAlpha = 1
+    }
+
     // Front lines: the two side lines, the front half of each rim, and all of the seen cap's rim.
     ctx.beginPath()
     if (sideShows) {
@@ -157,7 +173,7 @@ export function drawCylinder(
     if (seenCap !== null && options.showCenterLines) centerLines(seenCap)
     ctx.stroke()
 
-    // The axis is a construction line, drawn dashed over everything and past both caps.
+    // The axis is a construction line, drawn dashed over the shape and past both caps.
     if (options.showAxis) {
         const reach = Math.min(cyl.halfLength + AXIS_OVERHANG * cyl.radius, AXIS_MAX_REACH)
         ctx.strokeStyle = AXIS_COLOR
@@ -167,4 +183,7 @@ export function drawCylinder(
         ctx.stroke()
         ctx.setLineDash([])
     }
+
+    // The seen ellipse's axes go on top, so the dashed axis doesn't hide the minor axis.
+    if (options.showEllipseAxes && seenCap !== null) ellipseAxes(seenCap)
 }

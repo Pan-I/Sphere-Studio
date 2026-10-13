@@ -129,13 +129,15 @@ A cylinder in a random orientation, from squat to long, for practicing ellipses.
 
 **Features**
 
-- **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer. A seed gives the cylinder the same rotation it gives the sphere and the cube, and also picks its proportions: the length runs from half the diameter to three times it.
+- **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer. A seed gives the cylinder the same rotation it gives the sphere and the cube, and also picks its proportions: the length runs from half the diameter to three times it. With **Uniform size** on (the default) every cylinder is twice as long as it is wide instead.
 - **Display options** (saved in your browser between visits):
   - Shading: color, grayscale, or none (lines only). The side and the end facing you get different shades.
   - Line thickness: 1 to 8 px
   - Perspective: near parts look bigger, so the near end is a little larger than the far one. Off gives a flat view where the two ends are identical ellipses.
-  - Show hidden edges: draws the back half of the far end faintly
+  - Uniform size (height 2× diameter): on by default. Off uses the seed's random proportions.
+  - Show hidden edges: draws the back half of the far end faintly, and the axes of an ellipse that faces away
   - Show axis: a dashed red line through the centres of both ends
+  - Show ellipse axes: each ellipse's major axis in red and minor axis in dark blue, faint on an end that faces away
   - Show center lines: a cross on each end through its true centre, along the diameters that become the ellipse's axes
 
 ---
@@ -148,13 +150,15 @@ A cone in a random orientation, from squat to tall, for practicing the base elli
 
 **Features**
 
-- **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer. A seed gives the cone the same rotation and proportions it gives the cylinder: the height runs from half the base's diameter to three times it.
+- **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer. A seed gives the cone the same rotation and proportions it gives the cylinder: the height runs from half the base's diameter to three times it. With **Uniform size** on (the default) every cone is twice as tall as its base is wide instead.
 - **Display options** (saved in your browser between visits):
   - Shading: color, grayscale, or none (lines only). The side and the base get different shades.
   - Line thickness: 1 to 8 px
   - Perspective: near parts look bigger. Off gives a flat (orthographic) view.
-  - Show hidden edges: draws the back of the base faintly when the base faces away
+  - Uniform size (height 2× diameter): on by default. Off uses the seed's random proportions.
+  - Show hidden edges: draws the back of the base faintly when the base faces away, and its ellipse's axes
   - Show axis: a dashed red line through the apex and the centre of the base
+  - Show ellipse axes: the base ellipse's major axis in red and minor axis in dark blue, faint when the base faces away
   - Show center lines: a cross on the base through its true centre, along the diameters that become the ellipse's axes
 
 <!--
@@ -378,6 +382,10 @@ The geometry is in `src/math/cylinder.ts`. A cylinder has an axis (a unit vector
 
 The ellipses come from projecting each rim point by point (120 per rim), so they are exact in both views. In the flat view you can check the classic rules against the drawing: the long half-axis of each ellipse is the radius, the short one is the radius times how directly that end faces you, and the short one lies along the cylinder's axis. The center lines show the two diameters that become those axes. In perspective the drawn ellipse's own axes drift a little away from them, and the cross is no longer in the middle of the ellipse, for the same reason the Box Randomizer's center lines aren't.
 
+**Ellipse axes.** The major and minor axes are those of the ellipse actually drawn, in both views, so in perspective they are not the center lines. `projectedCircle` (`src/math/ellipse.ts`) gets them exactly. Perspective projection takes the rim's `(cos φ, sin φ, 1)` to screen coordinates with one 3×3 matrix `M`, so the unit circle `x² + y² = 1` becomes a conic on screen, `adj(M)ᵀ·diag(1, 1, −1)·adj(M)`. The ellipse's centre is where that conic's gradient is zero, and its axes are the eigenvectors of the conic's top-left 2×2 block, the longer axis going with the smaller eigenvalue. The determinant of that block and the conic's value at the centre come straight from `M`, which keeps thin, nearly edge-on ellipses accurate. A test checks that every projected rim point lies on the ellipse, and that in a flat view the minor axis lines up with the cylinder's axis and the major axis is the radius. The Cone Randomizer draws its base's axes the same way (`src/tools/shared/ellipseAxes.ts`).
+
+**Uniform size.** With the option on, the drawing uses a length-to-diameter ratio of 2 (`UNIFORM_PROPORTION` in `cylinder.ts`) instead of the seed's. The seed still picks a proportion, so a shared link shows the same cylinder whichever way the option is set.
+
 ---
 
 ## How the Cone Randomizer works
@@ -403,7 +411,7 @@ src/
   shortcuts/              Keyboard shortcuts: the registry, useShortcuts, and the ? list
   tools/
     registry.ts           The list of tools; drives routes, nav and home-page cards (with live thumbnails)
-    shared/               Shared components and utilities: session controls, the Display options panel, canvas sizing
+    shared/               Shared components and utilities: session controls, the Display options panel, canvas sizing, ellipse axes
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
     circle-trio/          Circle Trio 1 component and layout, plus the drawing and options both Circle Trios use
     circle-trio-2/        Circle Trio 2 component and layout
@@ -416,6 +424,7 @@ src/
     sphere.ts             Great circles, sectors, projection, visibility, intersections
     cube.ts               Cube corners, edges and faces, perspective projection, which faces you see
     cylinder.ts           Cylinder proportions, rims, side lines, and the diameters behind each ellipse's axes
+    ellipse.ts            The exact centre and major and minor axes of a circle's ellipse on screen
     cone.ts               Cone shape, side normals, and where the side lines touch the base
 ```
 

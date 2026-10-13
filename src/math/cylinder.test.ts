@@ -10,6 +10,7 @@ import {
     proportionFromPick,
     rimPoint,
     sideFacing,
+    UNIFORM_PROPORTION,
     type Cylinder,
 } from './cylinder'
 import { dot, randomQuat, type Vec3 } from './quat'
@@ -41,6 +42,11 @@ describe('cylinder proportions', () => {
         const cyl = makeCylinder([0, 0, 0, 1], 2)
         expect(cyl.halfLength / cyl.radius).toBeCloseTo(2)
         expect(cyl.axis).toEqual([0, 1, 0])
+    })
+
+    it('makes a uniform-size cylinder twice as long as it is wide', () => {
+        const cyl = makeCylinder([0, 0, 0, 1], UNIFORM_PROPORTION)
+        expect(2 * cyl.halfLength).toBeCloseTo(2 * (2 * cyl.radius))
     })
 
     it('has an axis and rim directions at right angles', () => {

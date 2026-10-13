@@ -12,8 +12,10 @@ export interface ConeOptions {
     shading: Shading
     lineWidth: number
     perspective: boolean
+    uniformSize: boolean
     showHiddenEdges: boolean
     showAxis: boolean
+    showEllipseAxes: boolean
     showCenterLines: boolean
 }
 
@@ -22,8 +24,10 @@ export const CONE_OPTIONS = defineOptions<ConeOptions>('sphere-studio:cone-rando
     shading: colorModeField('Shading', 'None (lines only)'),
     lineWidth: lineWidthField(),
     perspective: toggleField('Perspective', true),
+    uniformSize: toggleField('Uniform size (height 2× diameter)', true),
     showHiddenEdges: toggleField('Show hidden edges', true),
     showAxis: toggleField('Show axis', true),
+    showEllipseAxes: toggleField('Show ellipse axes', true),
     showCenterLines: toggleField('Show center lines', false),
 })
 
