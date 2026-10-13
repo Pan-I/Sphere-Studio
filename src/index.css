@@ -86,6 +86,21 @@ a {
     margin: 0;
 }
 
+/* A live example at the top of each card. It inherits the text colour, which Circle Trio draws its lines in. */
+.tool-thumbnail {
+    display: block;
+    width: 10rem;
+    max-width: 100%;
+    margin: 0 auto 0.75rem;
+    color: inherit;
+}
+
+.tool-thumbnail canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+}
+
 /* Form controls: comfortable touch targets, and 16px text so iOS doesn't zoom in on focus. */
 button,
 input[type='text'],

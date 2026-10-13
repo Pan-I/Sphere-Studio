@@ -132,10 +132,13 @@ Tools are driven by one registry, `src/tools/registry.ts`. Adding an entry there
        name: 'My Tool',
        description: 'One sentence for the home-page card.',
        component: MyTool,
+       drawExample: drawMyToolExample, // the home-page thumbnail, see below
    },
    ```
 
-3. Add unit tests next to the code (`*.test.ts`). `src/tools/registry.test.ts` already checks that slugs are unique and URL-safe and that every tool has a name and description.
+   `drawExample(ctx, size, seed)` draws the picture for a seed on a square canvas `size` units wide, using the tool's default options. The home page calls it for a small live example on the tool's card, and clicking that example opens the tool on the same seed. It gets nothing from the tool's page, which makes it a quick check that the drawing code stands on its own. Put it in `src/tools/<slug>/example.ts`; the Sphere Randomizer's is only a few lines.
+
+3. Add unit tests next to the code (`*.test.ts`). `src/tools/registry.test.ts` already checks that slugs are unique and URL-safe and that every tool has a name and description, and `src/tools/examples.test.ts` checks that every tool's example draws, and draws the same picture for the same seed.
 4. Document it in this README: add a row to the [Tools](#tools) table and copy the commented-out template under the Sphere Randomizer section.
 
 The page heading and browser tab title (`<Tool name> · Sphere Studio`) come from the registry entry, so the component only renders the tool itself.
@@ -234,7 +237,7 @@ src/
   site/                   Site shell: layout and nav, home page, tool page (with full screen), 404, site name
   shortcuts/              Keyboard shortcuts: the registry, useShortcuts, and the ? list
   tools/
-    registry.ts           The list of tools; drives routes, nav and home-page cards
+    registry.ts           The list of tools; drives routes, nav and home-page cards (with live thumbnails)
     shared/               Shared components and utilities
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
     circle-trio/          Circle Trio component, drawing, seeds, palettes, options, timer

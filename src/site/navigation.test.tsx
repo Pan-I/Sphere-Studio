@@ -4,6 +4,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import App from '../App'
+import { TOOLS } from '../tools/registry'
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
@@ -88,6 +89,24 @@ describe('navigation with seeded poses', () => {
         expect(window.location.pathname).toBe('/sphere-randomizer')
         expect(container.querySelector('canvas')).not.toBeNull()
         expect(document.title).toContain('Sphere Randomizer')
+    })
+
+    it('shows a live example on every home-page card', async () => {
+        await mount('/')
+        expect(container.querySelectorAll('.tool-card canvas')).toHaveLength(TOOLS.length)
+    })
+
+    it('opens the tool on the same pose when you click its example', async () => {
+        await mount('/')
+        const card = byText('.tool-card h2', 'Sphere Randomizer')!.closest('.tool-card')!
+        const thumbnail = card.querySelector('a.tool-thumbnail')!
+        const seed = new URL(thumbnail.getAttribute('href')!, 'http://x').searchParams.get('seed')
+        expect(seed).toMatch(/^\d+$/)
+
+        await click(thumbnail)
+        expect(window.location.pathname).toBe('/sphere-randomizer')
+        expect(seedInUrl()).toBe(seed)
+        expect(container.textContent).toContain(`Seed: ${seed}`)
     })
 
     it('lets the canvas scale to the screen instead of pinning it to a pixel size', async () => {
