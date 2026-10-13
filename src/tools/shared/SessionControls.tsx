@@ -77,10 +77,12 @@ export function SessionControls({ session }: { session: SeedSession }) {
                     Enter a whole number of seconds from {MIN_SECONDS} to {MAX_SECONDS}.
                 </p>
             )}
-            <div className="session-seed-row">
-                <span>
-                    Seed: <strong>{seed}</strong>
-                </span>
+            {/* Copy link sits on its own row under the seed, so a longer or shorter seed can't
+                push it around. */}
+            <p className="session-seed">
+                Seed: <strong>{seed}</strong>
+            </p>
+            <div className="session-copy-row">
                 <button onClick={copyLink}>Copy link</button>
                 <span className="session-status" role="status" aria-live="polite">
                     {copyState === 'copied' && 'Link copied!'}
