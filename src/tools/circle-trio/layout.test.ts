@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { bounds, distance, overlaps } from '../../math/circles'
-import { FRAME, layoutFromSeed } from './layout'
+import { bounds, distance, overlaps, type Circle } from '../../math/circles'
+import { ALONG_OVERSHOOT, FRAME, layoutFromSeed } from './layout'
 
 const SEEDS = Array.from({ length: 5000 }, (_, i) => i)
 
@@ -11,9 +11,9 @@ describe('layoutFromSeed', () => {
 
     it('keeps layouts stable, so links shared earlier still show the same picture', () => {
         const expected = [
-            [-0.2171908621383791, -0.2403278945029304, 0.41345542727038265],
-            [0.5262224704677829, 0.057048461450251164, 0.3565077503863722],
-            [0.3601214771388629, -0.2491867929268926, 0.18141791537427443],
+            [-0.3696252695151931, -0.2037850474206515, 0.41345542727038265],
+            [0.37378806309096896, 0.09359130853253006, 0.3565077503863722],
+            [0.7110857314477164, -0.49086180544961633, 0.18141791537427443],
         ]
         layoutFromSeed(48213).forEach((c, i) => {
             expect(c.center[0]).toBeCloseTo(expected[i][0], 10)
@@ -61,24 +61,47 @@ describe('layoutFromSeed', () => {
         expect(similar / SEEDS.length).toBeLessThan(0.05) // expected about 0.02
     })
 
-    it('keeps the small circle touching at least one large circle', () => {
-        for (const seed of SEEDS) {
+    it('usually keeps the small circle touching a large one, but lets it float free', () => {
+        const free = SEEDS.filter((seed) => {
             const [a, b, s] = layoutFromSeed(seed)
-            expect(overlaps(a, s) || overlaps(b, s)).toBe(true)
-        }
+            return !overlaps(a, s) && !overlaps(b, s)
+        }).length
+        expect(free / SEEDS.length).toBeGreaterThan(0.1) // expected about 0.16
+        expect(free / SEEDS.length).toBeLessThan(0.22)
     })
 
-    it('places the small circle between the large ones, measured along the line', () => {
+    it('places the small circle along the line, up to a quarter of the gap past either centre', () => {
+        let beyond = 0
         for (const seed of SEEDS) {
-            const [a, b, s] = layoutFromSeed(seed)
-            const ab = distance(a.center, b.center)
-            // How far along the A→B line the small centre sits, as a fraction of the gap.
-            const t =
-                ((s.center[0] - a.center[0]) * (b.center[0] - a.center[0]) +
-                    (s.center[1] - a.center[1]) * (b.center[1] - a.center[1])) /
-                (ab * ab)
-            expect(t).toBeGreaterThanOrEqual(0.3 - 1e-9)
-            expect(t).toBeLessThanOrEqual(0.7 + 1e-9)
+            const { t } = placement(layoutFromSeed(seed))
+            expect(t).toBeGreaterThanOrEqual(-ALONG_OVERSHOOT - 1e-9)
+            expect(t).toBeLessThanOrEqual(1 + ALONG_OVERSHOOT + 1e-9)
+            if (t < 0 || t > 1) beyond++
         }
+        expect(beyond / SEEDS.length).toBeGreaterThan(0.25) // expected 1/3
+    })
+
+    it('drifts the small circle sideways up to 4.2 times its radius, three times the old reach', () => {
+        let far = 0
+        for (const seed of SEEDS) {
+            const layout = layoutFromSeed(seed)
+            const { side } = placement(layout)
+            expect(Math.abs(side)).toBeLessThanOrEqual(4.2 * layout[2].radius + 1e-9)
+            if (Math.abs(side) > 1.4 * layout[2].radius) far++
+        }
+        expect(far / SEEDS.length).toBeGreaterThan(0.4) // expected about 0.48
     })
 })
+
+/**
+ * Where the small centre sits: t is how far along the A→B line, as a fraction of the gap, and
+ * side is its distance off that line.
+ */
+function placement([a, b, s]: readonly Circle[]) {
+    const ab = distance(a.center, b.center)
+    const dx = (b.center[0] - a.center[0]) / ab
+    const dy = (b.center[1] - a.center[1]) / ab
+    const sx = s.center[0] - a.center[0]
+    const sy = s.center[1] - a.center[1]
+    return { t: (sx * dx + sy * dy) / ab, side: -sx * dy + sy * dx }
+}

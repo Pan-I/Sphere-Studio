@@ -10,7 +10,8 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 
 - [Tools](#tools)
   - [Sphere Randomizer](#sphere-randomizer)
-  - [Circle Trio](#circle-trio)
+  - [Circle Trio 1](#circle-trio-1)
+  - [Circle Trio 2](#circle-trio-2)
   - [Box Randomizer](#box-randomizer)
   - [Cylinder Randomizer](#cylinder-randomizer)
   - [Cone Randomizer](#cone-randomizer)
@@ -21,7 +22,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [The sphere and its eight sectors](#the-sphere-and-its-eight-sectors)
   - [Drawing](#drawing)
   - [Seeds and shareable poses](#seeds-and-shareable-poses)
-- [How Circle Trio works](#how-circle-trio-works)
+- [How Circle Trio 1 and 2 work](#how-circle-trio-1-and-2-work)
 - [How the Box Randomizer works](#how-the-box-randomizer-works)
 - [How the Cylinder Randomizer works](#how-the-cylinder-randomizer-works)
 - [How the Cone Randomizer works](#how-the-cone-randomizer-works)
@@ -37,7 +38,8 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 | Tool | Route | What it's for |
 | --- | --- | --- |
 | [Sphere Randomizer](#sphere-randomizer) | `/sphere-randomizer` | Generate a sphere to practice drawing a random face. |
-| [Circle Trio](#circle-trio) | `/circle-trio` | Generate three circles to practice drawing a randome face.|
+| [Circle Trio 1](#circle-trio-1) | `/circle-trio-1` | Generate two large circles and a small one to practice drawing a random face. |
+| [Circle Trio 2](#circle-trio-2) | `/circle-trio-2` | Generate one large circle and two small ones on its edge to practice drawing a random face. |
 | [Box Randomizer](#box-randomizer) | `/box-randomizer` | Generate a cube in a random orientation to practice drawing boxes. |
 | [Cylinder Randomizer](#cylinder-randomizer) | `/cylinder-randomizer` | Generate a cylinder in a random orientation and proportion to practice ellipses and the minor axis. |
 | [Cone Randomizer](#cone-randomizer) | `/cone-randomizer` | Generate a cone in a random orientation and proportion to practice the base ellipse and the side lines that meet it. |
@@ -65,11 +67,11 @@ How it works is covered in detail [below](#how-the-sphere-randomizer-works).
 
 ---
 
-### Circle Trio
+### Circle Trio 1
 
-**Route:** `/circle-trio` · **Source:** `src/tools/circle-trio/`
+**Route:** `/circle-trio-1` (the old `/circle-trio` address, seed included, redirects here) · **Source:** `src/tools/circle-trio/`
 
-Two large translucent circles and a smaller one roughly between them, in a new arrangement each time, for practicing overlapping forms.
+Two large translucent circles and a smaller one near the line between them, in a new arrangement each time, for practicing overlapping forms. The small circle can drift well off that line, or past either large circle's centre.
 
 **Features**
 
@@ -81,7 +83,21 @@ Two large translucent circles and a smaller one roughly between them, in a new a
   - Show outlines (always on when there is no fill)
   - Show centers: a dot at the middle of each circle
 
-How the arrangement is chosen is covered [below](#how-circle-trio-works).
+How the arrangement is chosen is covered [below](#how-circle-trio-1-and-2-work).
+
+---
+
+### Circle Trio 2
+
+**Route:** `/circle-trio-2` · **Source:** `src/tools/circle-trio-2/`
+
+One large translucent circle, placed randomly, and two smaller ones of similar size close together on its edge. Each small circle can be fully inside, across the edge or fully outside, but never both outside.
+
+**Features**
+
+- Everything Circle Trio 1 has: Randomize, the timer, seeds and `?seed=` links, and the same **Display options**, saved separately from Circle Trio 1's.
+
+How the arrangement is chosen is covered [below](#how-circle-trio-1-and-2-work).
 
 ---
 
@@ -207,7 +223,9 @@ Tools are driven by one registry, `src/tools/registry.ts`. Adding an entry there
 
    `drawExample(ctx, size, seed)` draws the picture for a seed on a square canvas `size` units wide, using the tool's default options. The home page calls it for a small live example on the tool's card, and clicking that example opens the tool on the same seed. It gets nothing from the tool's page, which makes it a quick check that the drawing code stands on its own. Put it in `src/tools/<slug>/example.ts`; the Sphere Randomizer's is only a few lines.
 
-3. Describe its display options in `src/tools/<slug>/displayOptions.ts` and the tool gets the **Display** panel, its defaults, and saving between visits for free. List one field per option with `defineOptions`; the panel shows them in that order. The shared presets keep common options identical across tools: `colorModeField` (color, grayscale or none), `lineWidthField` (1 to 8 px) and `toggleField` (a checkbox). A one-off option is a plain object, like Circle Trio's opacity:
+   To rename a tool's address later, keep the old one in `formerSlugs: ['old-slug']`. It then redirects to the new address, keeping `?seed=`, so shared links still open.
+
+3. Describe its display options in `src/tools/<slug>/displayOptions.ts` and the tool gets the **Display** panel, its defaults, and saving between visits for free. List one field per option with `defineOptions`; the panel shows them in that order. The shared presets keep common options identical across tools: `colorModeField` (color, grayscale or none), `lineWidthField` (1 to 8 px) and `toggleField` (a checkbox). A one-off option is a plain object, like Circle Trio 1's opacity:
 
    ```ts
    export const MY_OPTIONS = defineOptions<MyOptions>('sphere-studio:my-tool:display', {
@@ -226,7 +244,7 @@ Tools are driven by one registry, `src/tools/registry.ts`. Adding an entry there
    <OptionsPanel fields={MY_OPTIONS.fields} options={options} onChange={setOptions} />
    ```
 
-   TypeScript checks the fields against the options type: every option needs a field, and a boolean must be a toggle, a number a range, and a string a choice. A field can grey itself out with `disabledWhen(options)`, as Circle Trio's opacity does when there is no fill. Stored values are checked field by field when they are loaded, so a missing, renamed or out-of-range value falls back to its default instead of breaking the tool.
+   TypeScript checks the fields against the options type: every option needs a field, and a boolean must be a toggle, a number a range, and a string a choice. A field can grey itself out with `disabledWhen(options)`, as Circle Trio 1's opacity does when there is no fill. Stored values are checked field by field when they are loaded, so a missing, renamed or out-of-range value falls back to its default instead of breaking the tool.
 
 4. Add unit tests next to the code (`*.test.ts`). `src/tools/registry.test.ts` already checks that slugs are unique and URL-safe and that every tool has a name and description, and `src/tools/examples.test.ts` checks that every tool's example draws, and draws the same picture for the same seed.
 5. Document it in this README: add a row to the [Tools](#tools) table and copy the commented-out template under the Sphere Randomizer section.
@@ -299,19 +317,34 @@ seed ──► mulberry32(seed) ──► draws 1–3 ──► randomQuat ─�
 
 Tests in `pose.test.ts` check parsing, determinism, unit length, that consecutive seeds spread evenly across all eight sectors and marker picks spread evenly, and that share URLs round-trip.
 
-## How Circle Trio works
+## How Circle Trio 1 and 2 work
 
-The canvas spans −1 to 1 on both axes, with y pointing up. `layoutFromSeed` (`src/tools/circle-trio/layout.ts`) draws numbers from `mulberry32(seed)` in a fixed order:
+The canvas spans −1 to 1 on both axes, with y pointing up. Each tool's `layoutFromSeed` draws numbers from `mulberry32(seed)` in a fixed order.
+
+### Circle Trio 1
+
+`src/tools/circle-trio/layout.ts`:
 
 1. **Sizes.** Large circle A has a radius from 0.38 to 0.48 and B from 0.28 to 0.38, so they are rarely the same size. The small circle is 35% to 55% of their average.
 2. **Direction.** A random angle sets the line from A to B.
 3. **Gap.** The centres are 0.55× to 1.10× the sum of the radii apart. Below 1× they overlap, which happens about 82% of the time.
-4. **Small circle.** Its centre starts 30% to 70% of the way from A to B, then moves sideways off that line. In 65% of layouts it moves up to 0.6× its radius; in the other 35% it drifts 0.6× to 1.4×, to a random side.
-5. **Placement.** The group is centred, then shifted randomly within the room left inside a 0.9 frame.
+4. **Small circle.** Its centre starts anywhere from 25% of the gap before A's centre to 25% past B's (−25% to 125% of the way from A to B), then moves sideways off that line. In 65% of layouts it moves up to 1.8× its radius; in the other 35% it drifts 1.8× to 4.2×, to a random side. At the far end it floats clear of both large circles, about 16% of the time.
+5. **Placement.** `placeInFrame` centres the group, shrinks it if it's wider or taller than the 0.9 frame allows, then shifts it randomly within the room left over.
 
-New draws are only ever added at the end, so existing seeds keep their layout. A test pins seed 48213.
+New draws are only ever added at the end, so existing seeds keep their large circles. The small circle's ranges were widened when Circle Trio became Circle Trio 1, so links from before then show it in a new spot. A test pins seed 48213.
 
-Drawing (`drawCircles.ts`) fills a white background, then each circle at the chosen opacity, large ones first. The canvas blends each fill over what's below, so overlaps darken without any extra maths. Outlines and center dots are drawn on top at full strength.
+### Circle Trio 2
+
+`src/tools/circle-trio-2/layout.ts`:
+
+1. **Sizes.** The large circle has a radius from 0.42 to 0.55. The first small one is 35% to 55% of that, and the second is within 20% of the first's size.
+2. **First small circle.** A random angle around the large circle, and a random place across its edge: the centre is `R + k·r` from the large centre, with `k` from −1.5 to 1.5. At `k ≤ −1` it's fully inside, at `k ≥ 1` fully outside, and in between it crosses the edge.
+3. **Second small circle.** Its centre is 0.75× to 1.25× the sum of the small radii from the first's, to a random side, so they overlap a little or leave a gap of at most a quarter of that. It gets its own `k`, within 1.2 of the first's so they sit at a similar depth, and capped below 1 when the first is fully outside, so the two are never both outside. The angle between them comes from the law of cosines.
+4. **Placement.** The same `placeInFrame` as Circle Trio 1, which is what puts the large circle somewhere random on the canvas.
+
+Each small circle ends up inside about 15% of the time, across the edge 73% and outside 12%. A test pins seed 48213.
+
+Both tools draw with `drawCircles.ts`, which fills a white background, then each circle at the chosen opacity, large ones first. The canvas blends each fill over what's below, so overlaps darken without any extra maths. Outlines and center dots are drawn on top at full strength.
 
 ---
 
@@ -372,7 +405,8 @@ src/
     registry.ts           The list of tools; drives routes, nav and home-page cards (with live thumbnails)
     shared/               Shared components and utilities: session controls, the Display options panel, canvas sizing
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
-    circle-trio/          Circle Trio component, drawing, seeds, palettes, options, timer
+    circle-trio/          Circle Trio 1 component and layout, plus the drawing and options both Circle Trios use
+    circle-trio-2/        Circle Trio 2 component and layout
     box-randomizer/       Box Randomizer component, drawing, seeds, options
     cylinder-randomizer/  Cylinder Randomizer component, drawing, seeds, options
     cone-randomizer/      Cone Randomizer component, drawing, seeds, options

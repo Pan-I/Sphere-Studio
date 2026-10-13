@@ -52,7 +52,7 @@ describe('keyboard shortcuts', () => {
     })
 
     it('starts and pauses the timer on P', async () => {
-        await mount('/circle-trio?seed=48213')
+        await mount('/circle-trio-1?seed=48213')
         await press('p')
         expect(button('Pause')).not.toBeNull()
         await press('P')
@@ -111,7 +111,7 @@ describe('full screen', () => {
     })
 
     it('leaves on Escape or the exit button, and keeps the other shortcuts working', async () => {
-        await mount('/circle-trio?seed=48213')
+        await mount('/circle-trio-1?seed=48213')
         await act(async () => button('Full screen')!.click())
         expect(frame().classList).toContain('focus-mode')
 

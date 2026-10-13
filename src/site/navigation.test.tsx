@@ -117,16 +117,24 @@ describe('navigation with seeded poses', () => {
         expect(canvas.className).toContain('tool-canvas')
     })
 
-    it('opens a shared Circle Trio link on the right layout', async () => {
+    it('opens a shared Circle Trio 1 link on the right layout', async () => {
+        await mount('/circle-trio-1?seed=48213')
+        expect(document.title).toContain('Circle Trio 1')
+        expect(container.textContent).toContain('Seed: 48213')
+    })
+
+    it('sends old Circle Trio links to Circle Trio 1, keeping the seed', async () => {
         await mount('/circle-trio?seed=48213')
-        expect(document.title).toContain('Circle Trio')
+        expect(window.location.pathname).toBe('/circle-trio-1')
+        expect(seedInUrl()).toBe('48213')
+        expect(document.title).toContain('Circle Trio 1')
         expect(container.textContent).toContain('Seed: 48213')
     })
 
     it('gives each tool its own seed when you switch between them', async () => {
         await mount('/sphere-randomizer?seed=48213')
-        await click(byText('.site-nav a', 'Circle Trio'))
-        expect(window.location.pathname).toBe('/circle-trio')
+        await click(byText('.site-nav a', 'Circle Trio 2'))
+        expect(window.location.pathname).toBe('/circle-trio-2')
         expect(seedInUrl()).not.toBeNull()
         expect(container.textContent).toContain(`Seed: ${seedInUrl()}`)
     })

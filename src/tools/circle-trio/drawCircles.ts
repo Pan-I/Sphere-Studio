@@ -1,7 +1,7 @@
 import type { Circle } from '../../math/circles'
 import { outlinesShown, type CircleOptions, type Fill } from './displayOptions'
 
-/** Fill colours for the large circles and the small one, in draw order. */
+/** Fill colours for the three circles, in draw order (largest first in both Circle Trios). */
 const FILL_COLORS: Record<Exclude<Fill, 'none'>, readonly [string, string, string]> = {
     color: ['#3d74b8', '#d0663a', '#3f9a6e'],
     grayscale: ['#555', '#888', '#333'],

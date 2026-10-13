@@ -11,7 +11,7 @@ import '../shared/tool.css'
 
 const SIZE = 480
 
-export function CircleTrio() {
+export function CircleTrio1() {
     const session = useSeedSession()
     const { seed } = session
     const circles = useMemo(() => layoutFromSeed(seed), [seed])

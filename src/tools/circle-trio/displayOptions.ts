@@ -4,6 +4,7 @@ import {
     lineWidthField,
     toggleField,
     type ColorMode,
+    type OptionFields,
 } from '../shared/options'
 
 export type Fill = ColorMode
@@ -18,8 +19,8 @@ export interface CircleOptions {
 
 const noFill = (options: CircleOptions) => options.fill === 'none'
 
-/** The Display panel, in order. Also gives the defaults and how the options are saved. */
-export const CIRCLE_OPTIONS = defineOptions<CircleOptions>('sphere-studio:circle-trio:display', {
+/** The Display panel, in order. Circle Trio 1 and 2 share it, each saving its own choices. */
+export const CIRCLE_FIELDS: OptionFields<CircleOptions> = {
     fill: colorModeField('Fill', 'None (outlines only)'),
     opacity: {
         kind: 'range',
@@ -38,7 +39,10 @@ export const CIRCLE_OPTIONS = defineOptions<CircleOptions>('sphere-studio:circle
         checkedWhenDisabled: true,
     },
     showCenters: toggleField('Show centers', false),
-})
+}
+
+/** Circle Trio 1's options. The key predates the "1", so saved choices carry over. */
+export const CIRCLE_OPTIONS = defineOptions('sphere-studio:circle-trio:display', CIRCLE_FIELDS)
 
 export const DEFAULT_OPTIONS = CIRCLE_OPTIONS.defaults
 
