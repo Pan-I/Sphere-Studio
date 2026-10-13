@@ -6,6 +6,12 @@ export const MIN_PROPORTION = 0.5
 export const MAX_PROPORTION = 3
 
 /**
+ * The fixed proportion the Cylinder and Cone Randomizers use when "Uniform size" is on: the
+ * length (or a cone's height) is twice the diameter.
+ */
+export const UNIFORM_PROPORTION = 2
+
+/**
  * Turns a number in [0, 1) into a length-to-diameter ratio between MIN_PROPORTION and
  * MAX_PROPORTION. It is spread evenly on a log scale, so squat and long cylinders come up as
  * often as each other.

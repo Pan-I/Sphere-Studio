@@ -1,7 +1,8 @@
 import { baseNormal, frontArc, makeCone, type Cone } from '../../math/cone'
 import { facesViewer, project } from '../../math/cube'
-import { capDiameters, rimPoint } from '../../math/cylinder'
+import { capDiameters, rimPoint, UNIFORM_PROPORTION } from '../../math/cylinder'
 import type { Quat, Vec3 } from '../../math/quat'
+import { rimCircle, strokeEllipseAxes } from '../shared/ellipseAxes'
 import type { ConeOptions, Shading } from './displayOptions'
 
 const HIDDEN_ALPHA = 0.2
@@ -38,9 +39,9 @@ const along = (p: Vec3, d: Vec3, k: number): Vec3 => [
 ]
 
 /**
- * Draws the cone rotated by `q`, with height / diameter = `proportion`, on a square canvas
- * `size` units wide. The side and, when it faces the viewer, the base are filled; the back of
- * the base rim is drawn faintly.
+ * Draws the cone rotated by `q`, with height / diameter = `proportion` (or 2 with uniform size
+ * on), on a square canvas `size` units wide. The side and, when it faces the viewer, the base
+ * are filled; the back of the base rim is drawn faintly, and so are the base ellipse's axes.
  */
 export function drawCone(
     ctx: CanvasRenderingContext2D,
@@ -52,11 +53,14 @@ export function drawCone(
     const camera = options.perspective ? CAMERA_DISTANCE : null
     const c = size / 2
     const r = size * SCALE
-    const cone: Cone = makeCone(q, proportion)
+    // Projected coordinates to canvas ones. Canvas y points down.
+    const toCanvas = (x: number, y: number): [number, number] => [c + x * r, c - y * r]
+    // With uniform size on, the seed's proportions give way to a fixed 2:1.
+    const cone: Cone = makeCone(q, options.uniformSize ? UNIFORM_PROPORTION : proportion)
 
     const toScreen = (p: Vec3): [number, number] => {
         const [x, y] = project(p, camera)
-        return [c + x * r, c - y * r] // canvas y points down
+        return toCanvas(x, y)
     }
     const line = (a: Vec3, b: Vec3) => {
         ctx.moveTo(...toScreen(a))
@@ -133,6 +137,16 @@ export function drawCone(
         ctx.globalAlpha = 1
     }
 
+    // The base ellipse's major and minor axes: faint when the base faces away, like its hidden
+    // rim, and at full strength when you see it.
+    const ellipseAxes = () =>
+        strokeEllipseAxes(ctx, rimCircle(cone, cone.base), camera, toCanvas, options.lineWidth)
+    if (options.showEllipseAxes && options.showHiddenEdges && !baseSeen) {
+        ctx.globalAlpha = HIDDEN_ALPHA
+        ellipseAxes()
+        ctx.globalAlpha = 1
+    }
+
     // Front lines: the two side lines, and the front of the rim or all of it.
     ctx.beginPath()
     if (sideShows && !sideAllRound) {
@@ -143,7 +157,7 @@ export function drawCone(
     if (baseSeen && options.showCenterLines) centerLines()
     ctx.stroke()
 
-    // The axis is a construction line, drawn dashed over everything and past both ends.
+    // The axis is a construction line, drawn dashed over the shape and past both ends.
     if (options.showAxis) {
         const reach = Math.min(cone.halfLength + AXIS_OVERHANG * cone.radius, AXIS_MAX_REACH)
         ctx.strokeStyle = AXIS_COLOR
@@ -153,4 +167,7 @@ export function drawCone(
         ctx.stroke()
         ctx.setLineDash([])
     }
+
+    // The seen ellipse's axes go on top, so the dashed axis doesn't hide the minor axis.
+    if (options.showEllipseAxes && baseSeen) ellipseAxes()
 }
