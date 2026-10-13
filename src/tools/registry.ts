@@ -3,6 +3,8 @@ import { BoxRandomizer } from './box-randomizer/BoxRandomizer'
 import { drawBoxExample } from './box-randomizer/example'
 import { CircleTrio } from './circle-trio/CircleTrio'
 import { drawCircleExample } from './circle-trio/example'
+import { CylinderRandomizer } from './cylinder-randomizer/CylinderRandomizer'
+import { drawCylinderExample } from './cylinder-randomizer/example'
 import { drawSphereExample } from './sphere-randomizer/example'
 import { SphereRandomizer } from './sphere-randomizer/SphereRandomizer'
 
@@ -36,6 +38,14 @@ export const TOOLS: readonly Tool[] = [
             'Two large translucent circles and a smaller one between them, in a new arrangement each time, for practicing overlapping forms.',
         component: CircleTrio,
         drawExample: drawCircleExample,
+    },
+    {
+        slug: 'cylinder-randomizer',
+        name: 'Cylinder Randomizer',
+        description:
+            'A cylinder in a random orientation and proportion, with its axis marked, for practicing ellipses and lining up their minor axis.',
+        component: CylinderRandomizer,
+        drawExample: drawCylinderExample,
     },
     {
         slug: 'sphere-randomizer',

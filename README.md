@@ -12,6 +12,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [Sphere Randomizer](#sphere-randomizer)
   - [Circle Trio](#circle-trio)
   - [Box Randomizer](#box-randomizer)
+  - [Cylinder Randomizer](#cylinder-randomizer)
   - [Keyboard shortcuts and full screen](#keyboard-shortcuts-and-full-screen)
   - [Adding a tool](#adding-a-tool)
 - [How the Sphere Randomizer works](#how-the-sphere-randomizer-works)
@@ -21,6 +22,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [Seeds and shareable poses](#seeds-and-shareable-poses)
 - [How Circle Trio works](#how-circle-trio-works)
 - [How the Box Randomizer works](#how-the-box-randomizer-works)
+- [How the Cylinder Randomizer works](#how-the-cylinder-randomizer-works)
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
 - [Deployment](#deployment)
@@ -35,6 +37,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 | [Sphere Randomizer](#sphere-randomizer) | `/sphere-randomizer` | Generate a sphere to practice drawing a random face. |
 | [Circle Trio](#circle-trio) | `/circle-trio` | Generate three circles to practice drawing a randome face.|
 | [Box Randomizer](#box-randomizer) | `/box-randomizer` | Generate a cube in a random orientation to practice drawing boxes. |
+| [Cylinder Randomizer](#cylinder-randomizer) | `/cylinder-randomizer` | Generate a cylinder in a random orientation and proportion to practice ellipses and the minor axis. |
 <!-- Add one row per new tool. -->
 
 ---
@@ -96,6 +99,25 @@ A cube in a random orientation, the other core form in drawing practice, with th
   - Show center lines: a cross on each face through its centre, joining the middles of opposite edges
 
 How it works is covered [below](#how-the-box-randomizer-works).
+
+---
+
+### Cylinder Randomizer
+
+**Route:** `/cylinder-randomizer` · **Source:** `src/tools/cylinder-randomizer/`
+
+A cylinder in a random orientation, from squat to long, for practicing ellipses. The trick people find hardest is that each end's ellipse has its minor (short) axis lined up with the cylinder's axis, so the axis is drawn through it.
+
+**Features**
+
+- **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer. A seed gives the cylinder the same rotation it gives the sphere and the cube, and also picks its proportions: the length runs from half the diameter to three times it.
+- **Display options** (saved in your browser between visits):
+  - Shading: color, grayscale, or none (lines only). The side and the end facing you get different shades.
+  - Line thickness: 1 to 8 px
+  - Perspective: near parts look bigger, so the near end is a little larger than the far one. Off gives a flat view where the two ends are identical ellipses.
+  - Show hidden edges: draws the back half of the far end faintly
+  - Show axis: a dashed red line through the centres of both ends
+  - Show center lines: a cross on each end through its true centre, along the diameters that become the ellipse's axes
 
 <!--
 ### Tool name
@@ -289,6 +311,20 @@ Center lines join the midpoints of a face's opposite edges. Under perspective, t
 
 ---
 
+## How the Cylinder Randomizer works
+
+The geometry is in `src/math/cylinder.ts`. A cylinder has an axis (a unit vector), two unit vectors `u` and `v` at right angles to it, a radius and a half-length. The point at angle φ on a rim is `centre + radius·(cos φ·u + sin φ·v)`. The radius and half-length are chosen so that `radius² + halfLength² = 1`, which puts the rims on the unit sphere and makes every cylinder the same overall size as the sphere and the cube.
+
+`poseFromSeed` (`src/tools/cylinder-randomizer/pose.ts`) takes the first three draws of `mulberry32(seed)` for the rotation, exactly as the other two tools do, and the fourth for the proportions (length over diameter, from 0.5 to 3, spread evenly on a log scale so squat and long cylinders are equally likely). `drawCylinder.ts` then works out:
+
+1. **Where the side lines go.** The side's outward normal at angle φ is `n = cos φ·u + sin φ·v`. In a flat view the side faces you where `n.z > 0`; in perspective, with the eye at `(0, 0, 5)`, it faces you where `n · eye > radius`. Both have the form `ρ cos(φ − base) > k`, so the side faces you for φ in `base ± acos(k / ρ)`. The two ends of that range are the silhouette, and the straight side lines run along the cylinder at those two angles, touching both ellipses (a test checks they really are tangent).
+2. **Which end faces you**, with the same test the Box Randomizer uses for a face. At most one end does; seen side-on in perspective, neither does. Looking straight down the axis in perspective, the side faces away all the way round and only the near end shows.
+3. **Draws** the side as the strip between the two rims' front halves, then the end that faces you on top, then the back half of the far rim faintly, then the side lines and every rim edge you can see. A rim is in front where its end faces you or the side next to it does, the same rule as a cube's edges.
+
+The ellipses come from projecting each rim point by point (120 per rim), so they are exact in both views. In the flat view you can check the classic rules against the drawing: the long half-axis of each ellipse is the radius, the short one is the radius times how directly that end faces you, and the short one lies along the cylinder's axis. The center lines show the two diameters that become those axes. In perspective the drawn ellipse's own axes drift a little away from them, and the cross is no longer in the middle of the ellipse, for the same reason the Box Randomizer's center lines aren't.
+
+---
+
 ## Project structure
 
 ```
@@ -306,11 +342,13 @@ src/
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
     circle-trio/          Circle Trio component, drawing, seeds, palettes, options, timer
     box-randomizer/       Box Randomizer component, drawing, seeds, options
+    cylinder-randomizer/  Cylinder Randomizer component, drawing, seeds, options
   math/                   Reusable math with no UI dependencies
     quat.ts               Vectors, quaternions, Shoemake random rotation
     random.ts             mulberry32 seeded PRNG
     sphere.ts             Great circles, sectors, projection, visibility, intersections
     cube.ts               Cube corners, edges and faces, perspective projection, which faces you see
+    cylinder.ts           Cylinder proportions, rims, side lines, and the diameters behind each ellipse's axes
 ```
 
 ## Getting started
