@@ -29,7 +29,7 @@ export const TOOLS: readonly Tool[] = [
         slug: 'sphere-randomizer',
         name: 'Sphere Randomizer',
         description:
-            'A randomly rotated sphere split into eight sectors, with a timer and shareable poses, for form drawing practice.',
+            'A randomly rotated sphere split into eight sectors, with a timer and shareable poses, to practice drawing a face for a random direction.',
         component: SphereRandomizer,
         drawExample: drawSphereExample,
     },
@@ -61,7 +61,7 @@ export const TOOLS: readonly Tool[] = [
         slug: 'circle-trio',
         name: 'Circle Trio',
         description:
-            'Two large translucent circles and a smaller one between them, in a new arrangement each time, for practicing overlapping forms.',
+            'Two large translucent circles and a smaller one between them, in a new arrangement each time, for practicing drawing faces with a random shape/form.',
         component: CircleTrio,
         drawExample: drawCircleExample,
     },
