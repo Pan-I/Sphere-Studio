@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { pickMarker } from '../../math/sphere'
+import { OptionsPanel } from '../shared/OptionsPanel'
 import { SessionControls } from '../shared/SessionControls'
 import { useSeedSession } from '../shared/useSeedSession'
+import { useStoredOptions } from '../shared/useStoredOptions'
 import { useSquareCanvas } from '../shared/useSquareCanvas'
 import { drawSphere } from './drawSphere'
-import { DisplayControls } from './DisplayControls'
-import { loadOptions, saveOptions } from './displayOptions'
+import { SPHERE_OPTIONS } from './displayOptions'
 import { poseFromSeed } from './pose'
 import '../shared/tool.css'
 
@@ -18,7 +19,8 @@ export function SphereRandomizer() {
         const { q, markerPick } = poseFromSeed(seed)
         return { q, marker: pickMarker(q, markerPick) }
     }, [seed])
-    const [options, setOptions] = useState(loadOptions)
+    // Display preferences, remembered between visits.
+    const [options, setOptions] = useStoredOptions(SPHERE_OPTIONS)
 
     // Redraw whenever the orientation or the display options change.
     const draw = useCallback(
@@ -26,11 +28,6 @@ export function SphereRandomizer() {
         [pose, options],
     )
     const canvasRef = useSquareCanvas(SIZE, draw)
-
-    // Remember display preferences between visits.
-    useEffect(() => {
-        saveOptions(options)
-    }, [options])
 
     return (
         <div className="tool-layout">
@@ -42,7 +39,7 @@ export function SphereRandomizer() {
                 aria-label={`Sphere divided into eight sectors, pose ${seed}`}
             />
             <SessionControls session={session} />
-            <DisplayControls options={options} onChange={setOptions} />
+            <OptionsPanel fields={SPHERE_OPTIONS.fields} options={options} onChange={setOptions} />
         </div>
     )
 }

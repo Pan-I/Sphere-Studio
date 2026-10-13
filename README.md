@@ -138,8 +138,29 @@ Tools are driven by one registry, `src/tools/registry.ts`. Adding an entry there
 
    `drawExample(ctx, size, seed)` draws the picture for a seed on a square canvas `size` units wide, using the tool's default options. The home page calls it for a small live example on the tool's card, and clicking that example opens the tool on the same seed. It gets nothing from the tool's page, which makes it a quick check that the drawing code stands on its own. Put it in `src/tools/<slug>/example.ts`; the Sphere Randomizer's is only a few lines.
 
-3. Add unit tests next to the code (`*.test.ts`). `src/tools/registry.test.ts` already checks that slugs are unique and URL-safe and that every tool has a name and description, and `src/tools/examples.test.ts` checks that every tool's example draws, and draws the same picture for the same seed.
-4. Document it in this README: add a row to the [Tools](#tools) table and copy the commented-out template under the Sphere Randomizer section.
+3. Describe its display options in `src/tools/<slug>/displayOptions.ts` and the tool gets the **Display** panel, its defaults, and saving between visits for free. List one field per option with `defineOptions`; the panel shows them in that order. The shared presets keep common options identical across tools: `colorModeField` (color, grayscale or none), `lineWidthField` (1 to 8 px) and `toggleField` (a checkbox). A one-off option is a plain object, like Circle Trio's opacity:
+
+   ```ts
+   export const MY_OPTIONS = defineOptions<MyOptions>('sphere-studio:my-tool:display', {
+       shading: colorModeField('Shading', 'None (lines only)'),
+       lineWidth: lineWidthField(),
+       showGuides: toggleField('Show guides', true),
+   })
+   export const DEFAULT_OPTIONS = MY_OPTIONS.defaults // for drawExample
+   ```
+
+   Then, in the component:
+
+   ```tsx
+   const [options, setOptions] = useStoredOptions(MY_OPTIONS)
+   // ...
+   <OptionsPanel fields={MY_OPTIONS.fields} options={options} onChange={setOptions} />
+   ```
+
+   TypeScript checks the fields against the options type: every option needs a field, and a boolean must be a toggle, a number a range, and a string a choice. A field can grey itself out with `disabledWhen(options)`, as Circle Trio's opacity does when there is no fill. Stored values are checked field by field when they are loaded, so a missing, renamed or out-of-range value falls back to its default instead of breaking the tool.
+
+4. Add unit tests next to the code (`*.test.ts`). `src/tools/registry.test.ts` already checks that slugs are unique and URL-safe and that every tool has a name and description, and `src/tools/examples.test.ts` checks that every tool's example draws, and draws the same picture for the same seed.
+5. Document it in this README: add a row to the [Tools](#tools) table and copy the commented-out template under the Sphere Randomizer section.
 
 The page heading and browser tab title (`<Tool name> · Sphere Studio`) come from the registry entry, so the component only renders the tool itself.
 
@@ -238,7 +259,7 @@ src/
   shortcuts/              Keyboard shortcuts: the registry, useShortcuts, and the ? list
   tools/
     registry.ts           The list of tools; drives routes, nav and home-page cards (with live thumbnails)
-    shared/               Shared components and utilities
+    shared/               Shared components and utilities: session controls, the Display options panel, canvas sizing
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
     circle-trio/          Circle Trio component, drawing, seeds, palettes, options, timer
   math/                   Reusable math with no UI dependencies
