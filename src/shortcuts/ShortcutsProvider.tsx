@@ -1,5 +1,6 @@
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { useTouchOnly } from '../site/useTouchOnly'
 import { ShortcutsContext, type ShortcutsContextValue } from './context'
 import { createShortcutRegistry, keyLabel, type ShortcutRegistry } from './shortcuts'
 import './shortcuts.css'
@@ -18,18 +19,20 @@ export function ShortcutsProvider({ children }: { children: ReactNode }) {
         openHelp: () => setHelpOpen(true),
     }))
 
+    const touchOnly = useTouchOnly()
+
     // The ? shortcut goes through the registry like any other, so it's listed with the rest.
-    useEffect(
-        () =>
-            registry.add([
-                {
-                    key: HELP_KEY,
-                    description: 'Show keyboard shortcuts',
-                    run: () => setHelpOpen(true),
-                },
-            ]),
-        [registry],
-    )
+    // Phones and tablets get no shortcut list, as they have no Shortcuts button (see ToolPage).
+    useEffect(() => {
+        if (touchOnly) return
+        return registry.add([
+            {
+                key: HELP_KEY,
+                description: 'Show keyboard shortcuts',
+                run: () => setHelpOpen(true),
+            },
+        ])
+    }, [registry, touchOnly])
 
     useEffect(() => {
         let handledKey: string | null = null

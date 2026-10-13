@@ -127,7 +127,9 @@ Every tool page has these, so your hand can stay on the pencil:
 
 Shortcuts are ignored while you're typing in a field, and when Ctrl, Cmd or Alt is held, so browser shortcuts like Ctrl+P still work.
 
-**Full screen** shows only the drawing and the timer, for a second screen or a tablet propped beside your paper. It uses the browser's Fullscreen API. Where that isn't available (iPhone Safari), the tool fills the browser window instead.
+**Full screen** shows only the drawing and the timer, for a second screen beside your paper. It uses the browser's Fullscreen API. Where that isn't available (iPhone Safari), the tool fills the browser window instead.
+
+On phones and tablets (touch only, no mouse or trackpad), the **Full screen** and **Shortcuts** buttons are hidden and <kbd>F</kbd> and <kbd>?</kbd> do nothing. `useTouchOnly` (in `src/site/`) decides this with the `(hover: none) and (pointer: coarse)` media query, so a tablet with a trackpad attached gets them back.
 
 **For new tools and features:**
 

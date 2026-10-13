@@ -126,3 +126,32 @@ describe('full screen', () => {
         expect(frame().classList).not.toContain('focus-mode')
     })
 })
+
+describe('on a touch-only device', () => {
+    beforeEach(() => {
+        // jsdom has no matchMedia; pretend to be a phone.
+        window.matchMedia = ((query: string) => ({
+            matches: query.includes('pointer: coarse'),
+            addEventListener: () => {},
+            removeEventListener: () => {},
+        })) as unknown as typeof window.matchMedia
+    })
+    afterEach(() => {
+        delete (window as { matchMedia?: unknown }).matchMedia
+    })
+
+    it('hides Full screen and Shortcuts, and ignores F and ?', async () => {
+        await mount('/sphere-randomizer?seed=48213')
+        expect(button('Full screen')).toBeNull()
+        expect(container.querySelector('button[aria-label="Keyboard shortcuts"]')).toBeNull()
+
+        await press('f')
+        expect(frame().classList).not.toContain('focus-mode')
+        await press('?')
+        expect(document.querySelector('[role="dialog"]')).toBeNull()
+
+        // Randomize still works.
+        await press(' ')
+        expect(seedInUrl()).not.toBe('48213')
+    })
+})
