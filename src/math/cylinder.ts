@@ -47,8 +47,12 @@ export function makeCylinder(q: Quat, proportion: number): Cylinder {
     }
 }
 
-/** The point at angle `phi` on the rim around `centre`. */
-export function rimPoint(cyl: Cylinder, centre: Vec3, phi: number): Vec3 {
+/** The point at angle `phi` on the rim around `centre`. The Cone Randomizer uses it too. */
+export function rimPoint(
+    cyl: Pick<Cylinder, 'u' | 'v' | 'radius'>,
+    centre: Vec3,
+    phi: number,
+): Vec3 {
     const c = Math.cos(phi) * cyl.radius
     const s = Math.sin(phi) * cyl.radius
     return [
@@ -90,7 +94,7 @@ export function frontArc(cyl: Cylinder, camera: number | null): readonly [number
  * foreshortened and always lines up with the cylinder's axis on screen. In perspective they are
  * still the cap's true centre lines, but the drawn ellipse's own axes drift away from them.
  */
-export function capDiameters(cyl: Cylinder): { major: Vec3; minor: Vec3 } {
+export function capDiameters(cyl: Pick<Cylinder, 'axis' | 'u'>): { major: Vec3; minor: Vec3 } {
     let major = cross(cyl.axis, [0, 0, 1])
     const len = Math.hypot(...major)
     // Looking straight along the axis the cap is a circle, and any diameter will do.

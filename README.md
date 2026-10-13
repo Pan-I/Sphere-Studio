@@ -13,6 +13,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [Circle Trio](#circle-trio)
   - [Box Randomizer](#box-randomizer)
   - [Cylinder Randomizer](#cylinder-randomizer)
+  - [Cone Randomizer](#cone-randomizer)
   - [Keyboard shortcuts and full screen](#keyboard-shortcuts-and-full-screen)
   - [Adding a tool](#adding-a-tool)
 - [How the Sphere Randomizer works](#how-the-sphere-randomizer-works)
@@ -23,6 +24,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 - [How Circle Trio works](#how-circle-trio-works)
 - [How the Box Randomizer works](#how-the-box-randomizer-works)
 - [How the Cylinder Randomizer works](#how-the-cylinder-randomizer-works)
+- [How the Cone Randomizer works](#how-the-cone-randomizer-works)
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
 - [Deployment](#deployment)
@@ -38,6 +40,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 | [Circle Trio](#circle-trio) | `/circle-trio` | Generate three circles to practice drawing a randome face.|
 | [Box Randomizer](#box-randomizer) | `/box-randomizer` | Generate a cube in a random orientation to practice drawing boxes. |
 | [Cylinder Randomizer](#cylinder-randomizer) | `/cylinder-randomizer` | Generate a cylinder in a random orientation and proportion to practice ellipses and the minor axis. |
+| [Cone Randomizer](#cone-randomizer) | `/cone-randomizer` | Generate a cone in a random orientation and proportion to practice the base ellipse and the side lines that meet it. |
 <!-- Add one row per new tool. -->
 
 ---
@@ -118,6 +121,25 @@ A cylinder in a random orientation, from squat to long, for practicing ellipses.
   - Show hidden edges: draws the back half of the far end faintly
   - Show axis: a dashed red line through the centres of both ends
   - Show center lines: a cross on each end through its true centre, along the diameters that become the ellipse's axes
+
+---
+
+### Cone Randomizer
+
+**Route:** `/cone-randomizer` · **Source:** `src/tools/cone-randomizer/`
+
+A cone in a random orientation, from squat to tall, for practicing the base ellipse and the two straight side lines, which touch the ellipse rather than meeting it at the ends of its long axis.
+
+**Features**
+
+- **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer. A seed gives the cone the same rotation and proportions it gives the cylinder: the height runs from half the base's diameter to three times it.
+- **Display options** (saved in your browser between visits):
+  - Shading: color, grayscale, or none (lines only). The side and the base get different shades.
+  - Line thickness: 1 to 8 px
+  - Perspective: near parts look bigger. Off gives a flat (orthographic) view.
+  - Show hidden edges: draws the back of the base faintly when the base faces away
+  - Show axis: a dashed red line through the apex and the centre of the base
+  - Show center lines: a cross on the base through its true centre, along the diameters that become the ellipse's axes
 
 <!--
 ### Tool name
@@ -325,6 +347,16 @@ The ellipses come from projecting each rim point by point (120 per rim), so they
 
 ---
 
+## How the Cone Randomizer works
+
+The geometry is in `src/math/cone.ts` and builds on the cylinder's. A cone has the same axis, `u`, `v`, radius and half-length as a cylinder of the same proportions, with the base centred at `−halfLength` along the axis and the apex at `+halfLength`. The base rim sits on the unit sphere, so a cone is a cylinder with one end shrunk to a point, and the rim points come from the cylinder's `rimPoint`. `poseFromSeed` draws the rotation and proportions exactly as the Cylinder Randomizer does, so a seed gives both the same pose.
+
+1. **Where the side lines go.** Along the straight line from the rim at angle φ up to the apex, the side's outward normal is `n = height·(cos φ·u + sin φ·v) + radius·axis`. In a flat view the side faces you where `n.z > 0`. In perspective it faces the eye at `(0, 0, 5)` where `n · eye > radius·halfLength`, because `n · p` is that same number at every point `p` on the line. As with the cylinder, both have the form `ρ cos(φ − base) > k`, so the side faces you for φ in `base ± acos(k / ρ)`, and the side lines run from the rim at those two angles to the apex. A test checks they really are tangent to the drawn ellipse, in both views. Unlike the cylinder's, the range can be empty (you're facing the base and the apex is hidden behind it) or a full turn (you're looking down on the apex and the base is hidden underneath), and then there are no side lines at all.
+2. **Whether the base faces you**, with the Box Randomizer's face test.
+3. **Draws** the side as the apex joined to the front of the rim, the base on top when it faces you, the back of the rim faintly when it doesn't, then the side lines and every rim edge you can see.
+
+---
+
 ## Project structure
 
 ```
@@ -343,12 +375,14 @@ src/
     circle-trio/          Circle Trio component, drawing, seeds, palettes, options, timer
     box-randomizer/       Box Randomizer component, drawing, seeds, options
     cylinder-randomizer/  Cylinder Randomizer component, drawing, seeds, options
+    cone-randomizer/      Cone Randomizer component, drawing, seeds, options
   math/                   Reusable math with no UI dependencies
     quat.ts               Vectors, quaternions, Shoemake random rotation
     random.ts             mulberry32 seeded PRNG
     sphere.ts             Great circles, sectors, projection, visibility, intersections
     cube.ts               Cube corners, edges and faces, perspective projection, which faces you see
     cylinder.ts           Cylinder proportions, rims, side lines, and the diameters behind each ellipse's axes
+    cone.ts               Cone shape, side normals, and where the side lines touch the base
 ```
 
 ## Getting started

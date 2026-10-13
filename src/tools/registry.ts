@@ -5,6 +5,8 @@ import { BoxRandomizer } from './box-randomizer/BoxRandomizer'
 import { drawBoxExample } from './box-randomizer/example'
 import { CylinderRandomizer } from './cylinder-randomizer/CylinderRandomizer'
 import { drawCylinderExample } from './cylinder-randomizer/example'
+import { ConeRandomizer } from './cone-randomizer/ConeRandomizer'
+import { drawConeExample } from './cone-randomizer/example'
 import { CircleTrio } from './circle-trio/CircleTrio'
 import { drawCircleExample } from './circle-trio/example'
 
@@ -46,6 +48,14 @@ export const TOOLS: readonly Tool[] = [
             'A cylinder in a random orientation and proportion, with its axis marked, for practicing ellipses and lining up their minor axis.',
         component: CylinderRandomizer,
         drawExample: drawCylinderExample,
+    },
+    {
+        slug: 'cone-randomizer',
+        name: 'Cone Randomizer',
+        description:
+            'A cone in a random orientation and proportion, with its axis marked, for practicing the base ellipse and the side lines that meet it.',
+        component: ConeRandomizer,
+        drawExample: drawConeExample,
     },
     {
         slug: 'circle-trio',
