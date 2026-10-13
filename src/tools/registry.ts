@@ -1,4 +1,6 @@
 import type { ComponentType } from 'react'
+import { BoxRandomizer } from './box-randomizer/BoxRandomizer'
+import { drawBoxExample } from './box-randomizer/example'
 import { CircleTrio } from './circle-trio/CircleTrio'
 import { drawCircleExample } from './circle-trio/example'
 import { drawSphereExample } from './sphere-randomizer/example'
@@ -19,6 +21,14 @@ export interface Tool {
 
 /** Every tool on the site. Adding an entry here adds its route, nav link, and home-page card. */
 export const TOOLS: readonly Tool[] = [
+    {
+        slug: 'box-randomizer',
+        name: 'Box Randomizer',
+        description:
+            'A cube in a random orientation, with the faces that point at you shaded and the hidden edges shown faintly, for practicing boxes.',
+        component: BoxRandomizer,
+        drawExample: drawBoxExample,
+    },
     {
         slug: 'circle-trio',
         name: 'Circle Trio',

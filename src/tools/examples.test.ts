@@ -42,7 +42,7 @@ const drawn = (draw: (typeof TOOLS)[number]['drawExample'], seed: number) => {
 describe.each(TOOLS)('$name home-page example', ({ drawExample }) => {
     it('draws on its own, without the tool page around it', () => {
         const log = drawn(drawExample, 48213)
-        expect(log.some((call) => call.startsWith('arc('))).toBe(true)
+        expect(log).toContain('stroke()')
     })
 
     it('draws the same picture for the same seed', () => {
