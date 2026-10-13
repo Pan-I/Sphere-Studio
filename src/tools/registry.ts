@@ -1,12 +1,12 @@
 import type { ComponentType } from 'react'
+import { SphereRandomizer } from './sphere-randomizer/SphereRandomizer'
+import { drawSphereExample } from './sphere-randomizer/example'
 import { BoxRandomizer } from './box-randomizer/BoxRandomizer'
 import { drawBoxExample } from './box-randomizer/example'
-import { CircleTrio } from './circle-trio/CircleTrio'
-import { drawCircleExample } from './circle-trio/example'
 import { CylinderRandomizer } from './cylinder-randomizer/CylinderRandomizer'
 import { drawCylinderExample } from './cylinder-randomizer/example'
-import { drawSphereExample } from './sphere-randomizer/example'
-import { SphereRandomizer } from './sphere-randomizer/SphereRandomizer'
+import { CircleTrio } from './circle-trio/CircleTrio'
+import { drawCircleExample } from './circle-trio/example'
 
 export interface Tool {
     /** URL segment, e.g. "sphere-randomizer" is served at /sphere-randomizer. */
@@ -24,20 +24,20 @@ export interface Tool {
 /** Every tool on the site. Adding an entry here adds its route, nav link, and home-page card. */
 export const TOOLS: readonly Tool[] = [
     {
+        slug: 'sphere-randomizer',
+        name: 'Sphere Randomizer',
+        description:
+            'A randomly rotated sphere split into eight sectors, with a timer and shareable poses, for form drawing practice.',
+        component: SphereRandomizer,
+        drawExample: drawSphereExample,
+    },
+    {
         slug: 'box-randomizer',
         name: 'Box Randomizer',
         description:
             'A cube in a random orientation, with the faces that point at you shaded and the hidden edges shown faintly, for practicing boxes.',
         component: BoxRandomizer,
         drawExample: drawBoxExample,
-    },
-    {
-        slug: 'circle-trio',
-        name: 'Circle Trio',
-        description:
-            'Two large translucent circles and a smaller one between them, in a new arrangement each time, for practicing overlapping forms.',
-        component: CircleTrio,
-        drawExample: drawCircleExample,
     },
     {
         slug: 'cylinder-randomizer',
@@ -48,11 +48,11 @@ export const TOOLS: readonly Tool[] = [
         drawExample: drawCylinderExample,
     },
     {
-        slug: 'sphere-randomizer',
-        name: 'Sphere Randomizer',
+        slug: 'circle-trio',
+        name: 'Circle Trio',
         description:
-            'A randomly rotated sphere split into eight sectors, with a timer and shareable poses, for form drawing practice.',
-        component: SphereRandomizer,
-        drawExample: drawSphereExample,
+            'Two large translucent circles and a smaller one between them, in a new arrangement each time, for practicing overlapping forms.',
+        component: CircleTrio,
+        drawExample: drawCircleExample,
     },
 ]
