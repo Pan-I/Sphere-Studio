@@ -26,7 +26,7 @@ export function CircleControls({ options, onChange }: Props) {
     const noFill = options.fill === 'none'
 
     return (
-        <fieldset className="tool-options">
+        <fieldset className="tool-display">
             <legend>Display</legend>
             <label className="tool-option">
                 <span>Fill</span>

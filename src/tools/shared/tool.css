@@ -16,39 +16,39 @@
     aspect-ratio: 1;
 }
 
-.tool-actions {
+.session-actions {
     display: flex;
     gap: 0.75rem;
 }
 
-.sphere-actions button {
+.session-actions button {
     flex: 1;
 }
 
-.tool-timer-row {
+.session-timer-row {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     gap: 1rem;
 }
 
-.tool-field {
+.session-field {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
 }
 
-.sphere-field input {
+.session-field input {
     width: 7rem;
 }
 
-.tool-timer {
+.session-timer {
     font-size: 1.75rem;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
 
-.tool-seed-row {
+.session-seed-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -56,17 +56,17 @@
 }
 
 /* Own line with reserved height, so "Link copied!" doesn't shift the layout. */
-.tool-status {
+.session-status {
     flex-basis: 100%;
     min-height: 1.5em;
 }
 
-.tool-seed-form {
+.session-seed-form {
     display: flex;
     gap: 0.5rem;
 }
 
-.sphere-seed-form input {
+.session-seed-form input {
     flex: 1;
     min-width: 0;
 }
@@ -83,7 +83,7 @@
     border-radius: 0.5rem;
 }
 
-.sphere-display legend {
+.tool-display legend {
     padding: 0 0.4rem;
     font-weight: 600;
 }
@@ -96,11 +96,11 @@
     min-height: 44px;
 }
 
-.sphere-option select {
+.tool-option select {
     min-width: 9rem;
 }
 
-.sphere-option input[type='checkbox'] {
+.tool-option input[type='checkbox'] {
     width: 1.4rem;
     height: 1.4rem;
     margin: 0;
@@ -115,7 +115,7 @@
     justify-content: flex-end;
 }
 
-.sphere-range input {
+.tool-range input {
     flex: 1;
     min-width: 6rem;
     max-width: 12rem;
@@ -123,7 +123,7 @@
     accent-color: var(--accent);
 }
 
-.sphere-range output {
+.tool-range output {
     min-width: 3ch;
     text-align: right;
     font-variant-numeric: tabular-nums;

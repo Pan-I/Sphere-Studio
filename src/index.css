@@ -129,6 +129,67 @@ select {
     color: inherit;
 }
 
+/* Tool name with the Full screen and Shortcuts buttons beside it. */
+.tool-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.tool-heading h1 {
+    margin: 0;
+}
+
+.tool-heading-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Full screen (or focus mode where the browser has no full screen): the tool fills the window and
+   only its parts marked data-focus="show" stay visible, minus anything inside marked "hide". */
+.tool-frame.focus-mode {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow: auto;
+    background: Canvas;
+    color: CanvasText;
+}
+
+.focus-mode .tool-layout {
+    max-width: none;
+    align-items: center;
+}
+
+.focus-mode .tool-layout > :not([data-focus='show']),
+.focus-mode [data-focus='hide'] {
+    display: none;
+}
+
+/* As big as fits, leaving room for the timer below. dvw/dvh track the phone's address bar. */
+.focus-mode .tool-canvas {
+    width: min(calc(100dvw - 2rem), calc(100dvh - 6rem));
+    max-width: none;
+}
+.focus-mode .session-timer {
+    font-size: 2.5rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.focus-exit {
+    position: fixed;
+    top: 0.75rem;
+    right: 0.75rem;
+}
+
 @media (max-width: 30rem) {
     .site-main {
         padding: 1rem 0.75rem;

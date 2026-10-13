@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { pickMarker } from '../../math/sphere'
-import { bufferScale } from '../shared/canvasScale'
 import { SessionControls } from '../shared/SessionControls'
 import { useSeedSession } from '../shared/useSeedSession'
+import { useSquareCanvas } from '../shared/useSquareCanvas'
 import { drawSphere } from './drawSphere'
 import { DisplayControls } from './DisplayControls'
 import { loadOptions, saveOptions } from './displayOptions'
@@ -12,7 +12,6 @@ import '../shared/tool.css'
 const SIZE = 480
 
 export function SphereRandomizer() {
-    const canvasRef = useRef<HTMLCanvasElement>(null)
     const session = useSeedSession()
     const { seed } = session
     const pose = useMemo(() => {
@@ -21,19 +20,12 @@ export function SphereRandomizer() {
     }, [seed])
     const [options, setOptions] = useState(loadOptions)
 
-    // Draw whenever the orientation changes.
-    useEffect(() => {
-        const canvas = canvasRef.current
-        const ctx = canvas?.getContext('2d')
-        if (!canvas || !ctx) return
-        // Size the drawing buffer for the screen, capped at 2x (see bufferScale).
-        const pixels = Math.round(SIZE * bufferScale(window.devicePixelRatio))
-        canvas.width = pixels
-        canvas.height = pixels
-        const scale = pixels / SIZE
-        ctx.setTransform(scale, 0, 0, scale, 0, 0)
-        drawSphere(ctx, SIZE, pose.q, options, pose.marker)
-    }, [pose, options])
+    // Redraw whenever the orientation or the display options change.
+    const draw = useCallback(
+        (ctx: CanvasRenderingContext2D) => drawSphere(ctx, SIZE, pose.q, options, pose.marker),
+        [pose, options],
+    )
+    const canvasRef = useSquareCanvas(SIZE, draw)
 
     // Remember display preferences between visits.
     useEffect(() => {
@@ -45,6 +37,7 @@ export function SphereRandomizer() {
             <canvas
                 ref={canvasRef}
                 className="tool-canvas"
+                data-focus="show"
                 role="img"
                 aria-label={`Sphere divided into eight sectors, pose ${seed}`}
             />

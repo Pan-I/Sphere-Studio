@@ -1,0 +1,56 @@
+.shortcut-help-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: color-mix(in srgb, Canvas 40%, transparent);
+}
+
+.shortcut-help {
+    width: min(100%, 24rem);
+    padding: 1rem 1.25rem 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: 0 0.5rem 2rem rgb(0 0 0 / 0.25);
+}
+
+.shortcut-help h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.15rem;
+}
+
+.shortcut-help dl {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+}
+
+.shortcut-help dl > div {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.shortcut-help dt {
+    min-width: 4.5rem;
+}
+
+.shortcut-help dd {
+    margin: 0;
+}
+
+kbd {
+    display: inline-block;
+    min-width: 1.5em;
+    padding: 0.1rem 0.45rem;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 0.35rem;
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: center;
+}

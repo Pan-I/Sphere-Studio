@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { useShortcuts } from '../../shortcuts/useShortcuts'
 import { MAX_SECONDS, MIN_SECONDS } from './countdown'
 import { MAX_SEED, buildShareUrl, parseSeed } from './seed'
 import type { SeedSession } from './useSeedSession'
@@ -11,6 +12,10 @@ export function SessionControls({ session }: { session: SeedSession }) {
     const [seedText, setSeedText] = useState('')
     const [copyState, setCopyState] = useState<CopyState>('idle')
     const parsedSeed = parseSeed(seedText)
+    useShortcuts([
+        { key: ' ', description: 'New pose', run: session.randomize },
+        { key: 'p', description: 'Start or pause the timer', run: session.toggle },
+    ])
     const seedInvalid = seedText.trim() !== '' && parsedSeed === null
 
     // Clear the "Copied!" message after a moment.
@@ -49,8 +54,9 @@ export function SessionControls({ session }: { session: SeedSession }) {
                     {running ? 'Pause' : startLabel}
                 </button>
             </div>
-            <div className="session-timer-row">
-                <label className="session-field">
+            {/* The timer stays in view in full screen; the interval field doesn't. */}
+            <div className="session-timer-row" data-focus="show">
+                <label className="session-field" data-focus="hide">
                     Interval (seconds)
                     <input
                         type="number"
