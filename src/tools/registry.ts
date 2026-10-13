@@ -5,6 +5,8 @@ import { BoxRandomizer } from './box-randomizer/BoxRandomizer'
 import { drawBoxExample } from './box-randomizer/example'
 import { CylinderRandomizer } from './cylinder-randomizer/CylinderRandomizer'
 import { drawCylinderExample } from './cylinder-randomizer/example'
+import { ConeRandomizer } from './cone-randomizer/ConeRandomizer'
+import { drawConeExample } from './cone-randomizer/example'
 import { CircleTrio } from './circle-trio/CircleTrio'
 import { drawCircleExample } from './circle-trio/example'
 
@@ -27,7 +29,7 @@ export const TOOLS: readonly Tool[] = [
         slug: 'sphere-randomizer',
         name: 'Sphere Randomizer',
         description:
-            'A randomly rotated sphere split into eight sectors, with a timer and shareable poses, for form drawing practice.',
+            'A randomly rotated sphere split into eight sectors, with a timer and shareable poses, to practice drawing a face for a random direction.',
         component: SphereRandomizer,
         drawExample: drawSphereExample,
     },
@@ -48,10 +50,18 @@ export const TOOLS: readonly Tool[] = [
         drawExample: drawCylinderExample,
     },
     {
+        slug: 'cone-randomizer',
+        name: 'Cone Randomizer',
+        description:
+            'A cone in a random orientation and proportion, with its axis marked, for practicing the base ellipse and the side lines that meet it.',
+        component: ConeRandomizer,
+        drawExample: drawConeExample,
+    },
+    {
         slug: 'circle-trio',
         name: 'Circle Trio',
         description:
-            'Two large translucent circles and a smaller one between them, in a new arrangement each time, for practicing overlapping forms.',
+            'Two large translucent circles and a smaller one between them, in a new arrangement each time, for practicing drawing faces with a random shape/form.',
         component: CircleTrio,
         drawExample: drawCircleExample,
     },
