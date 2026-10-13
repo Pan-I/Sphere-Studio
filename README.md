@@ -11,6 +11,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 - [Tools](#tools)
   - [Sphere Randomizer](#sphere-randomizer)
   - [Circle Trio](#circle-trio)
+  - [Box Randomizer](#box-randomizer)
   - [Keyboard shortcuts and full screen](#keyboard-shortcuts-and-full-screen)
   - [Adding a tool](#adding-a-tool)
 - [How the Sphere Randomizer works](#how-the-sphere-randomizer-works)
@@ -19,6 +20,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [Drawing](#drawing)
   - [Seeds and shareable poses](#seeds-and-shareable-poses)
 - [How Circle Trio works](#how-circle-trio-works)
+- [How the Box Randomizer works](#how-the-box-randomizer-works)
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
 - [Deployment](#deployment)
@@ -32,6 +34,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 | --- | --- | --- |
 | [Sphere Randomizer](#sphere-randomizer) | `/sphere-randomizer` | Generate a sphere to practice drawing a random face. |
 | [Circle Trio](#circle-trio) | `/circle-trio` | Generate three circles to practice drawing a randome face.|
+| [Box Randomizer](#box-randomizer) | `/box-randomizer` | Generate a cube in a random orientation to practice drawing boxes. |
 <!-- Add one row per new tool. -->
 
 ---
@@ -73,6 +76,26 @@ Two large translucent circles and a smaller one roughly between them, in a new a
   - Show centers: a dot at the middle of each circle
 
 How the arrangement is chosen is covered [below](#how-circle-trio-works).
+
+---
+
+### Box Randomizer
+
+**Route:** `/box-randomizer` · **Source:** `src/tools/box-randomizer/`
+
+A cube in a random orientation, the other core form in drawing practice, with the faces that point at you shaded and the edges behind shown faintly.
+
+**Features**
+
+- **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer. A seed gives the cube the same rotation it gives the sphere.
+- **Display options** (saved in your browser between visits):
+  - Shading: color, grayscale, or none (lines only). Each axis has its own shade, so the faces you see always differ.
+  - Line thickness: 1 to 8 px
+  - Perspective: near edges look bigger than far ones. Off gives a flat (orthographic) view where parallel edges stay parallel.
+  - Show hidden edges: draws the edges behind the cube faintly
+  - Show center lines: a cross on each face through its centre, joining the middles of opposite edges
+
+How it works is covered [below](#how-the-box-randomizer-works).
 
 <!--
 ### Tool name
@@ -246,6 +269,24 @@ Drawing (`drawCircles.ts`) fills a white background, then each circle at the cho
 
 ---
 
+## How the Box Randomizer works
+
+The cube's geometry is in `src/math/cube.ts`, and it's all derived from one numbering. Corner `i` (0 to 7) sits at ±1/√3 on each axis, with bit 0 of `i` choosing +x, bit 1 +y and bit 2 +z. That puts every corner on the unit sphere, the same size as the Sphere Randomizer's sphere.
+
+- **12 edges.** Two corners share an edge when they differ in exactly one coordinate, which is one bit of their index, so the edges are every `[i, i | bit]` where that bit isn't already set.
+- **6 faces.** Each face fixes one bit (its axis and side) and walks the other two bits in the order 00, 01, 11, 10, so consecutive corners always share an edge.
+
+`quatFromSeed` (`src/tools/box-randomizer/pose.ts`) takes the first three draws of `mulberry32(seed)` and turns them into a rotation with `randomQuat`, exactly as the Sphere Randomizer does. `drawBox.ts` then:
+
+1. **Rotates** the 8 corners and the 6 face normals with `rotate`.
+2. **Projects** each corner to the screen. With perspective on, the eye sits 5 units in front of the centre and a point at depth `z` is scaled by `5 / (5 − z)`, so near corners grow and far ones shrink, while anything at depth 0 keeps its size. With it off, depth is simply dropped.
+3. **Finds the faces that point at you.** In the flat view that's a face whose normal has z > 0. In perspective it's a face whose normal points toward the eye from a corner of that face, which can differ from the flat test for a face that is nearly edge-on. You always see one, two or three faces, never both faces of one axis, and a test checks that over 500 random rotations.
+4. **Draws** the faces you see (they never overlap, so order doesn't matter), then the hidden edges faintly, then the front edges on top. An edge is in front when either face beside it is seen.
+
+Center lines join the midpoints of a face's opposite edges. Under perspective, the midpoint of the edge in 3D is not the midpoint of its drawing, which is exactly why these lines are worth practicing: the cross lands at the face's true centre.
+
+---
+
 ## Project structure
 
 ```
@@ -262,10 +303,12 @@ src/
     shared/               Shared components and utilities: session controls, the Display options panel, canvas sizing
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
     circle-trio/          Circle Trio component, drawing, seeds, palettes, options, timer
+    box-randomizer/       Box Randomizer component, drawing, seeds, options
   math/                   Reusable math with no UI dependencies
     quat.ts               Vectors, quaternions, Shoemake random rotation
     random.ts             mulberry32 seeded PRNG
     sphere.ts             Great circles, sectors, projection, visibility, intersections
+    cube.ts               Cube corners, edges and faces, perspective projection, which faces you see
 ```
 
 ## Getting started
