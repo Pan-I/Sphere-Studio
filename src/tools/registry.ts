@@ -7,8 +7,10 @@ import { CylinderRandomizer } from './cylinder-randomizer/CylinderRandomizer'
 import { drawCylinderExample } from './cylinder-randomizer/example'
 import { ConeRandomizer } from './cone-randomizer/ConeRandomizer'
 import { drawConeExample } from './cone-randomizer/example'
-import { CircleTrio } from './circle-trio/CircleTrio'
+import { CircleTrio1 } from './circle-trio/CircleTrio1'
 import { drawCircleExample } from './circle-trio/example'
+import { CircleTrio2 } from './circle-trio-2/CircleTrio2'
+import { drawCircleTrio2Example } from './circle-trio-2/example'
 
 export interface Tool {
     /** URL segment, e.g. "sphere-randomizer" is served at /sphere-randomizer. */
@@ -21,6 +23,8 @@ export interface Tool {
      * nothing from the tool's page. The home-page card uses it for a small live example.
      */
     drawExample: (ctx: CanvasRenderingContext2D, size: number, seed: number) => void
+    /** Earlier slugs, which redirect here (keeping `?seed=`) so old links still work. */
+    formerSlugs?: readonly string[]
 }
 
 /** Every tool on the site. Adding an entry here adds its route, nav link, and home-page card. */
@@ -58,11 +62,20 @@ export const TOOLS: readonly Tool[] = [
         drawExample: drawConeExample,
     },
     {
-        slug: 'circle-trio',
-        name: 'Circle Trio',
+        slug: 'circle-trio-1',
+        name: 'Circle Trio 1',
         description:
-            'Two large translucent circles and a smaller one between them, in a new arrangement each time, for practicing drawing faces with a random shape/form.',
-        component: CircleTrio,
+            'Two large translucent circles and a smaller one near the line between them, in a new arrangement each time, for practicing drawing faces with a random shape/form.',
+        component: CircleTrio1,
         drawExample: drawCircleExample,
+        formerSlugs: ['circle-trio'],
+    },
+    {
+        slug: 'circle-trio-2',
+        name: 'Circle Trio 2',
+        description:
+            'One large translucent circle and two smaller ones close together on its edge, inside, across or outside it, for practicing drawing faces with a random shape/form.',
+        component: CircleTrio2,
+        drawExample: drawCircleTrio2Example,
     },
 ]

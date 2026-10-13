@@ -12,9 +12,16 @@ describe('TOOLS registry', () => {
     })
 
     it('uses lowercase, URL-safe slugs', () => {
-        for (const { slug } of TOOLS) {
-            expect(slug).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+        for (const { slug, formerSlugs = [] } of TOOLS) {
+            for (const s of [slug, ...formerSlugs]) {
+                expect(s).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+            }
         }
+    })
+
+    it('never reuses a former slug, so every old link has one place to go', () => {
+        const all = TOOLS.flatMap((t) => [t.slug, ...(t.formerSlugs ?? [])])
+        expect(new Set(all).size).toBe(all.length)
     })
 
     it('gives every tool a name and a description', () => {

@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router'
+import { Redirect } from './site/Redirect'
 import { ShortcutsProvider } from './shortcuts/ShortcutsProvider'
 import { HomePage } from './site/HomePage'
 import { NotFoundPage } from './site/NotFoundPage'
@@ -19,6 +20,15 @@ export default function App() {
                             element={<ToolPage tool={tool} />}
                         />
                     ))}
+                    {TOOLS.flatMap((tool) =>
+                        (tool.formerSlugs ?? []).map((old) => (
+                            <Route
+                                key={old}
+                                path={old}
+                                element={<Redirect to={`/${tool.slug}`} />}
+                            />
+                        )),
+                    )}
                     <Route path="*" element={<NotFoundPage />} />
                 </Route>
             </Routes>
