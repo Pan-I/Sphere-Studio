@@ -11,6 +11,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 - [Tools](#tools)
   - [Sphere Randomizer](#sphere-randomizer)
   - [Circle Trio](#circle-trio)
+  - [Keyboard shortcuts and full screen](#keyboard-shortcuts-and-full-screen)
   - [Adding a tool](#adding-a-tool)
 - [How the Sphere Randomizer works](#how-the-sphere-randomizer-works)
   - [Random rotations with quaternions](#random-rotations-with-quaternions)
@@ -90,11 +91,39 @@ further down and link to it from here.
 
 ---
 
+### Keyboard shortcuts and full screen
+
+Every tool page has these, so your hand can stay on the pencil:
+
+| Key | What it does |
+| --- | --- |
+| <kbd>Space</kbd> | New pose |
+| <kbd>P</kbd> | Start or pause the timer |
+| <kbd>F</kbd> | Full screen on or off (<kbd>Esc</kbd> also leaves) |
+| <kbd>?</kbd> | Show the list of shortcuts |
+
+Shortcuts are ignored while you're typing in a field, and when Ctrl, Cmd or Alt is held, so browser shortcuts like Ctrl+P still work.
+
+**Full screen** shows only the drawing and the timer, for a second screen or a tablet propped beside your paper. It uses the browser's Fullscreen API. Where that isn't available (iPhone Safari), the tool fills the browser window instead.
+
+**For new tools and features:**
+
+- **Adding a shortcut**: call `useShortcuts` from any component. The shortcut works while that component is on screen, is removed when it goes away, and appears in the <kbd>?</kbd> list automatically. If two components use the same key, the one that appeared most recently wins.
+
+  ```tsx
+  useShortcuts([{ key: 'd', description: 'Download PNG', run: downloadPng }])
+  ```
+
+- **Full screen**: wrapping is done by the tool page, so a new tool gets it for free. In full screen, only the tool's top-level elements marked `data-focus="show"` stay visible, and anything inside them marked `data-focus="hide"` is dropped. Mark your canvas with `data-focus="show"`. `SessionControls` already keeps the timer.
+- **A sharp canvas at any size**: draw with `useSquareCanvas(SIZE, draw)` (in `src/tools/shared/`). It sizes the drawing buffer to the canvas's real size on screen, so it stays crisp in full screen, while `draw` keeps working in the same 0 to `SIZE` units.
+
+---
+
 ### Adding a tool
 
 Tools are driven by one registry, `src/tools/registry.ts`. Adding an entry there gives the tool its route, nav link, and home-page card automatically.
 
-1. Create a folder `src/tools/<slug>/` with a component that takes no props, for example `MyTool.tsx`. Keep tool-specific logic and styles in that folder; put reusable math in `src/math/`.
+1. Create a folder `src/tools/<slug>/` with a component that takes no props, for example `MyTool.tsx`. Keep tool-specific logic and styles in that folder; put reusable math in `src/math/`. Give its canvas `data-focus="show"` so it stays visible in [full screen](#keyboard-shortcuts-and-full-screen).
 2. Register it in `src/tools/registry.ts`:
 
    ```ts
@@ -202,7 +231,8 @@ public/
   favicon.svg             Browser tab icon
 src/
   main.tsx, App.tsx       Entry point and routes (one route per registered tool)
-  site/                   Site shell: layout and nav, home page, tool page, 404, site name
+  site/                   Site shell: layout and nav, home page, tool page (with full screen), 404, site name
+  shortcuts/              Keyboard shortcuts: the registry, useShortcuts, and the ? list
   tools/
     registry.ts           The list of tools; drives routes, nav and home-page cards
     shared/               Shared components and utilities

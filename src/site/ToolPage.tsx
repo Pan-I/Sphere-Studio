@@ -1,14 +1,51 @@
+import { useRef } from 'react'
+import { useOpenShortcutHelp, useShortcuts } from '../shortcuts/useShortcuts'
+import type { Shortcut } from '../shortcuts/shortcuts'
 import type { Tool } from '../tools/registry'
 import { SITE_NAME } from './config'
 import { useDocumentTitle } from './useDocumentTitle'
+import { useFullscreen } from './useFullscreen'
 
 export function ToolPage({ tool }: { tool: Tool }) {
     useDocumentTitle(`${tool.name} · ${SITE_NAME}`)
     const ToolComponent = tool.component
+    const frameRef = useRef<HTMLDivElement>(null)
+    const fullscreen = useFullscreen(frameRef)
+    const openHelp = useOpenShortcutHelp()
+
+    // Every tool gets full screen for free. In the browser's own full screen, Esc is handled by
+    // the browser, so our own Esc is only needed for the CSS-only fallback.
+    const shortcuts: Shortcut[] = [
+        { key: 'f', description: 'Full screen on or off', run: fullscreen.toggle },
+    ]
+    if (fullscreen.active && !fullscreen.native) {
+        shortcuts.push({ key: 'Escape', description: 'Leave full screen', run: fullscreen.exit })
+    }
+    useShortcuts(shortcuts)
+
     return (
         <>
-            <h1>{tool.name}</h1>
-            <ToolComponent />
+            <div className="tool-heading">
+                <h1>{tool.name}</h1>
+                <div className="tool-heading-actions">
+                    <button onClick={fullscreen.enter}>Full screen</button>
+                    <button onClick={openHelp} aria-label="Keyboard shortcuts">
+                        Shortcuts <kbd>?</kbd>
+                    </button>
+                </div>
+            </div>
+            {/* In full screen, only children marked data-focus="show" stay visible (see index.css). */}
+            <div
+                ref={frameRef}
+                className={fullscreen.active ? 'tool-frame focus-mode' : 'tool-frame'}
+            >
+                <ToolComponent />
+                {fullscreen.active && (
+                    <button className="focus-exit" onClick={fullscreen.exit}>
+                        Exit full screen
+                    </button>
+                )}
+            </div>
         </>
     )
 }
