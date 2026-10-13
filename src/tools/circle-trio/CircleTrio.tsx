@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
+import { OptionsPanel } from '../shared/OptionsPanel'
 import { SessionControls } from '../shared/SessionControls'
 import { useSeedSession } from '../shared/useSeedSession'
+import { useStoredOptions } from '../shared/useStoredOptions'
 import { useSquareCanvas } from '../shared/useSquareCanvas'
-import { CircleControls } from './CircleControls'
-import { loadOptions, saveOptions } from './displayOptions'
+import { CIRCLE_OPTIONS } from './displayOptions'
 import { drawCircles } from './drawCircles'
 import { layoutFromSeed } from './layout'
 import '../shared/tool.css'
@@ -14,7 +15,8 @@ export function CircleTrio() {
     const session = useSeedSession()
     const { seed } = session
     const circles = useMemo(() => layoutFromSeed(seed), [seed])
-    const [options, setOptions] = useState(loadOptions)
+    // Display preferences, remembered between visits.
+    const [options, setOptions] = useStoredOptions(CIRCLE_OPTIONS)
 
     // Redraw whenever the layout or the display options change.
     const draw = useCallback(
@@ -22,11 +24,6 @@ export function CircleTrio() {
         [circles, options],
     )
     const canvasRef = useSquareCanvas(SIZE, draw)
-
-    // Remember display preferences between visits.
-    useEffect(() => {
-        saveOptions(options)
-    }, [options])
 
     return (
         <div className="tool-layout">
@@ -38,7 +35,7 @@ export function CircleTrio() {
                 aria-label={`Two large circles and a small one, layout ${seed}`}
             />
             <SessionControls session={session} />
-            <CircleControls options={options} onChange={setOptions} />
+            <OptionsPanel fields={CIRCLE_OPTIONS.fields} options={options} onChange={setOptions} />
         </div>
     )
 }

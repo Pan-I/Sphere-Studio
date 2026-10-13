@@ -144,13 +144,12 @@ select {
     color: inherit;
 }
 
-/* Tool name with the Full screen and Shortcuts buttons beside it. */
+/* Tool name, with the Full screen and Shortcuts buttons underneath it. */
 .tool-heading {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
     margin-bottom: 1rem;
 }
 
