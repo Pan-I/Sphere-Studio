@@ -47,6 +47,12 @@
     gap: 1rem;
 }
 
+.session-timer-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
 .session-field {
     display: flex;
     flex-direction: column;
@@ -55,6 +61,62 @@
 
 .session-field input {
     width: 7rem;
+}
+
+.session-chime {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+}
+
+.session-chime input {
+    width: 1.4rem;
+    height: 1.4rem;
+    margin: 0;
+    accent-color: var(--accent);
+}
+
+.session-clock {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+/* The countdown ring: a faint track with the time left drawn over it in the accent colour. */
+.session-ring {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: none;
+}
+
+.session-ring circle {
+    fill: none;
+    stroke-width: 4;
+}
+
+.session-ring-track {
+    stroke: var(--line);
+}
+
+.session-ring-fill {
+    stroke: var(--accent);
+}
+
+/* While running, each second's step is eased over the second, so the ring drains smoothly. */
+.session-ring.running .session-ring-fill {
+    transition: stroke-dasharray 1s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .session-ring.running .session-ring-fill {
+        transition: none;
+    }
+}
+
+.focus-mode .session-ring {
+    width: 4rem;
+    height: 4rem;
 }
 
 .session-timer {

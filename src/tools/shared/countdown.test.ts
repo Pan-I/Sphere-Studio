@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_SECONDS, parseInterval, tick, type Countdown } from './countdown.ts'
+import { MAX_SECONDS, parseInterval, ringFraction, tick, type Countdown } from './countdown.ts'
 
 describe('parseInterval', () => {
     it('accepts whole numbers in range, ignoring surrounding spaces', () => {
@@ -41,5 +41,19 @@ describe('tick', () => {
             if (c.fired) fires++
         }
         expect(fires).toBe(2) // on ticks 3 and 6
+    })
+})
+
+describe('ringFraction', () => {
+    it('is full before the first Start and empty without a valid interval', () => {
+        expect(ringFraction(null, 30, false)).toBe(1)
+        expect(ringFraction(null, null, false)).toBe(0)
+        expect(ringFraction({ remaining: 10, fired: false }, null, true)).toBe(0)
+    })
+
+    it('shows the time left while paused, and aims at the next tick while running', () => {
+        expect(ringFraction({ remaining: 15, fired: false }, 30, false)).toBe(0.5)
+        expect(ringFraction({ remaining: 15, fired: false }, 30, true)).toBeCloseTo(14 / 30)
+        expect(ringFraction({ remaining: 1, fired: false }, 30, true)).toBe(0)
     })
 })

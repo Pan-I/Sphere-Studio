@@ -67,7 +67,7 @@ A randomly rotated sphere split into eight sectors by three perpendicular great 
 **Features**
 
 - **Randomize** shows a new, uniformly random orientation.
-- **Timer**: set an interval (1 to 3600 seconds) and press Start; a new pose appears each time it runs out. Pause and Resume keep the remaining time, and any manual pose change restarts the countdown.
+- **Timer**: set an interval (1 to 3600 seconds) and press Start; a new pose appears each time it runs out. Pause and Resume keep the remaining time, and any manual pose change restarts the countdown. A ring beside the time drains as it counts down, and a soft chime plays when the timer brings a new pose (see Timer ring and chime below).
 - **Seeds**: every pose has a seed from 0 to 999,999. The current seed is shown on the page and kept in the address bar as `?seed=…`, so the URL is always a link to the exact pose. **Copy link** copies it, and **Load seed** jumps to a seed you type in.
 - **Display options** (saved in your browser between visits; **Reset to defaults** puts them back):
   - Shading: color, grayscale, or none (lines only)
@@ -291,6 +291,7 @@ Every tool page has these, so your hand can stay on the pencil:
 | <kbd>P</kbd> | Start or pause the timer |
 | <kbd>←</kbd> / <kbd>→</kbd> | Back and forward through this session's poses |
 | <kbd>S</kbd> | Star or unstar this pose (see Favorites below) |
+| <kbd>C</kbd> | Chime on or off (see Timer ring and chime below) |
 | <kbd>D</kbd> | Download the drawing as a PNG (see below) |
 | <kbd>F</kbd> | Full screen on or off (<kbd>Esc</kbd> also leaves) |
 | <kbd>?</kbd> | Show the list of shortcuts |
@@ -300,6 +301,8 @@ Shortcuts are ignored while you're typing in a field, and when Ctrl, Cmd or Alt 
 **Pose history**: **← Back** and **Forward →** under Randomize step through the last 20 poses you've seen on that page, so a pose you skipped past (or the timer replaced) isn't lost. "Pose 3 of 7" shows where you are. Every new pose (Randomize, the timer, a loaded seed, an option that picks a new pose) goes on the end; if you'd gone back, the poses ahead of you are dropped, as in a browser. Going back or forward restarts a running timer's countdown, like Randomize does. The history is for this visit only: it starts again when you reload or open another tool, and the address bar always holds the pose on screen, so Copy link still shares it.
 
 **Favorites**: **☆ Favorite** beside the seed (or <kbd>S</kbd>) stars the pose on screen, and the **Favorites** box under the session controls lists every pose you've starred on that tool, newest first. Click one to show it again (it goes on the end of the pose history, like a loaded seed), or **×** to remove it. Favorites are saved in your browser per tool, under `sphere-studio:<tool slug>:favorites` in `localStorage`, so they're still there next visit; each tool keeps up to 50, and starring one more drops the oldest. **Reset to defaults** only resets the Display options, never favorites. In full screen the box is hidden, but <kbd>S</kbd> still works and a ★ next to the timer shows the pose is starred.
+
+**Timer ring and chime**: so you can keep your eyes on your paper, a ring beside the timer drains as the countdown runs, and a soft bell chimes when the timer runs out and brings a new pose. Poses you pick yourself (Randomize, Back, a seed, a favorite) don't chime. Untick **Chime on new pose** under the interval (or press <kbd>C</kbd>) to turn it off; ticking it again plays the chime once so you can check your volume. The setting is one for the whole site, saved in your browser under `sphere-studio:chime`, and **Reset to defaults** doesn't touch it. In full screen the ring stays beside the timer, a little bigger, and <kbd>C</kbd> still works. The chime is made in the browser with the Web Audio API (`src/tools/shared/chime.ts`), so there's no sound file; browsers only allow sound after a click or key press, which is why it's switched on when you press Start or <kbd>P</kbd>.
 
 **Download PNG**: the **Download PNG** button under the tool's name (or <kbd>D</kbd>) saves the drawing on screen as a PNG, for reference or printing. It's redrawn at 1600 × 1600 pixels whatever the size on screen (about 13.5 cm or 5.3 in at 300 dpi), with your Display options and the page's background, so it looks like the screen, in light or dark mode. The file is named after the tool and seed, like `box-randomizer-48213.png`, so you can find the pose again later; in Value Study with your own photo open, it's named after the photo instead. <kbd>D</kbd> works in full screen too, and the button stays on phones and tablets.
 
@@ -315,7 +318,7 @@ On phones and tablets (touch only, no mouse or trackpad), the **Full screen** an
   useShortcuts([{ key: 'd', description: 'Download PNG', run: downloadPng }])
   ```
 
-- **Full screen**: wrapping is done by the tool page, so a new tool gets it for free. In full screen, only the tool's top-level elements marked `data-focus="show"` stay visible, and anything inside them marked `data-focus="hide"` is dropped. Mark your canvas with `data-focus="show"`. `SessionControls` already keeps the timer.
+- **Full screen**: wrapping is done by the tool page, so a new tool gets it for free. In full screen, only the tool's top-level elements marked `data-focus="show"` stay visible, and anything inside them marked `data-focus="hide"` is dropped. Mark your canvas with `data-focus="show"`. `SessionControls` already keeps the timer and its ring.
 - **A sharp canvas at any size**: draw with `useSquareCanvas(SIZE, draw)` (in `src/tools/shared/`). It sizes the drawing buffer to the canvas's real size on screen, so it stays crisp in full screen, while `draw` keeps working in the same 0 to `SIZE` units. It also gives Download PNG your `draw` function, through `CanvasExportContext` from the tool page, so a new tool gets downloads for free: `canvasExport.ts` calls `draw` again on a 1600-pixel canvas placed hidden beside yours (so colours read from CSS, like Circle Trio's line colour, come out the same) and fills the page background in behind it. Pass a third argument to name the file after something other than the seed, as Value Study does with your photo's name.
 
 ---
@@ -595,7 +598,7 @@ src/
   shortcuts/              Keyboard shortcuts: the registry, useShortcuts, and the ? list
   tools/
     registry.ts           The list of tools; drives routes, nav and home-page cards (with live thumbnails)
-    shared/               Shared components and utilities: session controls, pose history and favorites, the Display options panel, canvas sizing and PNG download, ellipse axes
+    shared/               Shared components and utilities: session controls, the timer's ring and chime, pose history and favorites, the Display options panel, canvas sizing and PNG download, ellipse axes
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
     circle-trio/          Circle Trio 1 component and layout, plus the drawing and options both Circle Trios use
     circle-trio-2/        Circle Trio 2 component and layout

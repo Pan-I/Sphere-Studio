@@ -1,13 +1,19 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useShortcuts } from '../../shortcuts/useShortcuts'
+import { playChime, unlockAudio } from './chime'
+import { CountdownRing } from './CountdownRing'
 import { MAX_SECONDS, MIN_SECONDS } from './countdown'
 import { MAX_SEED, buildShareUrl, parseSeed } from './seed'
+import { useChime } from './useChime'
 import { useFavorites } from './useFavorites'
 import type { SeedSession } from './useSeedSession'
 
 type CopyState = 'idle' | 'copied' | 'failed'
 
-/** Randomize, pose history, the timer, the seed rows and favorites, shared by every seeded tool. */
+/**
+ * Randomize, pose history, the timer with its ring and chime, the seed rows and favorites,
+ * shared by every seeded tool.
+ */
 export function SessionControls({ session }: { session: SeedSession }) {
     const { seed, running, countdown, intervalText, seconds, historyPosition } = session
     const [seedText, setSeedText] = useState('')
@@ -15,9 +21,18 @@ export function SessionControls({ session }: { session: SeedSession }) {
     const parsedSeed = parseSeed(seedText)
     const favorites = useFavorites()
     const starred = favorites.isFavorite(seed)
+    const chime = useChime()
+
+    // Starting is a click or a key press, the moment the browser lets a page turn sound on, so
+    // the chime can play later when the time runs out with nobody touching the page.
+    const toggleTimer = () => {
+        if (!running) unlockAudio()
+        session.toggle()
+    }
+
     useShortcuts([
         { key: ' ', description: 'New pose', run: session.randomize },
-        { key: 'p', description: 'Start or pause the timer', run: session.toggle },
+        { key: 'p', description: 'Start or pause the timer', run: toggleTimer },
         { key: 'ArrowLeft', label: '←', description: 'Previous pose', run: session.back },
         {
             key: 'ArrowRight',
@@ -26,8 +41,19 @@ export function SessionControls({ session }: { session: SeedSession }) {
             run: session.forward,
         },
         { key: 's', description: 'Star or unstar this pose', run: () => favorites.toggle(seed) },
+        { key: 'c', description: 'Chime on or off', run: chime.toggle },
     ])
     const seedInvalid = seedText.trim() !== '' && parsedSeed === null
+
+    // Chime when the timer runs out and brings a new pose. Only the tick that fires has `fired`
+    // set, and every tick makes a new countdown, so this runs once per new pose.
+    const chimeOn = useRef(chime.on)
+    useEffect(() => {
+        chimeOn.current = chime.on
+    })
+    useEffect(() => {
+        if (countdown?.fired && chimeOn.current) playChime()
+    }, [countdown])
 
     // Clear the "Copied!" message after a moment.
     useEffect(() => {
@@ -61,7 +87,7 @@ export function SessionControls({ session }: { session: SeedSession }) {
                 <button className="primary" onClick={session.randomize}>
                     Randomize
                 </button>
-                <button onClick={session.toggle} disabled={!running && seconds === null}>
+                <button onClick={toggleTimer} disabled={!running && seconds === null}>
                     {running ? 'Pause' : startLabel}
                 </button>
             </div>
@@ -76,29 +102,38 @@ export function SessionControls({ session }: { session: SeedSession }) {
                     Forward →
                 </button>
             </div>
-            {/* The timer stays in view in full screen; the interval field doesn't. */}
+            {/* The timer and its ring stay in view in full screen; the interval and chime don't. */}
             <div className="session-timer-row" data-focus="show">
-                <label className="session-field" data-focus="hide">
-                    Interval (seconds)
-                    <input
-                        type="number"
-                        min={MIN_SECONDS}
-                        max={MAX_SECONDS}
-                        step={1}
-                        value={intervalText}
-                        disabled={running}
-                        onChange={(e) => session.changeInterval(e.target.value)}
-                    />
-                </label>
+                <div className="session-timer-settings" data-focus="hide">
+                    <label className="session-field">
+                        Interval (seconds)
+                        <input
+                            type="number"
+                            min={MIN_SECONDS}
+                            max={MAX_SECONDS}
+                            step={1}
+                            value={intervalText}
+                            disabled={running}
+                            onChange={(e) => session.changeInterval(e.target.value)}
+                        />
+                    </label>
+                    <label className="session-chime">
+                        <input type="checkbox" checked={chime.on} onChange={chime.toggle} />
+                        Chime on new pose
+                    </label>
+                </div>
                 {/* Only shown in full screen, where the Favorite button is hidden. */}
                 {starred && (
                     <span className="session-starred" title="Favorite">
                         ★
                     </span>
                 )}
-                <span role="timer" className="session-timer">
-                    {shown === null ? '–' : `${shown}s`}
-                </span>
+                <div className="session-clock">
+                    <CountdownRing countdown={countdown} interval={seconds} running={running} />
+                    <span role="timer" className="session-timer">
+                        {shown === null ? '–' : `${shown}s`}
+                    </span>
+                </div>
             </div>
             {seconds === null && (
                 <p className="tool-hint">
