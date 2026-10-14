@@ -1,11 +1,13 @@
 import { useEffect, useReducer, useRef, useState } from 'react'
 import { parseInterval } from './countdown'
+import { canGoBack, canGoForward } from './poseHistory'
 import { buildShareUrl, randomSeed, readSeedFromUrl } from './seed'
 import { initialTimerState, timerReducer } from './timerState'
 
 /**
  * Everything a seeded tool needs besides its drawing: the current seed (from a ?seed= link
- * or random), the auto-randomize timer, and keeping the address bar in sync.
+ * or random), the auto-randomize timer, the last few poses for Back and Forward, and keeping
+ * the address bar in sync.
  *
  * `fit` adjusts each random seed before it's shown, so a tool can limit which poses Randomize
  * and the timer pick. Seeds from a link or typed in are shown as they are.
@@ -20,8 +22,10 @@ export function useSeedSession(fit: (seed: number) => number = (seed) => seed) {
 
     // The seed is the single source of truth for what's on screen. A ?seed= link wins on first load.
     // It lives with the timer so a tick that runs out can swap the seed in the same update.
-    const [{ seed, running, countdown }, dispatch] = useReducer(timerReducer, undefined, () =>
-        initialTimerState(readSeedFromUrl(window.location.search) ?? fit(randomSeed())),
+    const [{ seed, history, running, countdown }, dispatch] = useReducer(
+        timerReducer,
+        undefined,
+        () => initialTimerState(readSeedFromUrl(window.location.search) ?? fit(randomSeed())),
     )
     const [intervalText, setIntervalText] = useState('30')
     const seconds = parseInterval(intervalText)
@@ -46,6 +50,9 @@ export function useSeedSession(fit: (seed: number) => number = (seed) => seed) {
 
     // Any manual change restarts the countdown while the timer is running.
     const showSeed = (next: number) => dispatch({ type: 'showSeed', seed: next, interval: seconds })
+    // Back and forward through this session's poses, so a skipped one isn't lost.
+    const back = () => dispatch({ type: 'step', step: -1, interval: seconds })
+    const forward = () => dispatch({ type: 'step', step: 1, interval: seconds })
 
     const toggle = () => {
         if (running) {
@@ -68,6 +75,12 @@ export function useSeedSession(fit: (seed: number) => number = (seed) => seed) {
         intervalText,
         seconds,
         showSeed,
+        back,
+        forward,
+        canGoBack: canGoBack(history),
+        canGoForward: canGoForward(history),
+        /** Where the current pose is in the history, counting from 1, and how many it holds. */
+        historyPosition: { current: history.index + 1, total: history.seeds.length },
         randomize: () => showSeed(newSeed()),
         toggle,
         changeInterval,

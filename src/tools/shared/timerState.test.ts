@@ -1,15 +1,22 @@
 import { describe, expect, it } from 'vitest'
+import { startHistory } from './poseHistory.ts'
 import { initialTimerState, timerReducer, type TimerState } from './timerState.ts'
 
 const running = (remaining: number, seed = 7): TimerState => ({
     seed,
+    history: startHistory(seed),
     running: true,
     countdown: { remaining, fired: false },
 })
 
 describe('initialTimerState', () => {
     it('starts stopped with no countdown', () => {
-        expect(initialTimerState(42)).toEqual({ seed: 42, running: false, countdown: null })
+        expect(initialTimerState(42)).toEqual({
+            seed: 42,
+            history: startHistory(42),
+            running: false,
+            countdown: null,
+        })
     })
 })
 
@@ -59,14 +66,14 @@ describe('timerReducer', () => {
                 seed: 12,
                 interval: 30,
             })
-            expect(next).toEqual({ seed: 12, running: false, countdown: null })
+            expect(next).toMatchObject({ seed: 12, running: false, countdown: null })
         })
     })
 
     describe('start and pause', () => {
         it('starts a fresh countdown at the full interval', () => {
             const next = timerReducer(initialTimerState(7), { type: 'start', interval: 30 })
-            expect(next).toEqual({
+            expect(next).toMatchObject({
                 seed: 7,
                 running: true,
                 countdown: { remaining: 30, fired: false },
@@ -88,7 +95,48 @@ describe('timerReducer', () => {
         it('clears the countdown and keeps the seed', () => {
             const paused = { ...running(3), running: false }
             const next = timerReducer(paused, { type: 'intervalChanged' })
-            expect(next).toEqual({ seed: 7, running: false, countdown: null })
+            expect(next).toMatchObject({ seed: 7, running: false, countdown: null })
+        })
+    })
+
+    describe('history', () => {
+        it('adds each new pose, whether shown by hand or by the timer', () => {
+            const shown = timerReducer(running(1), { type: 'showSeed', seed: 12, interval: 30 })
+            const fired = timerReducer(
+                { ...shown, countdown: { remaining: 1, fired: false } },
+                { type: 'tick', interval: 30, nextSeed: 99 },
+            )
+            expect(fired.history).toEqual({ seeds: [7, 12, 99], index: 2 })
+        })
+
+        it('leaves the history alone on a tick that does not fire', () => {
+            const state = running(5)
+            const next = timerReducer(state, { type: 'tick', interval: 30, nextSeed: 99 })
+            expect(next.history).toBe(state.history)
+        })
+
+        it('steps back and forward, restarting the countdown while running', () => {
+            const shown = timerReducer(running(3), { type: 'showSeed', seed: 12, interval: 30 })
+            const ticked = timerReducer(shown, { type: 'tick', interval: 30, nextSeed: 99 })
+            const back = timerReducer(ticked, { type: 'step', step: -1, interval: 30 })
+            expect(back.seed).toBe(7)
+            expect(back.countdown).toEqual({ remaining: 30, fired: false })
+            const forward = timerReducer(back, { type: 'step', step: 1, interval: 30 })
+            expect(forward.seed).toBe(12)
+        })
+
+        it('does nothing at either end, not even restarting the countdown', () => {
+            const state = running(3)
+            expect(timerReducer(state, { type: 'step', step: -1, interval: 30 })).toBe(state)
+            expect(timerReducer(state, { type: 'step', step: 1, interval: 30 })).toBe(state)
+        })
+
+        it('leaves a paused countdown alone when stepping', () => {
+            const shown = timerReducer(running(3), { type: 'showSeed', seed: 12, interval: 30 })
+            const paused = timerReducer(shown, { type: 'pause' })
+            const back = timerReducer(paused, { type: 'step', step: -1, interval: 30 })
+            expect(back.seed).toBe(7)
+            expect(back.countdown).toEqual({ remaining: 30, fired: false })
         })
     })
 })
