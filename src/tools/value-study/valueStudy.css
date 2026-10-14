@@ -1,0 +1,12 @@
+.value-photo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* While a file is dragged over the tool, show that it can be dropped. */
+.value-dropping {
+    outline: 2px dashed var(--accent);
+    outline-offset: 0.5rem;
+    border-radius: 0.25rem;
+}

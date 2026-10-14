@@ -16,6 +16,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [Cylinder Randomizer](#cylinder-randomizer)
   - [Cone Randomizer](#cone-randomizer)
   - [Lit Sphere](#lit-sphere)
+  - [Value Study](#value-study)
   - [Keyboard shortcuts and full screen](#keyboard-shortcuts-and-full-screen)
   - [Adding a tool](#adding-a-tool)
 - [How the Sphere Randomizer works](#how-the-sphere-randomizer-works)
@@ -28,6 +29,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 - [How the Cylinder Randomizer works](#how-the-cylinder-randomizer-works)
 - [How the Cone Randomizer works](#how-the-cone-randomizer-works)
 - [How the Lit Sphere works](#how-the-lit-sphere-works)
+- [How the Value Study works](#how-the-value-study-works)
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
 - [Deployment](#deployment)
@@ -46,6 +48,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 | [Cylinder Randomizer](#cylinder-randomizer) | `/cylinder-randomizer` | Generate a cylinder in a random orientation and proportion to practice ellipses and the minor axis. |
 | [Cone Randomizer](#cone-randomizer) | `/cone-randomizer` | Generate a cone in a random orientation and proportion to practice the base ellipse and the side lines that meet it. |
 | [Lit Sphere](#lit-sphere) | `/lit-sphere` | Generate a sphere lit from a random direction to practice light, shadow and values. |
+| [Value Study](#value-study) | `/value-study` | Load a photo and see it in grayscale and grouped into 3, 5 or 7 values, to plan a drawing's big light and dark shapes. |
 <!-- Add one row per new tool. -->
 
 ---
@@ -182,6 +185,28 @@ A sphere resting on a floor, lit from a random direction, for practicing light a
   - Label the zones: names each zone with a callout (highlight, halftone, core shadow, reflected light, cast shadow, occlusion)
 
 How the light is chosen and the shading worked out is covered [below](#how-the-lit-sphere-works).
+
+### Value Study
+
+**Route:** `/value-study` · **Source:** `src/tools/value-study/`
+
+Load a photo and see it in grayscale and grouped into 3, 5 or 7 flat values, to plan the big light and dark shapes before you draw or paint. It's the first tool that takes your own picture, and the picture never leaves your browser: it's decoded and processed on a canvas in the page, never uploaded, and gone when you close or reload the tab.
+
+**Features**
+
+- **Open a photo** (or press <kbd>O</kbd>), drag one onto the tool, or paste one (Ctrl+V / Cmd+V). JPEG, PNG, WebP and anything else your browser can show work. **Back to samples** puts the sample back.
+- Before you open a photo, it shows a **sample**: the Lit Sphere's sphere for the seed, smoothly shaded. **Randomize**, the **timer** and **seeds** work as on the other tools and pick a new sample. They're hidden while you study a photo.
+- **The value scale** under the picture shows each value as a swatch, with how much of the picture it covers.
+- **Display options** (saved in your browser between visits; **Reset to defaults** puts them back):
+  - Show: **Values** (grouped into flat values, the default), **Grayscale** (smooth), or the **Original** photo
+  - Number of values: 3, 5 (the default) or 7, from black to white in even steps
+  - Simplify (squint): 0 to 10 px of blur before grouping, so small details merge into the big shapes, like squinting. Default 2 px.
+  - Stretch to full range (on): spreads a flat or hazy photo's values over black to white first, so it still uses every value. Turn it off to see the photo's own range.
+  - Outline the value shapes (off): cyan lines where one value meets the next, on any view. On the original photo, they show where its value shapes are.
+  - Show value scale (on)
+- **Extra keys**: <kbd>O</kbd> opens a photo, <kbd>V</kbd> switches between values, grayscale and original, and <kbd>3</kbd>, <kbd>5</kbd> and <kbd>7</kbd> set the number of values.
+
+How the values are measured and grouped is covered [below](#how-the-value-study-works).
 
 <!--
 ### Tool name
@@ -438,6 +463,20 @@ The terminator is the circle on the sphere at right angles to the light. Since i
 
 ---
 
+## How the Value Study works
+
+A photo is decoded with `createImageBitmap`, which also turns phone photos upright from their EXIF orientation. It's kept in memory for the tab (`usePhoto.ts`); nothing is sent anywhere. Pictures are `Picture`s (`picture.ts`): something with an aspect ratio that can give its pixels at a size. A photo gets them by drawing itself onto a canvas that size; the sample works them out with the Lit Sphere's own shading, so it needs no canvas, which lets the home-page thumbnail and the tests draw it too.
+
+`drawValueStudy.ts` fits the picture on the canvas and processes it at the canvas's real resolution, in physical pixels, so it stays sharp in full screen. The steps, all in `src/math/values.ts` and tested there:
+
+1. **Lightness**: each pixel's CIE L\* lightness, 0 (black) to 100 (white), from its sRGB color. L\* is used rather than plain RGB because equal steps in it look equal to the eye, and it sees green as much lighter than blue, as we do. Grayscale shows this value as a gray.
+2. **Stretch** (if on): the darkest 1% and the lightest 1% are clipped, and everything between is spread over 0 to 100.
+3. **Simplify**: two box blurs in each direction, which look like a Gaussian blur and cost the same at any radius. The radius is measured on the 480-unit canvas and scaled with it, so the thumbnail and full screen simplify the same amount.
+4. **Grouping**: 0 to 100 is cut into 3, 5 or 7 equal bands, and each band is drawn as one gray, evenly spaced from black to white like a printed value scale. The swatches count how many pixels fall in each band.
+5. **Outlines**: a pixel is on an outline when the pixel to its right or below it is in another band.
+
+---
+
 ## Project structure
 
 ```
@@ -459,6 +498,7 @@ src/
     cylinder-randomizer/  Cylinder Randomizer component, drawing, seeds, options
     cone-randomizer/      Cone Randomizer component, drawing, seeds, options
     lit-sphere/           Lit Sphere component, drawing, shading model, light from a seed, options
+    value-study/          Value Study component, opening photos, the sample picture, drawing, options
   math/                   Reusable math with no UI dependencies
     quat.ts               Vectors, quaternions, Shoemake random rotation
     random.ts             mulberry32 seeded PRNG
@@ -468,6 +508,7 @@ src/
     ellipse.ts            The exact centre and major and minor axes of a circle's ellipse on screen
     cone.ts               Cone shape, side normals, and where the side lines touch the base
     light.ts              The Lit Sphere's scene: the view, the floor, the light, the terminator and the cast shadow
+    values.ts             Value studies: L* lightness, blur, stretching, grouping into values, outlines
 ```
 
 ## Getting started
