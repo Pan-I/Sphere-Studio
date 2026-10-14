@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react'
+import { useEffect, useReducer, useRef, useState } from 'react'
 import { parseInterval } from './countdown'
 import { buildShareUrl, randomSeed, readSeedFromUrl } from './seed'
 import { initialTimerState, timerReducer } from './timerState'
@@ -6,12 +6,22 @@ import { initialTimerState, timerReducer } from './timerState'
 /**
  * Everything a seeded tool needs besides its drawing: the current seed (from a ?seed= link
  * or random), the auto-randomize timer, and keeping the address bar in sync.
+ *
+ * `fit` adjusts each random seed before it's shown, so a tool can limit which poses Randomize
+ * and the timer pick. Seeds from a link or typed in are shown as they are.
  */
-export function useSeedSession() {
+export function useSeedSession(fit: (seed: number) => number = (seed) => seed) {
+    // The latest `fit`, for the timer, which keeps running across renders.
+    const fitRef = useRef(fit)
+    useEffect(() => {
+        fitRef.current = fit
+    })
+    const newSeed = () => fitRef.current(randomSeed())
+
     // The seed is the single source of truth for what's on screen. A ?seed= link wins on first load.
     // It lives with the timer so a tick that runs out can swap the seed in the same update.
     const [{ seed, running, countdown }, dispatch] = useReducer(timerReducer, undefined, () =>
-        initialTimerState(readSeedFromUrl(window.location.search) ?? randomSeed()),
+        initialTimerState(readSeedFromUrl(window.location.search) ?? fit(randomSeed())),
     )
     const [intervalText, setIntervalText] = useState('30')
     const seconds = parseInterval(intervalText)
@@ -29,7 +39,7 @@ export function useSeedSession() {
     useEffect(() => {
         if (!running || seconds === null) return
         const id = window.setInterval(() => {
-            dispatch({ type: 'tick', interval: seconds, nextSeed: randomSeed() })
+            dispatch({ type: 'tick', interval: seconds, nextSeed: newSeed() })
         }, 1000)
         return () => window.clearInterval(id)
     }, [running, seconds])
@@ -58,7 +68,7 @@ export function useSeedSession() {
         intervalText,
         seconds,
         showSeed,
-        randomize: () => showSeed(randomSeed()),
+        randomize: () => showSeed(newSeed()),
         toggle,
         changeInterval,
     }

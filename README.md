@@ -17,6 +17,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [Cone Randomizer](#cone-randomizer)
   - [Lit Sphere](#lit-sphere)
   - [Value Study](#value-study)
+  - [Perspective Grid](#perspective-grid)
   - [Keyboard shortcuts and full screen](#keyboard-shortcuts-and-full-screen)
   - [Adding a tool](#adding-a-tool)
 - [How the Sphere Randomizer works](#how-the-sphere-randomizer-works)
@@ -30,6 +31,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 - [How the Cone Randomizer works](#how-the-cone-randomizer-works)
 - [How the Lit Sphere works](#how-the-lit-sphere-works)
 - [How the Value Study works](#how-the-value-study-works)
+- [How the Perspective Grid works](#how-the-perspective-grid-works)
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
 - [Deployment](#deployment)
@@ -49,6 +51,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 | [Cone Randomizer](#cone-randomizer) | `/cone-randomizer` | Generate a cone in a random orientation and proportion to practice the base ellipse and the side lines that meet it. |
 | [Lit Sphere](#lit-sphere) | `/lit-sphere` | Generate a sphere lit from a random direction to practice light, shadow and values. |
 | [Value Study](#value-study) | `/value-study` | Load a photo and see it in grayscale and grouped into 3, 5 or 7 values, to plan a drawing's big light and dark shapes. |
+| [Perspective Grid](#perspective-grid) | `/perspective-grid` | Generate a 1, 2 or 3 point perspective grid with the horizon and vanishing points marked, to practice boxes in a scene. |
 <!-- Add one row per new tool. -->
 
 ---
@@ -207,6 +210,29 @@ Load a photo and see it in grayscale and grouped into 3, 5 or 7 flat values, to 
 - **Extra keys**: <kbd>O</kbd> opens a photo, <kbd>V</kbd> switches between values, grayscale and original, and <kbd>3</kbd>, <kbd>5</kbd> and <kbd>7</kbd> set the number of values.
 
 How the values are measured and grouped is covered [below](#how-the-value-study-works).
+
+### Perspective Grid
+
+**Route:** `/perspective-grid` · **Source:** `src/tools/perspective-grid/`
+
+A random 1, 2 or 3 point perspective grid with the horizon line and vanishing points marked, for practicing boxes in a scene. Draw boxes, rooms or buildings along the guide lines, or try placing your own vanishing points and check them against the grid.
+
+**Features**
+
+- **Guide lines** fan out from each vanishing point across the canvas, in its own color: VP 1 (left, on the horizon) blue, VP 2 (right, on the horizon) orange, and VP 3 (where verticals meet, in 3 point) green.
+- **Points off the canvas** are shown by an arrow at the edge, pointing the way to them, with "(off canvas)" in the label. The lines still run toward them exactly. At least one point is always on the canvas, and so is the horizon.
+- **Randomize**, the **timer** and **seeds** work as on the other tools. The number of points comes from the seed, so a shared link shows the same grid to everyone, whatever they picked.
+- **Display options** (saved in your browser between visits; **Reset to defaults** puts them back):
+  - Vanishing points: **Any (1, 2 or 3)** (the default), or only 1, 2 or 3 point grids. Picking one switches to a nearby grid that has that many, and Randomize and the timer keep to it.
+  - Grid colors: one per point (the default), or grayscale
+  - Line thickness: the horizon and the sample box; the guide lines are half as thick
+  - Grid lines per point: 0 to 24, default 10. At 0 only the horizon and the points are left.
+  - Show horizon line (on)
+  - Label the points (on)
+  - Show a sample box (off): a box standing square to the grid, with each edge in the color of the point it runs toward, its hidden edges faint. Draw your own first, then turn this on to compare.
+- **Extra keys**: <kbd>1</kbd>, <kbd>2</kbd> and <kbd>3</kbd> keep to 1, 2 or 3 point grids, <kbd>0</kbd> goes back to any, and <kbd>B</kbd> shows or hides the sample box.
+
+How the grid is chosen and drawn is covered [below](#how-the-perspective-grid-works).
 
 <!--
 ### Tool name
@@ -477,6 +503,24 @@ A photo is decoded with `createImageBitmap`, which also turns phone photos uprig
 
 ---
 
+## How the Perspective Grid works
+
+The grid is a real camera looking at a world of boxes: the eye sits at the origin, y points up, and every box edge runs along x, y or z. `src/math/perspective.ts` holds the camera (a turn, a tilt, the eye's distance from the picture, and the center of vision) and projects points and directions onto the picture. A direction's **vanishing point** is where a line from the eye in that direction meets the picture; directions parallel to the picture have none, which is why 1 point perspective keeps x and y lines parallel and 2 point keeps verticals vertical.
+
+`pose.ts` picks the vanishing points on the picture first, the way you'd place them on paper, and works out the camera that sees them:
+
+- **1 point**: the point is the center of vision, and the camera looks straight along z.
+- **2 point**: the two points are 0.9 to 2 canvas widths apart on the horizon, with one on the canvas and the canvas's middle between them. x and z are at right angles, which fixes the eye's distance: if the center of vision is a and b from the two points, the distance is √(a·b).
+- **3 point**: the third point is straight above the center of vision when looking up (worm's eye) and below it when looking down (bird's eye). The center of vision is then the orthocenter of the three points, where the triangle's altitudes cross, and the tilt and distance follow from that.
+
+Tests check the round trip: the camera built for some points puts its vanishing points exactly there, and the lines of a box, projected, really meet at them.
+
+The number of points is `seed % 3 + 1`. Choosing a number in the options moves to the nearest seed that has it, and `useSeedSession` takes an optional `fit` so Randomize and the timer only pick such seeds. A typed or shared seed is always shown as it is.
+
+The guide lines from a point are evenly spaced in angle, with one along the horizon (or, for the third point, the vertical). From a point on the canvas they go all the way round; from a point off it they fan across the angle the canvas covers, so a far point still gives about the same number of lines across the picture.
+
+---
+
 ## Project structure
 
 ```
@@ -499,6 +543,7 @@ src/
     cone-randomizer/      Cone Randomizer component, drawing, seeds, options
     lit-sphere/           Lit Sphere component, drawing, shading model, light from a seed, options
     value-study/          Value Study component, opening photos, the sample picture, drawing, options
+    perspective-grid/     Perspective Grid component, the grid from a seed, drawing, options
   math/                   Reusable math with no UI dependencies
     quat.ts               Vectors, quaternions, Shoemake random rotation
     random.ts             mulberry32 seeded PRNG
@@ -509,6 +554,7 @@ src/
     cone.ts               Cone shape, side normals, and where the side lines touch the base
     light.ts              The Lit Sphere's scene: the view, the floor, the light, the terminator and the cast shadow
     values.ts             Value studies: L* lightness, blur, stretching, grouping into values, outlines
+    perspective.ts        Perspective cameras: vanishing points, the horizon, the camera for given points, guide-line fans
 ```
 
 ## Getting started
