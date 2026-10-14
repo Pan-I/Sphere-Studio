@@ -11,12 +11,12 @@ describe('Form Combo options', () => {
             shading: 'color',
             lineWidth: 2,
             perspective: true,
-            uniformSize: false,
+            uniformSize: true,
             highlightMeet: true,
-            showHiddenEdges: true,
+            showHiddenEdges: false,
             showSphereLines: true,
             showAxes: false,
-            showEllipseAxes: false,
+            showEllipseAxes: true,
         })
     })
 

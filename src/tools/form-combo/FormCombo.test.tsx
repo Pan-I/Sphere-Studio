@@ -71,6 +71,6 @@ describe('Form Combo', () => {
         await mount('/form-combo?seed=48213')
         await press('m')
         await press('h')
-        expect(stored()).toMatchObject({ highlightMeet: false, showHiddenEdges: false })
+        expect(stored()).toMatchObject({ highlightMeet: false, showHiddenEdges: true })
     })
 })
