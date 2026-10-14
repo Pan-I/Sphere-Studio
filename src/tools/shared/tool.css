@@ -25,6 +25,21 @@
     flex: 1;
 }
 
+.session-history {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.session-history button {
+    flex: 1;
+}
+
+.session-history-position {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
 .session-timer-row {
     display: flex;
     align-items: flex-end;

@@ -6,15 +6,22 @@ import type { SeedSession } from './useSeedSession'
 
 type CopyState = 'idle' | 'copied' | 'failed'
 
-/** Randomize, the timer, and the seed rows, shared by every seeded tool. */
+/** Randomize, pose history, the timer, and the seed rows, shared by every seeded tool. */
 export function SessionControls({ session }: { session: SeedSession }) {
-    const { seed, running, countdown, intervalText, seconds } = session
+    const { seed, running, countdown, intervalText, seconds, historyPosition } = session
     const [seedText, setSeedText] = useState('')
     const [copyState, setCopyState] = useState<CopyState>('idle')
     const parsedSeed = parseSeed(seedText)
     useShortcuts([
         { key: ' ', description: 'New pose', run: session.randomize },
         { key: 'p', description: 'Start or pause the timer', run: session.toggle },
+        { key: 'ArrowLeft', label: '←', description: 'Previous pose', run: session.back },
+        {
+            key: 'ArrowRight',
+            label: '→',
+            description: 'Next pose in history',
+            run: session.forward,
+        },
     ])
     const seedInvalid = seedText.trim() !== '' && parsedSeed === null
 
@@ -52,6 +59,17 @@ export function SessionControls({ session }: { session: SeedSession }) {
                 </button>
                 <button onClick={session.toggle} disabled={!running && seconds === null}>
                     {running ? 'Pause' : startLabel}
+                </button>
+            </div>
+            <div className="session-history">
+                <button onClick={session.back} disabled={!session.canGoBack}>
+                    ← Back
+                </button>
+                <span className="session-history-position">
+                    Pose {historyPosition.current} of {historyPosition.total}
+                </span>
+                <button onClick={session.forward} disabled={!session.canGoForward}>
+                    Forward →
                 </button>
             </div>
             {/* The timer stays in view in full screen; the interval field doesn't. */}
