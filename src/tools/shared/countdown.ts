@@ -20,3 +20,20 @@ export function tick(c: Countdown, interval: number): Countdown {
         ? { remaining: interval, fired: true }
         : { remaining: c.remaining - 1, fired: false }
 }
+
+/**
+ * How full to draw the countdown ring, from 1 (the whole interval left) down to 0. While running
+ * it aims at where the time will be on the next tick, and the ring's CSS transition fills in the
+ * second between, so it drains smoothly instead of in steps. Before the first Start it's full,
+ * and with no valid interval it's empty.
+ */
+export function ringFraction(
+    countdown: Countdown | null,
+    interval: number | null,
+    running: boolean,
+): number {
+    if (interval === null) return 0
+    if (!countdown) return 1
+    const remaining = running ? countdown.remaining - 1 : countdown.remaining
+    return Math.min(1, Math.max(0, remaining / interval))
+}
