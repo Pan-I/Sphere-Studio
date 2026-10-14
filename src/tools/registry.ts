@@ -7,6 +7,8 @@ import { CylinderRandomizer } from './cylinder-randomizer/CylinderRandomizer'
 import { drawCylinderExample } from './cylinder-randomizer/example'
 import { ConeRandomizer } from './cone-randomizer/ConeRandomizer'
 import { drawConeExample } from './cone-randomizer/example'
+import { LitSphere } from './lit-sphere/LitSphere'
+import { drawLitSphereExample } from './lit-sphere/example'
 import { CircleTrio1 } from './circle-trio/CircleTrio1'
 import { drawCircleExample } from './circle-trio/example'
 import { CircleTrio2 } from './circle-trio-2/CircleTrio2'
@@ -60,6 +62,14 @@ export const TOOLS: readonly Tool[] = [
             'A cone in a random orientation and proportion, with its axis marked, for practicing the base ellipse and the side lines that meet it.',
         component: ConeRandomizer,
         drawExample: drawConeExample,
+    },
+    {
+        slug: 'lit-sphere',
+        name: 'Lit Sphere',
+        description:
+            'A sphere on a floor with the light coming from a random direction, showing the light side, core shadow, reflected light and cast shadow, for practicing light and shadow.',
+        component: LitSphere,
+        drawExample: drawLitSphereExample,
     },
     {
         slug: 'circle-trio-1',
