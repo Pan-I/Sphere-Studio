@@ -13,6 +13,8 @@ import { ValueStudy } from './value-study/ValueStudy'
 import { drawValueStudyExample } from './value-study/example'
 import { PerspectiveGrid } from './perspective-grid/PerspectiveGrid'
 import { drawPerspectiveGridExample } from './perspective-grid/example'
+import { FormCombo } from './form-combo/FormCombo'
+import { drawFormComboExample } from './form-combo/example'
 import { CircleTrio1 } from './circle-trio/CircleTrio1'
 import { drawCircleExample } from './circle-trio/example'
 import { CircleTrio2 } from './circle-trio-2/CircleTrio2'
@@ -90,6 +92,14 @@ export const TOOLS: readonly Tool[] = [
             'A random 1, 2 or 3 point perspective grid with the horizon and vanishing points marked, for practicing boxes in a scene.',
         component: PerspectiveGrid,
         drawExample: drawPerspectiveGridExample,
+    },
+    {
+        slug: 'form-combo',
+        name: 'Form Combo',
+        description:
+            'A sphere, box and cylinder in random orientations, pushed into each other, with the lines where they meet marked, for practicing forms that intersect.',
+        component: FormCombo,
+        drawExample: drawFormComboExample,
     },
     {
         slug: 'circle-trio-1',

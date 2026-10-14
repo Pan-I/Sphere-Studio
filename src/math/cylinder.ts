@@ -78,11 +78,19 @@ export function rimPoint(
  * the side at rim point p faces it where n·(eye − p) > 0, which works out to
  * n·eye > radius, because n·p is the radius whatever p is along the axis. Both have the form
  * ρ cos(φ − base) > k, so the range is base ± acos(k / ρ).
+ *
+ * `eye` is where the eye sits relative to the cylinder's centre in perspective. It is
+ * (0, 0, camera) for a cylinder in the middle of the view; the Form Combo passes its own for a
+ * cylinder placed off to one side.
  */
-export function frontArc(cyl: Cylinder, camera: number | null): readonly [number, number] {
+export function frontArc(
+    cyl: Cylinder,
+    camera: number | null,
+    eye: Vec3 = [0, 0, camera ?? 0],
+): readonly [number, number] {
     // The view direction (flat) or the eye (perspective), measured along u and v.
-    const du = camera === null ? cyl.u[2] : cyl.u[2] * camera
-    const dv = camera === null ? cyl.v[2] : cyl.v[2] * camera
+    const du = camera === null ? cyl.u[2] : dot(cyl.u, eye)
+    const dv = camera === null ? cyl.v[2] : dot(cyl.v, eye)
     const rho = Math.hypot(du, dv)
     const k = camera === null ? 0 : cyl.radius
     const base = Math.atan2(dv, du)

@@ -132,3 +132,19 @@ describe('ellipses in a flat view', () => {
         }
     })
 })
+
+describe('side lines seen from off to one side', () => {
+    it('touch the side where the line of sight from the eye just grazes it', () => {
+        const eye: Vec3 = [1.5, -0.8, 4]
+        for (const cyl of randomCylinders()) {
+            expect(frontArc(cyl, CAMERA, [0, 0, CAMERA])).toEqual(frontArc(cyl, CAMERA))
+            const [from, to] = frontArc(cyl, CAMERA, eye)
+            if (to <= from) continue
+            for (const phi of [from, to]) {
+                const p = rimPoint(cyl, cyl.caps[1], phi)
+                const n = rimPoint({ ...cyl, radius: 1 }, [0, 0, 0], phi)
+                expect(dot(n, [eye[0] - p[0], eye[1] - p[1], eye[2] - p[2]])).toBeCloseTo(0)
+            }
+        }
+    })
+})

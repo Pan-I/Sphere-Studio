@@ -93,3 +93,18 @@ describe.each([
         }
     })
 })
+
+describe('side lines seen from off to one side', () => {
+    it('run where the line of sight from the eye just grazes the side', () => {
+        const eye: Vec3 = [-1.2, 1.4, 4.5]
+        for (const cone of randomCones()) {
+            expect(frontArc(cone, CAMERA, [0, 0, CAMERA])).toEqual(frontArc(cone, CAMERA))
+            const [from, to] = frontArc(cone, CAMERA, eye)
+            if (to <= from || to - from >= 2 * Math.PI - 1e-9) continue
+            for (const phi of [from, to]) {
+                const p = rimPoint(cone, cone.base, phi)
+                expect(dot(sideNormal(cone, phi), sub(eye, p))).toBeCloseTo(0)
+            }
+        }
+    })
+})
