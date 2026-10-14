@@ -291,6 +291,7 @@ Every tool page has these, so your hand can stay on the pencil:
 | <kbd>P</kbd> | Start or pause the timer |
 | <kbd>←</kbd> / <kbd>→</kbd> | Back and forward through this session's poses |
 | <kbd>S</kbd> | Star or unstar this pose (see Favorites below) |
+| <kbd>D</kbd> | Download the drawing as a PNG (see below) |
 | <kbd>F</kbd> | Full screen on or off (<kbd>Esc</kbd> also leaves) |
 | <kbd>?</kbd> | Show the list of shortcuts |
 
@@ -300,9 +301,11 @@ Shortcuts are ignored while you're typing in a field, and when Ctrl, Cmd or Alt 
 
 **Favorites**: **☆ Favorite** beside the seed (or <kbd>S</kbd>) stars the pose on screen, and the **Favorites** box under the session controls lists every pose you've starred on that tool, newest first. Click one to show it again (it goes on the end of the pose history, like a loaded seed), or **×** to remove it. Favorites are saved in your browser per tool, under `sphere-studio:<tool slug>:favorites` in `localStorage`, so they're still there next visit; each tool keeps up to 50, and starring one more drops the oldest. **Reset to defaults** only resets the Display options, never favorites. In full screen the box is hidden, but <kbd>S</kbd> still works and a ★ next to the timer shows the pose is starred.
 
+**Download PNG**: the **Download PNG** button under the tool's name (or <kbd>D</kbd>) saves the drawing on screen as a PNG, for reference or printing. It's redrawn at 1600 × 1600 pixels whatever the size on screen (about 13.5 cm or 5.3 in at 300 dpi), with your Display options and the page's background, so it looks like the screen, in light or dark mode. The file is named after the tool and seed, like `box-randomizer-48213.png`, so you can find the pose again later; in Value Study with your own photo open, it's named after the photo instead. <kbd>D</kbd> works in full screen too, and the button stays on phones and tablets.
+
 **Full screen** shows only the drawing and the timer, for a second screen beside your paper. It uses the browser's Fullscreen API. Where that isn't available (iPhone Safari), the tool fills the browser window instead.
 
-On phones and tablets (touch only, no mouse or trackpad), the **Full screen** and **Shortcuts** buttons are hidden and <kbd>F</kbd> and <kbd>?</kbd> do nothing. `useTouchOnly` (in `src/site/`) decides this with the `(hover: none) and (pointer: coarse)` media query, so a tablet with a trackpad attached gets them back.
+On phones and tablets (touch only, no mouse or trackpad), the **Full screen** and **Shortcuts** buttons are hidden (**Download PNG** stays) and <kbd>F</kbd> and <kbd>?</kbd> do nothing. `useTouchOnly` (in `src/site/`) decides this with the `(hover: none) and (pointer: coarse)` media query, so a tablet with a trackpad attached gets them back.
 
 **For new tools and features:**
 
@@ -313,7 +316,7 @@ On phones and tablets (touch only, no mouse or trackpad), the **Full screen** an
   ```
 
 - **Full screen**: wrapping is done by the tool page, so a new tool gets it for free. In full screen, only the tool's top-level elements marked `data-focus="show"` stay visible, and anything inside them marked `data-focus="hide"` is dropped. Mark your canvas with `data-focus="show"`. `SessionControls` already keeps the timer.
-- **A sharp canvas at any size**: draw with `useSquareCanvas(SIZE, draw)` (in `src/tools/shared/`). It sizes the drawing buffer to the canvas's real size on screen, so it stays crisp in full screen, while `draw` keeps working in the same 0 to `SIZE` units.
+- **A sharp canvas at any size**: draw with `useSquareCanvas(SIZE, draw)` (in `src/tools/shared/`). It sizes the drawing buffer to the canvas's real size on screen, so it stays crisp in full screen, while `draw` keeps working in the same 0 to `SIZE` units. It also gives Download PNG your `draw` function, through `CanvasExportContext` from the tool page, so a new tool gets downloads for free: `canvasExport.ts` calls `draw` again on a 1600-pixel canvas placed hidden beside yours (so colours read from CSS, like Circle Trio's line colour, come out the same) and fills the page background in behind it. Pass a third argument to name the file after something other than the seed, as Value Study does with your photo's name.
 
 ---
 
@@ -592,7 +595,7 @@ src/
   shortcuts/              Keyboard shortcuts: the registry, useShortcuts, and the ? list
   tools/
     registry.ts           The list of tools; drives routes, nav and home-page cards (with live thumbnails)
-    shared/               Shared components and utilities: session controls, pose history and favorites, the Display options panel, canvas sizing, ellipse axes
+    shared/               Shared components and utilities: session controls, pose history and favorites, the Display options panel, canvas sizing and PNG download, ellipse axes
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
     circle-trio/          Circle Trio 1 component and layout, plus the drawing and options both Circle Trios use
     circle-trio-2/        Circle Trio 2 component and layout
