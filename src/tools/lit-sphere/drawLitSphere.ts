@@ -41,7 +41,7 @@ const SUN_RADIUS = 0.1
 const CURVE_STEPS = 128
 
 /** Where the scene goes on the canvas: the sphere's centre and radius, in canvas units. */
-interface Layout {
+export interface Layout {
     cx: number
     cy: number
     r: number
@@ -58,7 +58,7 @@ function lightOnScreen(light: Vec3): { dir: [number, number]; inFront: boolean }
  * Fits the sphere, its whole cast shadow and the sun onto the canvas, centred, with the sphere as
  * large as that allows. The layout depends only on the light, so changing options never moves it.
  */
-function layoutFor(light: Vec3, size: number): Layout {
+export function layoutFor(light: Vec3, size: number): Layout {
     const box = sceneBounds(light)
     const { dir } = lightOnScreen(light)
     const reach = SUN_DISTANCE + SUN_RADIUS * 2

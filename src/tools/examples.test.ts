@@ -13,7 +13,15 @@ function recordingContext() {
     canvas.width = SIZE
     canvas.height = SIZE
     const log: string[] = []
-    const show = (v: unknown) => (typeof v === 'number' ? v.toFixed(2) : typeof v)
+    const show = (v: unknown) => {
+        if (typeof v === 'number') return v.toFixed(2)
+        // Pixels from createImageData: a checksum, so shading that differs counts as different.
+        const data = (v as { data?: unknown } | null)?.data
+        if (data instanceof Uint8ClampedArray) {
+            return `pixels#${data.reduce((h, b) => (h * 31 + b) >>> 0, 7)}`
+        }
+        return typeof v
+    }
     const ctx = new Proxy(
         {},
         {

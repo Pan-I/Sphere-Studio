@@ -9,6 +9,8 @@ import { ConeRandomizer } from './cone-randomizer/ConeRandomizer'
 import { drawConeExample } from './cone-randomizer/example'
 import { LitSphere } from './lit-sphere/LitSphere'
 import { drawLitSphereExample } from './lit-sphere/example'
+import { ValueStudy } from './value-study/ValueStudy'
+import { drawValueStudyExample } from './value-study/example'
 import { CircleTrio1 } from './circle-trio/CircleTrio1'
 import { drawCircleExample } from './circle-trio/example'
 import { CircleTrio2 } from './circle-trio-2/CircleTrio2'
@@ -70,6 +72,14 @@ export const TOOLS: readonly Tool[] = [
             'A sphere on a floor with the light coming from a random direction, showing the light side, core shadow, reflected light and cast shadow, for practicing light and shadow.',
         component: LitSphere,
         drawExample: drawLitSphereExample,
+    },
+    {
+        slug: 'value-study',
+        name: 'Value Study',
+        description:
+            'Load a photo and see it in grayscale and grouped into 3, 5 or 7 flat values, for planning the big light and dark shapes. The photo never leaves your browser.',
+        component: ValueStudy,
+        drawExample: drawValueStudyExample,
     },
     {
         slug: 'circle-trio-1',
