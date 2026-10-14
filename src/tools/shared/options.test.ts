@@ -8,6 +8,7 @@ import {
     defineOptions,
     lineWidthField,
     parseOptions,
+    sameOptions,
     toggleField,
     type OptionFields,
 } from './options'
@@ -71,6 +72,14 @@ describe('parseOptions', () => {
     })
 })
 
+describe('sameOptions', () => {
+    it('compares every field', () => {
+        expect(sameOptions(fields, { ...DEFAULTS }, DEFAULTS)).toBe(true)
+        expect(sameOptions(fields, { ...DEFAULTS, width: 3 }, DEFAULTS)).toBe(false)
+        expect(sameOptions(fields, { ...DEFAULTS, show: false }, DEFAULTS)).toBe(false)
+    })
+})
+
 describe('defineOptions', () => {
     it('saves and loads through localStorage, under the given key', () => {
         const store = new Map<string, string>()
@@ -81,6 +90,7 @@ describe('defineOptions', () => {
                 localStorage: {
                     getItem: (k: string) => store.get(k) ?? null,
                     setItem: (k: string, v: string) => store.set(k, v),
+                    removeItem: (k: string) => store.delete(k),
                 },
             },
         })
@@ -94,6 +104,9 @@ describe('defineOptions', () => {
                 show: false,
             })
             expect(set.load()).toEqual({ mode: 'none', width: 7, show: false })
+            set.save({ ...DEFAULTS })
+            expect(store.has('test:key')).toBe(false) // back at the defaults: nothing stored
+            expect(set.load()).toEqual(DEFAULTS)
         } finally {
             if (original) Object.defineProperty(globalThis, 'window', original)
             else delete (globalThis as { window?: unknown }).window

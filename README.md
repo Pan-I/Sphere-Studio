@@ -57,7 +57,7 @@ A randomly rotated sphere split into eight sectors by three perpendicular great 
 - **Randomize** shows a new, uniformly random orientation.
 - **Timer**: set an interval (1 to 3600 seconds) and press Start; a new pose appears each time it runs out. Pause and Resume keep the remaining time, and any manual pose change restarts the countdown.
 - **Seeds**: every pose has a seed from 0 to 999,999. The current seed is shown on the page and kept in the address bar as `?seed=…`, so the URL is always a link to the exact pose. **Copy link** copies it, and **Load seed** jumps to a seed you type in.
-- **Display options** (saved in your browser between visits):
+- **Display options** (saved in your browser between visits; **Reset to defaults** puts them back):
   - Shading: color, grayscale, or none (lines only)
   - Line thickness: 1 to 8 px
   - Show far-side lines: draws the hidden half of each circle faintly
@@ -76,7 +76,7 @@ Two large translucent circles and a smaller one near the line between them, in a
 **Features**
 
 - **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer, with their own `?seed=` links.
-- **Display options** (saved in your browser between visits):
+- **Display options** (saved in your browser between visits; **Reset to defaults** puts them back):
   - Fill: color, grayscale, or none (outlines only)
   - Opacity: 15% to 60%
   - Line thickness: 1 to 8 px
@@ -110,7 +110,7 @@ A cube in a random orientation, the other core form in drawing practice, with th
 **Features**
 
 - **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer. A seed gives the cube the same rotation it gives the sphere.
-- **Display options** (saved in your browser between visits):
+- **Display options** (saved in your browser between visits; **Reset to defaults** puts them back):
   - Shading: color, grayscale, or none (lines only). Each axis has its own shade, so the faces you see always differ.
   - Line thickness: 1 to 8 px
   - Perspective: near edges look bigger than far ones. Off gives a flat (orthographic) view where parallel edges stay parallel.
@@ -130,7 +130,7 @@ A cylinder in a random orientation, from squat to long, for practicing ellipses.
 **Features**
 
 - **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer. A seed gives the cylinder the same rotation it gives the sphere and the cube, and also picks its proportions: the length runs from half the diameter to three times it. With **Uniform size** on (the default) every cylinder is twice as long as it is wide instead.
-- **Display options** (saved in your browser between visits):
+- **Display options** (saved in your browser between visits; **Reset to defaults** puts them back):
   - Shading: color, grayscale, or none (lines only). The side and the end facing you get different shades.
   - Line thickness: 1 to 8 px
   - Perspective: near parts look bigger, so the near end is a little larger than the far one. Off gives a flat view where the two ends are identical ellipses.
@@ -151,7 +151,7 @@ A cone in a random orientation, from squat to tall, for practicing the base elli
 **Features**
 
 - **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer. A seed gives the cone the same rotation and proportions it gives the cylinder: the height runs from half the base's diameter to three times it. With **Uniform size** on (the default) every cone is twice as tall as its base is wide instead.
-- **Display options** (saved in your browser between visits):
+- **Display options** (saved in your browser between visits; **Reset to defaults** puts them back):
   - Shading: color, grayscale, or none (lines only). The side and the base get different shades.
   - Line thickness: 1 to 8 px
   - Perspective: near parts look bigger. Off gives a flat (orthographic) view.

@@ -102,6 +102,11 @@ export function defaultsOf<T>(fields: OptionFields<T>): T {
     return out as T
 }
 
+/** True when every field has the same value in both, e.g. to tell whether options are at their defaults. */
+export function sameOptions<T>(fields: OptionFields<T>, a: T, b: T): boolean {
+    return entries(fields).every(([key]) => a[key] === b[key])
+}
+
 /** Checks one stored value against its field, falling back to the field's default. */
 function parseField<T>(field: AnyField<T>, value: unknown): unknown {
     switch (field.kind) {
@@ -144,9 +149,10 @@ export interface OptionSet<T> {
 
 /** `storageKey` is the localStorage key. Keep it unchanged so people's saved choices survive. */
 export function defineOptions<T>(storageKey: string, fields: OptionFields<T>): OptionSet<T> {
+    const defaults = Object.freeze(defaultsOf(fields))
     return {
         fields,
-        defaults: Object.freeze(defaultsOf(fields)),
+        defaults,
         load() {
             try {
                 return parseOptions(fields, window.localStorage.getItem(storageKey))
@@ -156,7 +162,11 @@ export function defineOptions<T>(storageKey: string, fields: OptionFields<T>): O
         },
         save(options) {
             try {
-                window.localStorage.setItem(storageKey, JSON.stringify(options))
+                // Nothing is stored at the defaults, so a later change to a default reaches
+                // everyone who hasn't picked something else.
+                if (sameOptions(fields, options, defaults))
+                    window.localStorage.removeItem(storageKey)
+                else window.localStorage.setItem(storageKey, JSON.stringify(options))
             } catch {
                 // Storage unavailable or full: the options just won't persist.
             }
