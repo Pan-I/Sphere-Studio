@@ -1,4 +1,5 @@
-import { clampToRange, type AnyField, type OptionFields } from './options'
+import { useMemo } from 'react'
+import { clampToRange, defaultsOf, sameOptions, type AnyField, type OptionFields } from './options'
 
 interface Props<T> {
     fields: OptionFields<T>
@@ -9,6 +10,8 @@ interface Props<T> {
 /** The "Display" box under every tool, built from the tool's option fields. */
 export function OptionsPanel<T>({ fields, options, onChange }: Props<T>) {
     const keys = Object.keys(fields) as (keyof T)[]
+    const defaults = useMemo(() => defaultsOf(fields), [fields])
+    const atDefaults = sameOptions(fields, options, defaults)
     return (
         <fieldset className="tool-display">
             <legend>Display</legend>
@@ -21,6 +24,11 @@ export function OptionsPanel<T>({ fields, options, onChange }: Props<T>) {
                     onChange={(value) => onChange({ ...options, [key]: value })}
                 />
             ))}
+            <div className="tool-display-actions">
+                <button type="button" disabled={atDefaults} onClick={() => onChange(defaults)}>
+                    Reset to defaults
+                </button>
+            </div>
         </fieldset>
     )
 }

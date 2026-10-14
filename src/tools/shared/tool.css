@@ -94,6 +94,12 @@
     font-weight: 600;
 }
 
+.tool-display-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+}
+
 .tool-option {
     display: flex;
     align-items: center;

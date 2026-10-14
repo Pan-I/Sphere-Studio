@@ -91,4 +91,17 @@ describe('OptionsPanel', () => {
         expect(outlines.checked).toBe(true)
         expect(latest.outlines).toBe(false) // the saved choice is kept for when a fill comes back
     })
+
+    it('resets every option to its default, and is greyed out while already there', async () => {
+        const reset = [...container.querySelectorAll('button')].find(
+            (b) => b.textContent === 'Reset to defaults',
+        )!
+        expect(reset.disabled).toBe(true)
+        await act(async () => setValue(control<HTMLSelectElement>('Mode', 'select'), 'none'))
+        await act(async () => setValue(control<HTMLInputElement>('Line thickness', 'input'), '6'))
+        expect(reset.disabled).toBe(false)
+        await act(async () => reset.click())
+        expect(latest).toEqual({ mode: 'color', width: 2, outlines: false })
+        expect(reset.disabled).toBe(true)
+    })
 })
