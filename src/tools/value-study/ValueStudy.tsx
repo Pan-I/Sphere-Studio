@@ -31,7 +31,8 @@ export function ValueStudy() {
         (ctx: CanvasRenderingContext2D) => drawValueStudy(ctx, SIZE, picture, options),
         [picture, options],
     )
-    const canvasRef = useSquareCanvas(SIZE, draw)
+    // A downloaded PNG is named after your photo rather than the sample's seed.
+    const canvasRef = useSquareCanvas(SIZE, draw, photo?.name.replace(/\.[^.]*$/, ''))
 
     const fileRef = useRef<HTMLInputElement>(null)
     const chooseFile = () => fileRef.current?.click()
