@@ -68,17 +68,23 @@ export function sideNormal(cone: Cone, phi: number): Vec3 {
  * p on that line; n·p is radius·halfLength wherever p is, since n is at right angles to the line
  * and to the base centre's offset from the rim. Both have the form ρ cos(φ − base) > k, so the
  * range is base ± acos(k / ρ), the same as the Cylinder Randomizer's side lines.
+ *
+ * `eye` is where the eye sits relative to the cone's centre in perspective, (0, 0, camera) for a
+ * cone in the middle of the view, as in the Cylinder Randomizer's frontArc.
  */
-export function frontArc(cone: Cone, camera: number | null): readonly [number, number] {
+export function frontArc(
+    cone: Cone,
+    camera: number | null,
+    eye: Vec3 = [0, 0, camera ?? 0],
+): readonly [number, number] {
     const h = 2 * cone.halfLength
-    const eye = camera ?? 1
-    const du = h * cone.u[2] * eye
-    const dv = h * cone.v[2] * eye
+    const du = h * (camera === null ? cone.u[2] : dot(cone.u, eye))
+    const dv = h * (camera === null ? cone.v[2] : dot(cone.v, eye))
     const rho = Math.hypot(du, dv)
     const k =
         camera === null
             ? -cone.radius * cone.axis[2]
-            : cone.radius * (cone.halfLength - camera * cone.axis[2])
+            : cone.radius * (cone.halfLength - dot(cone.axis, eye))
     const base = Math.atan2(dv, du)
     if (rho <= k) return [base, base]
     if (rho <= -k) return [base - Math.PI, base + Math.PI]

@@ -18,6 +18,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [Lit Sphere](#lit-sphere)
   - [Value Study](#value-study)
   - [Perspective Grid](#perspective-grid)
+  - [Form Combo](#form-combo)
   - [Keyboard shortcuts and full screen](#keyboard-shortcuts-and-full-screen)
   - [Adding a tool](#adding-a-tool)
 - [How the Sphere Randomizer works](#how-the-sphere-randomizer-works)
@@ -32,6 +33,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 - [How the Lit Sphere works](#how-the-lit-sphere-works)
 - [How the Value Study works](#how-the-value-study-works)
 - [How the Perspective Grid works](#how-the-perspective-grid-works)
+- [How the Form Combo works](#how-the-form-combo-works)
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
 - [Deployment](#deployment)
@@ -52,6 +54,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 | [Lit Sphere](#lit-sphere) | `/lit-sphere` | Generate a sphere lit from a random direction to practice light, shadow and values. |
 | [Value Study](#value-study) | `/value-study` | Load a photo and see it in grayscale and grouped into 3, 5 or 7 values, to plan a drawing's big light and dark shapes. |
 | [Perspective Grid](#perspective-grid) | `/perspective-grid` | Generate a 1, 2 or 3 point perspective grid with the horizon and vanishing points marked, to practice boxes in a scene. |
+| [Form Combo](#form-combo) | `/form-combo` | Generate a sphere, box and cylinder pushed into each other, with the lines where they meet marked, to practice forms that intersect. |
 <!-- Add one row per new tool. -->
 
 ---
@@ -233,6 +236,33 @@ A random 1, 2 or 3 point perspective grid with the horizon line and vanishing po
 - **Extra keys**: <kbd>1</kbd>, <kbd>2</kbd> and <kbd>3</kbd> keep to 1, 2 or 3 point grids, <kbd>0</kbd> goes back to any, and <kbd>B</kbd> shows or hides the sample box.
 
 How the grid is chosen and drawn is covered [below](#how-the-perspective-grid-works).
+
+### Form Combo
+
+**Route:** `/form-combo` · **Source:** `src/tools/form-combo/`
+
+A sphere, a box and a cylinder in random orientations and sizes, pushed partway into each other, for practicing forms that intersect. The hard part of drawing them is the line where one form goes into another, so that line is drawn in its own color. Try drawing the forms first, then work out where they meet, and check against the picture.
+
+**Features**
+
+- **Where forms meet** is drawn in purple: the curve where the cylinder's side goes into the sphere, the box's corner pokes out of the cylinder, and so on. Every form runs into at least one other, none is mostly inside another, and each one shows well enough not to hide behind the rest.
+- **Hidden lines** are drawn faintly, whether a form hides them, another form does, or they are inside another form, so you can see each form whole.
+- The forms are the same ones the other randomizers draw: the sphere with its three sector lines, the box with its faces shaded by direction, and the cylinder and cone with their rims and side lines.
+- **Randomize**, the **timer** and **seeds** work as on the other tools.
+- **Display options** (saved in your browser between visits; **Reset to defaults** puts them back):
+  - Forms: **Sphere, box and cylinder** (the default), two of them (the seed picks which), or all three and a cone
+  - Shading: color (the default, one color per form, with the box's faces in three shades), grayscale, or none (lines only)
+  - Line thickness
+  - Perspective (on)
+  - Uniform cylinders and cones (off): every cylinder and cone twice as long as it is wide, like "Uniform size" on the Cylinder and Cone Randomizers. Off, the seed picks each one's proportions.
+  - Highlight where forms meet (on). Off, those lines are drawn in black like the rest.
+  - Show hidden edges (on)
+  - Show the sphere's sector lines (on)
+  - Show cylinder and cone axes (off): dashed, as on the Cylinder and Cone Randomizers
+  - Show ellipse axes (off): the major (red) and minor (blue) axes of each cylinder cap's and cone base's ellipse, as on the Cylinder and Cone Randomizers. An end you can see gets them at full strength; one facing away, or behind or inside another form, gets them faintly with the hidden edges.
+- **Extra keys**: <kbd>2</kbd>, <kbd>3</kbd> and <kbd>4</kbd> pick two forms, the sphere, box and cylinder, or all four. <kbd>M</kbd> turns the highlight on or off, and <kbd>H</kbd> the hidden edges.
+
+The forms you get depend on the Forms option as well as the seed, so a shared link shows the same picture to someone with the same choice. How the forms are placed and drawn is covered [below](#how-the-form-combo-works).
 
 <!--
 ### Tool name
@@ -519,6 +549,26 @@ The number of points is `seed % 3 + 1`. Choosing a number in the options moves t
 
 The guide lines from a point are evenly spaced in angle, with one along the horizon (or, for the third point, the vertical). From a point on the canvas they go all the way round; from a point off it they fan across the angle the canvas covers, so a far point still gives about the same number of lines across the picture.
 
+## How the Form Combo works
+
+Each form is one of the unit forms the randomizers draw (a sphere of radius 1, a cube with its corners on the unit sphere, a cylinder or cone with its rims on it), turned by a random quaternion, then scaled and moved into place. `src/math/solids.ts` holds these placed **solids** and the three things the tool needs to know about each:
+
+- **Inside or out**: a number that is negative inside the form and positive outside, about the distance to the surface. For a box it is how far the farthest coordinate is past the half edge; for a cylinder, the larger of how far you are outside the tube and past the caps.
+- **Where a ray goes through it**: each form is the overlap of a few simple pieces (slabs between two planes, a round tube, a cone), so a ray's span inside the form is the overlap of its spans in each piece, and the piece it enters last is the face it comes in through.
+- **Its surface as patches**: a grid over the sphere, each face of the box, the cylinder's side and caps, the cone's side and base, spaced evenly by area.
+
+**Placing the forms** (`pose.ts`): the seed shuffles the forms, then places each one partway into one already placed, in a random direction squashed toward the screen so they sit side by side more than behind each other. A layout is checked three ways: each form must cross the one it was attached to (some of its surface inside it, measured on the patch grid), no form may have more than 40% of its surface inside another, and each must show at least 45% as much as it would alone, from a small test render. A layout that fails is thrown away for the next draws from the seed's stream, so a seed always ends at the same layout. Last, the scene is moved and scaled to fit the unit sphere, like the single forms.
+
+**Where forms meet** (`src/math/meet.ts`): for each pair, walk the grid over one form's surface and look at the other's inside-or-out number at each point. It changes sign where the surface goes into the other form. In each grid cell whose corners disagree, the crossing on each edge is found by halving the edge until it sits on the other surface, and the crossings are joined (marching squares). Every point found lies on both surfaces.
+
+**Drawing** (`drawFormCombo.ts`):
+
+1. **Fills**: for every pixel, the ray from the eye meets each form's span, and the nearest one gives the color (and for the box, the face). Only forms whose outline could cover the pixel are checked. Working pixel by pixel is what makes forms going into each other look right, which painting whole shapes back to front can't do.
+2. **Lines**: each form's outline (the sphere's silhouette circle, the box's edges, the rims, and the side lines from `frontArc` in `cylinder.ts` and `cone.ts`, which now take where the eye is relative to a form off to one side) and the lines where forms meet, as points in the scene.
+3. **Hiding**: a point is hidden when the way from it to the eye passes through any form, its own included. Lines are split into seen and hidden pieces at each point, then the hidden ones are drawn faintly underneath and the seen ones on top, each set as one path.
+
+The drawing is scaled to fill the canvas from where its lines land on screen, so a pose fills it however the forms are spread.
+
 ---
 
 ## Project structure
@@ -544,6 +594,7 @@ src/
     lit-sphere/           Lit Sphere component, drawing, shading model, light from a seed, options
     value-study/          Value Study component, opening photos, the sample picture, drawing, options
     perspective-grid/     Perspective Grid component, the grid from a seed, drawing, options
+    form-combo/           Form Combo component, placing the forms from a seed, drawing, options
   math/                   Reusable math with no UI dependencies
     quat.ts               Vectors, quaternions, Shoemake random rotation
     random.ts             mulberry32 seeded PRNG
@@ -555,6 +606,8 @@ src/
     light.ts              The Lit Sphere's scene: the view, the floor, the light, the terminator and the cast shadow
     values.ts             Value studies: L* lightness, blur, stretching, grouping into values, outlines
     perspective.ts        Perspective cameras: vanishing points, the horizon, the camera for given points, guide-line fans
+    solids.ts             Placed forms: inside or out, where a ray goes through them, their surfaces as patches
+    meet.ts               Where two forms' surfaces meet, and how much of one is inside another
 ```
 
 ## Getting started
