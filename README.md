@@ -15,6 +15,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [Box Randomizer](#box-randomizer)
   - [Cylinder Randomizer](#cylinder-randomizer)
   - [Cone Randomizer](#cone-randomizer)
+  - [Lit Sphere](#lit-sphere)
   - [Keyboard shortcuts and full screen](#keyboard-shortcuts-and-full-screen)
   - [Adding a tool](#adding-a-tool)
 - [How the Sphere Randomizer works](#how-the-sphere-randomizer-works)
@@ -26,6 +27,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 - [How the Box Randomizer works](#how-the-box-randomizer-works)
 - [How the Cylinder Randomizer works](#how-the-cylinder-randomizer-works)
 - [How the Cone Randomizer works](#how-the-cone-randomizer-works)
+- [How the Lit Sphere works](#how-the-lit-sphere-works)
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
 - [Deployment](#deployment)
@@ -43,6 +45,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 | [Box Randomizer](#box-randomizer) | `/box-randomizer` | Generate a cube in a random orientation to practice drawing boxes. |
 | [Cylinder Randomizer](#cylinder-randomizer) | `/cylinder-randomizer` | Generate a cylinder in a random orientation and proportion to practice ellipses and the minor axis. |
 | [Cone Randomizer](#cone-randomizer) | `/cone-randomizer` | Generate a cone in a random orientation and proportion to practice the base ellipse and the side lines that meet it. |
+| [Lit Sphere](#lit-sphere) | `/lit-sphere` | Generate a sphere lit from a random direction to practice light, shadow and values. |
 <!-- Add one row per new tool. -->
 
 ---
@@ -160,6 +163,25 @@ A cone in a random orientation, from squat to tall, for practicing the base elli
   - Show axis: a dashed red line through the apex and the centre of the base
   - Show ellipse axes: the base ellipse's major axis in red and minor axis in dark blue, faint when the base faces away
   - Show center lines: a cross on the base through its true centre, along the diameters that become the ellipse's axes
+
+### Lit Sphere
+
+**Route:** `/lit-sphere` · **Source:** `src/tools/lit-sphere/`
+
+A sphere resting on a floor, lit from a random direction, for practicing light and shadow: the light side with its highlight and halftone, the core shadow just past the terminator, the reflected light in the shadow, and the cast shadow on the floor, darkest where the sphere touches it.
+
+**Features**
+
+- **Randomize**, the **timer**, and **seeds** work exactly as in the Sphere Randomizer. Here a seed picks the light: from the left or the right, anywhere from beside you round to behind the sphere (never straight from behind you or straight behind the sphere), and from 30° to 65° above the floor.
+- **Display options** (saved in your browser between visits; **Reset to defaults** puts them back):
+  - Shading: grayscale (the default, a plain value study), color (warm light and cool shadow), or none (lines only: the outline, the terminator, the shadow's edge and a ring at the highlight)
+  - Line thickness: 1 to 8 px
+  - Flat value zones: each zone gets one flat value, like a value-grouping sketch, instead of smooth shading
+  - Show terminator and shadow edge: the line where light turns to shadow, faint where it runs round the back, and the outline of the cast shadow. Always on in lines only.
+  - Show light direction: a small sun with an arrow toward the sphere, faint when the light is behind the sphere
+  - Label the zones: names each zone with a callout (highlight, halftone, core shadow, reflected light, cast shadow, occlusion)
+
+How the light is chosen and the shading worked out is covered [below](#how-the-lit-sphere-works).
 
 <!--
 ### Tool name
@@ -398,6 +420,24 @@ The geometry is in `src/math/cone.ts` and builds on the cylinder's. A cone has t
 
 ---
 
+## How the Lit Sphere works
+
+The scene is in `src/math/light.ts`: a unit sphere at the origin sitting on a floor at y = −1, seen without perspective by a viewer looking 20° down so the floor shows. The light is distant, like the sun, so it's just a direction.
+
+`lightFromSeed` (`src/tools/lit-sphere/pose.ts`) takes three draws of `mulberry32(seed)`: which side, how far round from the viewer (30° to 150°), and how high (30° to 65°). Lower than 30° and the shadow would run off the canvas. The drawing is then fitted to the canvas around the sphere, the whole cast shadow and the sun, so the sphere moves and shrinks a little from pose to pose.
+
+`drawLitSphere.ts` works out every pixel, as the Sphere Randomizer does for its sectors. A pixel on the sphere gets its outward normal `n`; any other pixel gets the floor point behind it. The shading (`shading.ts`) is a small model of what artists are taught to see:
+
+- **Light side** (`n · light > 0`): brighter the more it faces the light, plus a highlight where `n` points halfway between the light and the viewer.
+- **Shadow side**: dark, except for **reflected light** from a low light source on the side away from the light, like light bouncing off the floor. The **core shadow** is where that bounce doesn't reach, just past the terminator. The two sides meet in a soft step at the terminator, and the brightest reflected light is kept darker than the darkest halftone, the rule that keeps the light and shadow families apart (a test checks it for several lights).
+- **Floor**: lit at a value set by the light's height. A floor point is in the **cast shadow** when the line from it toward the light passes through the sphere. The shadow's edge is crisp near the sphere and gets softer further away, and the **occlusion** shadow darkens the floor right around the contact point.
+
+The terminator is the circle on the sphere at right angles to the light. Since it is also the sphere's outline as seen from the light, sliding each of its points along the light down to the floor gives the exact edge of the cast shadow. Tests check that every terminator point is at right angles to the light and every shadow-edge point is exactly at the edge of the shadow.
+
+**Flat value zones** gives each zone (highlight, light, halftone, core shadow, reflected light, lit floor, cast shadow, occlusion) one value, from `ZONE_VALUES`. **Color** keeps the same values and tints them warm in the light and cool in the shadow.
+
+---
+
 ## Project structure
 
 ```
@@ -418,6 +458,7 @@ src/
     box-randomizer/       Box Randomizer component, drawing, seeds, options
     cylinder-randomizer/  Cylinder Randomizer component, drawing, seeds, options
     cone-randomizer/      Cone Randomizer component, drawing, seeds, options
+    lit-sphere/           Lit Sphere component, drawing, shading model, light from a seed, options
   math/                   Reusable math with no UI dependencies
     quat.ts               Vectors, quaternions, Shoemake random rotation
     random.ts             mulberry32 seeded PRNG
@@ -426,6 +467,7 @@ src/
     cylinder.ts           Cylinder proportions, rims, side lines, and the diameters behind each ellipse's axes
     ellipse.ts            The exact centre and major and minor axes of a circle's ellipse on screen
     cone.ts               Cone shape, side normals, and where the side lines touch the base
+    light.ts              The Lit Sphere's scene: the view, the floor, the light, the terminator and the cast shadow
 ```
 
 ## Getting started
