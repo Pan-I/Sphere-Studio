@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useOpenShortcutHelp, useShortcuts } from '../shortcuts/useShortcuts'
 import type { Shortcut } from '../shortcuts/shortcuts'
 import type { Tool } from '../tools/registry'
+import { ToolSlugContext } from '../tools/shared/toolSlug'
 import { SITE_NAME } from './config'
 import { useDocumentTitle } from './useDocumentTitle'
 import { useFullscreen } from './useFullscreen'
@@ -44,7 +45,10 @@ export function ToolPage({ tool }: { tool: Tool }) {
                 ref={frameRef}
                 className={fullscreen.active ? 'tool-frame focus-mode' : 'tool-frame'}
             >
-                <ToolComponent />
+                {/* Lets shared controls save per tool, e.g. each tool's favorites. */}
+                <ToolSlugContext value={tool.slug}>
+                    <ToolComponent />
+                </ToolSlugContext>
                 {fullscreen.active && (
                     <button className="focus-exit" onClick={fullscreen.exit}>
                         Exit full screen
