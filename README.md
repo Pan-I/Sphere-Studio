@@ -290,12 +290,15 @@ Every tool page has these, so your hand can stay on the pencil:
 | <kbd>Space</kbd> | New pose |
 | <kbd>P</kbd> | Start or pause the timer |
 | <kbd>←</kbd> / <kbd>→</kbd> | Back and forward through this session's poses |
+| <kbd>S</kbd> | Star or unstar this pose (see Favorites below) |
 | <kbd>F</kbd> | Full screen on or off (<kbd>Esc</kbd> also leaves) |
 | <kbd>?</kbd> | Show the list of shortcuts |
 
 Shortcuts are ignored while you're typing in a field, and when Ctrl, Cmd or Alt is held, so browser shortcuts like Ctrl+P still work.
 
 **Pose history**: **← Back** and **Forward →** under Randomize step through the last 20 poses you've seen on that page, so a pose you skipped past (or the timer replaced) isn't lost. "Pose 3 of 7" shows where you are. Every new pose (Randomize, the timer, a loaded seed, an option that picks a new pose) goes on the end; if you'd gone back, the poses ahead of you are dropped, as in a browser. Going back or forward restarts a running timer's countdown, like Randomize does. The history is for this visit only: it starts again when you reload or open another tool, and the address bar always holds the pose on screen, so Copy link still shares it.
+
+**Favorites**: **☆ Favorite** beside the seed (or <kbd>S</kbd>) stars the pose on screen, and the **Favorites** box under the session controls lists every pose you've starred on that tool, newest first. Click one to show it again (it goes on the end of the pose history, like a loaded seed), or **×** to remove it. Favorites are saved in your browser per tool, under `sphere-studio:<tool slug>:favorites` in `localStorage`, so they're still there next visit; each tool keeps up to 50, and starring one more drops the oldest. **Reset to defaults** only resets the Display options, never favorites. In full screen the box is hidden, but <kbd>S</kbd> still works and a ★ next to the timer shows the pose is starred.
 
 **Full screen** shows only the drawing and the timer, for a second screen beside your paper. It uses the browser's Fullscreen API. Where that isn't available (iPhone Safari), the tool fills the browser window instead.
 
@@ -423,6 +426,7 @@ seed ──► mulberry32(seed) ──► draws 1–3 ──► randomQuat ─�
 - **Marker pick** is the fourth draw. It selects among the front-facing intersections as `floor(pick × count)`. Because the marker draw comes *after* the orientation draws, adding it didn't change the orientation of any existing seed, so old links still show the same pose. A test pins the quaternion for seed 48213 to guard this.
 - **Picking a new seed.** Randomize and the timer choose a seed with `Math.random()`; the seed then deterministically produces the pose.
 - **History.** The seeds shown so far live next to the timer in `timerState.ts`, using the small helpers in `poseHistory.ts` (add a pose, step back or forward, keep the last 20). The seed on screen is always the history's current entry, so Back, Forward, the timer and Randomize can't disagree.
+- **Favorites.** A favorite is just a seed, so it shows exactly the same pose later, like a link does. The list lives in `favorites.ts` (reading stored data safely, starring and unstarring) and `useFavorites.ts`. The tool page tells the shared controls which tool they're on through `ToolSlugContext`, so each tool saves its own list.
 - **Links.** The current seed is written to `?seed=…` with `history.replaceState`, keeping other URL parameters and the hash. On load, a valid `?seed=` takes priority over a random one. Invalid seeds (not a whole number, or out of range) are ignored.
 - **What a seed doesn't include.** Display options (shading, line thickness, far-side lines, marker visibility) are personal preferences stored in `localStorage`, not part of the link, so a shared pose opens in each viewer's own style.
 
@@ -588,7 +592,7 @@ src/
   shortcuts/              Keyboard shortcuts: the registry, useShortcuts, and the ? list
   tools/
     registry.ts           The list of tools; drives routes, nav and home-page cards (with live thumbnails)
-    shared/               Shared components and utilities: session controls and pose history, the Display options panel, canvas sizing, ellipse axes
+    shared/               Shared components and utilities: session controls, pose history and favorites, the Display options panel, canvas sizing, ellipse axes
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
     circle-trio/          Circle Trio 1 component and layout, plus the drawing and options both Circle Trios use
     circle-trio-2/        Circle Trio 2 component and layout
