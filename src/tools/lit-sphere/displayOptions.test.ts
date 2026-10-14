@@ -10,10 +10,10 @@ describe('Lit Sphere options', () => {
         expect(DEFAULT_OPTIONS).toEqual({
             shading: 'grayscale',
             lineWidth: 2,
-            flatValues: false,
-            showShadowEdges: false,
+            flatValues: true,
+            showShadowEdges: true,
             showLight: true,
-            showLabels: false,
+            showLabels: true,
         })
     })
 
