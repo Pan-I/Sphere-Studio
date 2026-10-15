@@ -33,6 +33,8 @@ export interface Tool {
     drawExample: (ctx: CanvasRenderingContext2D, size: number, seed: number) => void
     /** Earlier slugs, which redirect here (keeping `?seed=`) so old links still work. */
     formerSlugs?: readonly string[]
+    /** False leaves the tool out of practice sessions, e.g. one that works on your own photo. */
+    practice?: boolean
 }
 
 /** Every tool on the site. Adding an entry here adds its route, nav link, and home-page card. */
@@ -84,6 +86,7 @@ export const TOOLS: readonly Tool[] = [
             'Load a photo and see it in grayscale and grouped into 3, 5 or 7 flat values, for planning the big light and dark shapes. The photo never leaves your browser.',
         component: ValueStudy,
         drawExample: drawValueStudyExample,
+        practice: false,
     },
     {
         slug: 'perspective-grid',
@@ -119,3 +122,6 @@ export const TOOLS: readonly Tool[] = [
         drawExample: drawCircleTrio2Example,
     },
 ]
+
+/** The tools a practice session can use, in the site's order. */
+export const PRACTICE_TOOLS: readonly Tool[] = TOOLS.filter((tool) => tool.practice !== false)

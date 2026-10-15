@@ -34,6 +34,29 @@ describe('timerReducer', () => {
             expect(next.countdown).toEqual({ remaining: 4, fired: false })
         })
 
+        it('stops on the same pose with nothing left when the last pose runs out', () => {
+            const next = timerReducer(running(1), {
+                type: 'tick',
+                interval: 30,
+                nextSeed: 99,
+                last: true,
+            })
+            expect(next.seed).toBe(7)
+            expect(next.running).toBe(false)
+            expect(next.countdown).toEqual({ remaining: 0, fired: true })
+        })
+
+        it('ignores `last` until the time runs out', () => {
+            const next = timerReducer(running(5), {
+                type: 'tick',
+                interval: 30,
+                nextSeed: 99,
+                last: true,
+            })
+            expect(next.running).toBe(true)
+            expect(next.countdown).toEqual({ remaining: 4, fired: false })
+        })
+
         it('does nothing without a countdown', () => {
             const state = initialTimerState(7)
             expect(timerReducer(state, { type: 'tick', interval: 30, nextSeed: 99 })).toBe(state)

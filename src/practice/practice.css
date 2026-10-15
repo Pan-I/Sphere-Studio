@@ -1,0 +1,268 @@
+.practice-intro {
+    max-width: 40rem;
+}
+
+.practice-setup {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 44rem;
+}
+
+.practice-presets {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.practice-preset-time {
+    opacity: 0.7;
+    font-size: 0.9rem;
+}
+
+.practice-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Number, tool, poses, seconds and the move and remove buttons on one line where they fit. */
+.practice-step {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.5rem 0.75rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+}
+
+.practice-step[aria-invalid='true'] {
+    border-color: color-mix(in srgb, #dc2626 60%, transparent);
+}
+
+.practice-step-number {
+    align-self: center;
+    min-width: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.practice-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.practice-field input {
+    width: 6rem;
+}
+
+.practice-field-tool {
+    flex: 1;
+    min-width: 11rem;
+}
+
+.practice-step-actions {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: auto;
+}
+
+.practice-step-actions button {
+    min-width: 44px;
+    padding: 0;
+}
+
+.practice-step-error {
+    flex-basis: 100%;
+}
+
+.practice-start-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.practice-total {
+    flex: 1;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.home-practice {
+    padding: 0.75rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    border-radius: 0.5rem;
+}
+
+.home-practice a {
+    font-weight: 600;
+}
+
+/* The session's progress above the drawing. It stays in full screen, minus its buttons. */
+.practice-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    padding: 0.6rem 1rem 0;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.practice-bar-text p {
+    margin: 0;
+}
+
+.practice-bar-now {
+    font-variant-numeric: tabular-nums;
+}
+
+.practice-bar-now span {
+    white-space: nowrap;
+}
+
+.practice-bar-next {
+    font-size: 0.9rem;
+    opacity: 0.75;
+}
+
+.practice-bar-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* How much of the whole session is done, as a thin line along the bar's bottom edge. */
+.practice-meter {
+    flex-basis: calc(100% + 2rem);
+    height: 4px;
+    margin: 0 -1rem;
+    background: var(--line);
+}
+
+.practice-meter span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s ease-out;
+}
+
+/* Full screen: the bar sits above the drawing, and the drawing leaves room for it. */
+.tool-frame.focus-mode:has(> .practice-bar) {
+    flex-direction: column;
+}
+
+.focus-mode > .practice-bar {
+    flex: none;
+    width: min(calc(100dvw - 2rem), 36rem);
+    box-sizing: border-box;
+    margin-bottom: 0.75rem;
+    text-align: center;
+    justify-content: center;
+}
+
+.focus-mode > .practice-bar ~ .tool-layout .tool-canvas {
+    width: min(calc(100dvw - 2rem), calc(100dvh - 11rem));
+}
+
+.practice-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.practice-summary-lead {
+    margin: 0;
+}
+
+.practice-summary-step h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.15rem;
+}
+
+.practice-summary-count {
+    font-size: 0.9rem;
+    font-weight: 400;
+    opacity: 0.75;
+}
+
+.practice-poses {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.practice-poses li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.practice-poses .tool-thumbnail {
+    width: 100%;
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+.practice-pose-seed {
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.75;
+}
+
+.practice-summary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+/* Phones: the tool on its own line beside the step's number, then the numbers and buttons. */
+@media (max-width: 30rem) {
+    .practice-step {
+        padding: 0.75rem;
+    }
+
+    .practice-field-tool {
+        flex-basis: calc(100% - 2.25rem);
+        min-width: 0;
+    }
+
+    .practice-field input {
+        width: 4.5rem;
+    }
+
+    .practice-total {
+        flex-basis: 100%;
+        order: -1;
+    }
+
+    .practice-bar {
+        padding: 0.5rem 0.75rem 0;
+    }
+
+    .practice-meter {
+        flex-basis: calc(100% + 1.5rem);
+        margin: 0 -0.75rem;
+    }
+
+    .practice-bar-actions button {
+        min-height: 40px;
+        padding: 0 0.8rem;
+    }
+}

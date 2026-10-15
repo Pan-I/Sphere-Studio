@@ -16,7 +16,8 @@ export interface TimerState {
 }
 
 export type TimerAction =
-    | { type: 'tick'; interval: number; nextSeed: number }
+    // `last` ends the run when this pose's time is up, keeping the pose (a practice step's end).
+    | { type: 'tick'; interval: number; nextSeed: number; last?: boolean }
     | { type: 'showSeed'; seed: number; interval: number | null }
     | { type: 'step'; step: -1 | 1; interval: number | null }
     | { type: 'start'; interval: number }
@@ -47,6 +48,8 @@ export function timerReducer(state: TimerState, action: TimerAction): TimerState
             if (!state.countdown) return state
             const countdown = tick(state.countdown, action.interval)
             if (!countdown.fired) return { ...state, countdown }
+            if (action.last)
+                return { ...state, running: false, countdown: { remaining: 0, fired: true } }
             const history = pushPose(state.history, action.nextSeed)
             return { ...state, countdown, history, seed: currentSeed(history) }
         }
