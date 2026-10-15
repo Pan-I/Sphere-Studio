@@ -13,6 +13,8 @@ import { ValueStudy } from './value-study/ValueStudy'
 import { drawValueStudyExample } from './value-study/example'
 import { PerspectiveGrid } from './perspective-grid/PerspectiveGrid'
 import { drawPerspectiveGridExample } from './perspective-grid/example'
+import { CurvilinearGrid } from './curvilinear-grid/CurvilinearGrid'
+import { drawCurvilinearGridExample } from './curvilinear-grid/example'
 import { FormCombo } from './form-combo/FormCombo'
 import { drawFormComboExample } from './form-combo/example'
 import { Subtract } from './subtract/Subtract'
@@ -137,6 +139,15 @@ export const TOOLS: readonly Tool[] = [
             'A random 1, 2 or 3 point perspective grid with the horizon and vanishing points marked, for practicing boxes in a scene.',
         component: PerspectiveGrid,
         drawExample: drawPerspectiveGridExample,
+    },
+    {
+        slug: 'curvilinear-grid',
+        group: 'perspective',
+        name: 'Curvilinear Grid',
+        description:
+            'A random fish-eye (5 point) or panoramic (4 point) grid, where straight lines curve between two vanishing points each, for practicing curvilinear perspective.',
+        component: CurvilinearGrid,
+        drawExample: drawCurvilinearGridExample,
     },
     {
         slug: 'circle-trio-1',
