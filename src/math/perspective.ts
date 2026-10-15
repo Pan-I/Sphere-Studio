@@ -22,8 +22,18 @@ export interface Camera {
     center: Point
 }
 
+/** Any camera with a turn and a tilt: the straight-lens `Camera` or a curvilinear one. */
+export type Aim = Pick<Camera, 'yaw' | 'pitch'>
+
 /** The camera's right, up and forward directions in the world. */
-export function cameraAxes({ yaw, pitch }: Camera): { right: Vec3; up: Vec3; forward: Vec3 } {
+export function cameraAxes<C extends Aim>({
+    yaw,
+    pitch,
+}: C): {
+    right: Vec3
+    up: Vec3
+    forward: Vec3
+} {
     const [sy, cy, sp, cp] = [Math.sin(yaw), Math.cos(yaw), Math.sin(pitch), Math.cos(pitch)]
     return {
         right: [cy, 0, -sy],
@@ -33,7 +43,7 @@ export function cameraAxes({ yaw, pitch }: Camera): { right: Vec3; up: Vec3; for
 }
 
 /** A world point or direction in the camera's own terms: right, up, and depth in front of the eye. */
-export function toCamera(camera: Camera, p: Vec3): Vec3 {
+export function toCamera(camera: Aim, p: Vec3): Vec3 {
     const { right, up, forward } = cameraAxes(camera)
     return [dot(p, right), dot(p, up), dot(p, forward)]
 }

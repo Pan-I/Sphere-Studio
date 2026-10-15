@@ -18,6 +18,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [Lit Sphere](#lit-sphere)
   - [Value Study](#value-study)
   - [Perspective Grid](#perspective-grid)
+  - [Curvilinear Grid](#curvilinear-grid)
   - [Form Combo](#form-combo)
   - [Subtract](#subtract)
   - [Practice sessions](#practice-sessions)
@@ -36,6 +37,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 - [How the Lit Sphere works](#how-the-lit-sphere-works)
 - [How the Value Study works](#how-the-value-study-works)
 - [How the Perspective Grid works](#how-the-perspective-grid-works)
+- [How the Curvilinear Grid works](#how-the-curvilinear-grid-works)
 - [How the Form Combo works](#how-the-form-combo-works)
 - [How Subtract works](#how-subtract-works)
 - [Project structure](#project-structure)
@@ -58,6 +60,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 | [Lit Sphere](#lit-sphere) | `/lit-sphere` | Generate a sphere lit from a random direction to practice light, shadow and values. |
 | [Value Study](#value-study) | `/value-study` | Load a photo and see it in grayscale and grouped into 3, 5 or 7 values, to plan a drawing's big light and dark shapes. |
 | [Perspective Grid](#perspective-grid) | `/perspective-grid` | Generate a 1, 2 or 3 point perspective grid with the horizon and vanishing points marked, to practice boxes in a scene. |
+| [Curvilinear Grid](#curvilinear-grid) | `/curvilinear-grid` | Generate a fish-eye (5 point) or panoramic (4 point) grid, where straight lines curve, to practice curvilinear perspective. |
 | [Form Combo](#form-combo) | `/form-combo` | Generate a sphere, box and cylinder pushed into each other, with the lines where they meet marked, to practice forms that intersect. |
 | [Subtract](#subtract) | `/subtract` | Generate a form with another cut out of it, with the rim of the hollow marked, to practice carved forms. |
 <!-- Add one row per new tool. -->
@@ -243,6 +246,30 @@ A random 1, 2 or 3 point perspective grid with the horizon line and vanishing po
 - **Extra keys**: <kbd>1</kbd>, <kbd>2</kbd> and <kbd>3</kbd> keep to 1, 2 or 3 point grids, <kbd>0</kbd> goes back to any, and <kbd>B</kbd> shows or hides the sample box.
 
 How the grid is chosen and drawn is covered [below](#how-the-perspective-grid-works).
+
+### Curvilinear Grid
+
+**Route:** `/curvilinear-grid` · **Source:** `src/tools/curvilinear-grid/`
+
+A random curvilinear perspective grid, the wide-angle kind where straight lines bend: a round **fish-eye** picture that sees 180° (5 point perspective, and 6 when turned), or a **panorama** 180° wide where verticals stay straight and level lines bow (4 point perspective). Draw boxes, rooms or streets along the curves.
+
+**Features**
+
+- **Guide lines** for each direction curve from one vanishing point to the opposite one, in that direction's color: VP 1 and VP 2 (on the horizon, left to right) blue and orange, VP 3 (where verticals meet, fish-eye only) green. The end lines run toward is a filled dot (**VP 1**), the far end a hollow one (**VP 1′**). On a panorama verticals stay parallel, so they have no point and no guide lines, as in 2 point perspective.
+- **Fish-eye**: the picture is the circle, with its rim at 90° from where you're looking. It looks straight ahead (the symmetric 5 point grid), turned, or 20° to 60° up or down, which curves the horizon and brings VP 3 inside. One end of every direction is always in the circle.
+- **Panorama**: always level, so verticals stay straight; the horizon is somewhere between 30% and 70% of the way down. Two of the four points on the horizon are always on the canvas.
+- **Randomize**, the **timer** and **seeds** work as on the other tools. The lens comes from the seed (even seeds fish-eye, odd panoramic), so a shared link shows the same grid to everyone.
+- **Display options** (saved in your browser between visits; **Reset to defaults** puts them back):
+  - Lens: **Any** (the default), fish-eye or panoramic. Picking one switches to the next seed that has it, and Randomize and the timer keep to it.
+  - Grid colors: one per direction (the default), or grayscale
+  - Line thickness: the horizon, the rim and the sample box; the guide lines are half as thick
+  - Grid lines per direction: 0 to 24, default 10
+  - Show horizon line (on)
+  - Label the points (on)
+  - Show a sample box (off): a box standing square to the grid, close enough that its edges bow, each edge in the color of its direction and its hidden edges faint. Draw your own first, then turn this on to compare.
+- **Extra keys**: <kbd>1</kbd> keeps to fish-eye grids, <kbd>2</kbd> to panoramic ones, <kbd>0</kbd> goes back to either, and <kbd>B</kbd> shows or hides the sample box.
+
+How the lenses work is covered [below](#how-the-curvilinear-grid-works).
 
 ### Form Combo
 
@@ -658,6 +685,17 @@ The number of points is `seed % 3 + 1`. Choosing a number in the options moves t
 
 The guide lines from a point are evenly spaced in angle, with one along the horizon (or, for the third point, the vertical). From a point on the canvas they go all the way round; from a point off it they fan across the angle the canvas covers, so a far point still gives about the same number of lines across the picture.
 
+## How the Curvilinear Grid works
+
+The scene is the Perspective Grid's: the eye at the origin, y up, and every box edge along x, y or z, seen by a camera with a turn and a tilt (`cameraAxes` in `perspective.ts`). Only the last step changes. A straight lens lands a direction where its line from the eye meets a flat picture; `src/math/curvilinear.ts` lands it by its angles instead:
+
+- **Fish-eye** (equidistant): the distance from the center is the angle off the line of sight, 180° across the circle, and the direction round the center stays as it is.
+- **Panorama** (cylindrical): across is the angle round the vertical, 180° across the canvas, and up is the height on a cylinder around the eye, so verticals stay vertical.
+
+A straight line in the world, seen from the eye, sweeps out a plane through the eye, and that plane cuts the sphere of directions in a **great circle**. So every line is drawn by sampling its great circle and projecting each direction; the circle passes through both ends of the line's direction, which is why each direction has two vanishing points. A family's guide lines are the planes through its direction, turned evenly about it, the first one level (or, for the verticals, straight up through the middle), the curved version of the Perspective Grid's even fan. The sample box's edges are sampled the same way, along their length.
+
+The camera is picked first and the points land where they land, unlike the Perspective Grid, which places its points and solves for the camera; that solve only works for a flat picture. The box is put between the middle of the picture and the horizon (on the side away from VP 3 when the fish-eye is tilted), then lifted clear of eye level by its own height, so you always see its top or underside. Tests check that projecting and un-projecting round-trip, that lines run to their vanishing point at both ends, that panorama verticals stay straight, and that the sample box is always whole and inside the picture.
+
 ## How the Form Combo works
 
 Each form is one of the unit forms the randomizers draw (a sphere of radius 1, a cube with its corners on the unit sphere, a cylinder or cone with its rims on it), turned by a random quaternion, then scaled and moved into place. `src/math/solids.ts` holds these placed **solids** and the three things the tool needs to know about each:
@@ -715,6 +753,7 @@ src/
     lit-sphere/           Lit Sphere component, drawing, shading model, light from a seed, options
     value-study/          Value Study component, opening photos, the sample picture, drawing, options
     perspective-grid/     Perspective Grid component, the grid from a seed, drawing, options
+    curvilinear-grid/     Curvilinear Grid component, the lens and camera from a seed, drawing, options
     form-combo/           Form Combo component, placing the forms from a seed, drawing, options
     subtract/             Subtract component, placing the cuts from a seed, drawing, options
   math/                   Reusable math with no UI dependencies
@@ -728,6 +767,7 @@ src/
     light.ts              The Lit Sphere's scene: the view, the floor, the light, the terminator and the cast shadow
     values.ts             Value studies: L* lightness, blur, stretching, grouping into values, outlines
     perspective.ts        Perspective cameras: vanishing points, the horizon, the camera for given points, guide-line fans
+    curvilinear.ts        Fish-eye and panoramic lenses: projecting directions, great circles, curved guide-line fans
     solids.ts             Placed forms: inside or out, where a ray goes through them, their surfaces as patches
     meet.ts               Where two forms' surfaces meet, and how much of one is inside another
     carve.ts              A form with others cut out of it: what a ray sees, and inside or out

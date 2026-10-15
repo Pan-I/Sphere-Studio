@@ -115,7 +115,7 @@ describe('navigation with seeded poses', () => {
                 ],
             ],
             ['Value', ['Lit Sphere', 'Value Study']],
-            ['Perspective', ['Perspective Grid']],
+            ['Perspective', ['Perspective Grid', 'Curvilinear Grid']],
             ['Shapes', ['Circle Trio 1', 'Circle Trio 2']],
         ])
     })
