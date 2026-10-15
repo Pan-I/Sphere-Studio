@@ -87,7 +87,7 @@ export function drawValueStudy(
             out[o + 1] = v
             out[o + 2] = v
         }
-        out.set(paper.fillRGB([out[o], out[o + 1], out[o + 2]]), o)
+        out.set(paper.valueRGB([out[o], out[o + 1], out[o + 2]]), o)
         out[o + 3] = 255
     }
     if (options.outlineShapes) {
@@ -135,7 +135,7 @@ function drawScale(
 
     levels.forEach((gray, k) => {
         const x = pad + k * width
-        const [shown] = paper.fillRGB([gray, gray, gray])
+        const [shown] = paper.valueRGB([gray, gray, gray])
         ctx.fillStyle = `rgb(${shown}, ${shown}, ${shown})`
         ctx.fillRect(x, top, width, height)
         ctx.fillStyle = shown > 118 ? '#222' : '#fff' // middle gray is 119

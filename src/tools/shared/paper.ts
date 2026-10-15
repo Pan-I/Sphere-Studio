@@ -23,6 +23,12 @@ export interface Paper {
     fill: (color: string) => string
     /** The same as `fill`, for pixel-by-pixel shading. */
     fillRGB: (rgb: RGB) => RGB
+    /**
+     * For value studies, where the lights matter as much as the darks: on dark paper, black
+     * becomes the paper and white becomes the ink, with everything between spaced evenly. So a
+     * highlight stays bright, unlike `fillRGB`, which dims the whole range.
+     */
+    valueRGB: (rgb: RGB) => RGB
     /** A coloured line: unchanged on white, lifted toward the ink on dark paper so it shows. */
     line: (color: string) => string
 }
@@ -63,6 +69,12 @@ export function makePaper(paper: RGB, ink: RGB): Paper {
         ink: css(ink),
         fill: (color) => adapt(color, fillRGB),
         fillRGB,
+        valueRGB: (rgb) =>
+            dark
+                ? ([0, 1, 2].map((i) =>
+                      Math.round(paper[i] + ((ink[i] - paper[i]) * rgb[i]) / 255),
+                  ) as never)
+                : rgb,
         line: (color) => adapt(color, (rgb) => mix(rgb, ink, LINE_LIFT)),
     }
 }

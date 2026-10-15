@@ -102,7 +102,7 @@ function shadePixels(
                 shade.value = flatValue(shade.zone, lighting)
                 shade.warmth = Math.round(shade.warmth)
             }
-            const [r, g, b] = paper.fillRGB(shadeColor(shade, mode))
+            const [r, g, b] = paper.valueRGB(shadeColor(shade, mode))
             const i = (py * width + px) * 4
             data[i] = r
             data[i + 1] = g

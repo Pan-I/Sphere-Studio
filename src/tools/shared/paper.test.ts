@@ -64,6 +64,18 @@ describe('dark paper', () => {
         expect(lightness(dark.line(minorAxis))).toBeGreaterThan(lightness(minorAxis) + 40)
     })
 
+    it('spreads values from the paper up to the ink, so highlights stay bright', () => {
+        expect(dark.valueRGB([0, 0, 0])).toEqual([29, 30, 35])
+        expect(dark.valueRGB([255, 255, 255])).toEqual([222, 222, 227])
+        const steps = [0, 64, 128, 192, 255].map((v) => dark.valueRGB([v, v, v])[0])
+        const gaps = steps.slice(1).map((s, i) => s - steps[i])
+        expect(Math.max(...gaps) - Math.min(...gaps)).toBeLessThanOrEqual(1)
+    })
+
+    it('leaves values alone on white paper', () => {
+        expect(WHITE_PAPER.valueRGB([10, 128, 250])).toEqual([10, 128, 250])
+    })
+
     it('dims pixels the same way as fills', () => {
         expect(dark.fillRGB([255, 255, 255])).toEqual(parseColor(dark.fill('#ffffff')))
     })
