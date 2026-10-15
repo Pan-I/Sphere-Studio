@@ -15,6 +15,8 @@ import { PerspectiveGrid } from './perspective-grid/PerspectiveGrid'
 import { drawPerspectiveGridExample } from './perspective-grid/example'
 import { FormCombo } from './form-combo/FormCombo'
 import { drawFormComboExample } from './form-combo/example'
+import { Subtract } from './subtract/Subtract'
+import { drawSubtractExample } from './subtract/example'
 import { CircleTrio1 } from './circle-trio/CircleTrio1'
 import { drawCircleExample } from './circle-trio/example'
 import { CircleTrio2 } from './circle-trio-2/CircleTrio2'
@@ -103,6 +105,14 @@ export const TOOLS: readonly Tool[] = [
             'A sphere, box and cylinder in random orientations, pushed into each other, with the lines where they meet marked, for practicing forms that intersect.',
         component: FormCombo,
         drawExample: drawFormComboExample,
+    },
+    {
+        slug: 'subtract',
+        name: 'Subtract',
+        description:
+            'A sphere, box, cylinder or cone with another form cut out of it, with the rim of the hollow marked and the cut-away part dashed, for practicing carved forms.',
+        component: Subtract,
+        drawExample: drawSubtractExample,
     },
     {
         slug: 'circle-trio-1',

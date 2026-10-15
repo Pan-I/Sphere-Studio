@@ -87,6 +87,8 @@ export interface Span {
     t0: number
     t1: number
     face: number
+    /** Which surface it leaves through, numbered the same way as `face`. */
+    exit: number
 }
 
 /** The values of t where a + b·t ≥ 0, as [from, to]. */
@@ -131,7 +133,7 @@ export function localSpan(kind: SolidKind, proportion: number, o: Vec3, d: Vec3)
             ox * dx + oy * dy + oz * dz,
             ox * ox + oy * oy + oz * oz - 1,
         )
-        return span ? { t0: span[0], t1: span[1], face: 0 } : null
+        return span ? { t0: span[0], t1: span[1], face: 0, exit: 0 } : null
     }
     if (kind === 'box') {
         // Each axis's slab, −HALF_EDGE ≤ o + t·d ≤ HALF_EDGE, worked out without making arrays,
@@ -139,6 +141,7 @@ export function localSpan(kind: SolidKind, proportion: number, o: Vec3, d: Vec3)
         let t0 = -Infinity
         let t1 = Infinity
         let face = 0
+        let exit = 0
         for (let axis = 0; axis < 3; axis++) {
             const oa = o[axis]
             const da = d[axis]
@@ -153,9 +156,13 @@ export function localSpan(kind: SolidKind, proportion: number, o: Vec3, d: Vec3)
                 t0 = from
                 face = axis
             }
-            t1 = Math.min(t1, Math.max(a, b))
+            const to = Math.max(a, b)
+            if (to < t1) {
+                t1 = to
+                exit = axis
+            }
         }
-        return t0 <= t1 ? { t0, t1, face } : null
+        return t0 <= t1 ? { t0, t1, face, exit } : null
     }
     if (kind === 'cylinder') {
         const { radius, halfLength } = roundSize(proportion)
@@ -175,6 +182,7 @@ export function localSpan(kind: SolidKind, proportion: number, o: Vec3, d: Vec3)
             t1 = (-qb + root) / qa
         }
         let face = 0
+        let exit = 0
         if (Math.abs(dy) < 1e-15) {
             if (Math.abs(oy) > halfLength) return null
         } else {
@@ -184,9 +192,12 @@ export function localSpan(kind: SolidKind, proportion: number, o: Vec3, d: Vec3)
                 t0 = Math.min(a, b)
                 face = 1
             }
-            t1 = Math.min(t1, Math.max(a, b))
+            if (Math.max(a, b) < t1) {
+                t1 = Math.max(a, b)
+                exit = 1
+            }
         }
-        return t0 <= t1 ? { t0, t1, face } : null
+        return t0 <= t1 ? { t0, t1, face, exit } : null
     }
 
     const { radius, halfLength } = roundSize(proportion)
@@ -207,14 +218,19 @@ export function localSpan(kind: SolidKind, proportion: number, o: Vec3, d: Vec3)
     let best: Span | null = null
     for (const tube of tubes) {
         let t0 = Math.max(tube[0], apexSide[0])
-        let t1 = Math.min(tube[1], apexSide[1], base[1])
+        let t1 = Math.min(tube[1], apexSide[1])
         let face = 0
+        let exit = 0
         if (base[0] > t0) {
             t0 = base[0]
             face = 1
         }
+        if (base[1] < t1) {
+            t1 = base[1]
+            exit = 1
+        }
         // The solid is convex, so at most one piece is left, bar a touch at the apex.
-        if (t0 <= t1 && (!best || t1 - t0 > best.t1 - best.t0)) best = { t0, t1, face }
+        if (t0 <= t1 && (!best || t1 - t0 > best.t1 - best.t0)) best = { t0, t1, face, exit }
     }
     return best
 }

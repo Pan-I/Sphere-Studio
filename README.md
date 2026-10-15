@@ -19,6 +19,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [Value Study](#value-study)
   - [Perspective Grid](#perspective-grid)
   - [Form Combo](#form-combo)
+  - [Subtract](#subtract)
   - [Practice sessions](#practice-sessions)
   - [Printable worksheets](#printable-worksheets)
   - [Keyboard shortcuts and full screen](#keyboard-shortcuts-and-full-screen)
@@ -36,6 +37,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 - [How the Value Study works](#how-the-value-study-works)
 - [How the Perspective Grid works](#how-the-perspective-grid-works)
 - [How the Form Combo works](#how-the-form-combo-works)
+- [How Subtract works](#how-subtract-works)
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
 - [Deployment](#deployment)
@@ -57,6 +59,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 | [Value Study](#value-study) | `/value-study` | Load a photo and see it in grayscale and grouped into 3, 5 or 7 values, to plan a drawing's big light and dark shapes. |
 | [Perspective Grid](#perspective-grid) | `/perspective-grid` | Generate a 1, 2 or 3 point perspective grid with the horizon and vanishing points marked, to practice boxes in a scene. |
 | [Form Combo](#form-combo) | `/form-combo` | Generate a sphere, box and cylinder pushed into each other, with the lines where they meet marked, to practice forms that intersect. |
+| [Subtract](#subtract) | `/subtract` | Generate a form with another cut out of it, with the rim of the hollow marked, to practice carved forms. |
 <!-- Add one row per new tool. -->
 
 [Practice sessions](#practice-sessions), at `/practice`, run several of these one after another on the timer.
@@ -267,6 +270,35 @@ A sphere, a box and a cylinder in random orientations and sizes, pushed partway 
 - **Extra keys**: <kbd>2</kbd>, <kbd>3</kbd> and <kbd>4</kbd> pick two forms, the sphere, box and cylinder, or all four. <kbd>M</kbd> turns the highlight on or off, and <kbd>H</kbd> the hidden edges.
 
 The forms you get depend on the Forms option as well as the seed, so a shared link shows the same picture to someone with the same choice. How the forms are placed and drawn is covered [below](#how-the-form-combo-works).
+
+### Subtract
+
+**Route:** `/subtract` · **Source:** `src/tools/subtract/`
+
+The other side of the Form Combo: a sphere, box, cylinder or cone with another of them cut out of it, as if carved away, for practicing carved forms. The hollow's inside is the cutting form's surface turned inside out, so a sphere leaves a bowl and a box leaves flat walls meeting in a corner. Try drawing the whole form first, then the form that cuts it, then work out the rim where the cut breaks through, and check against the picture.
+
+**Features**
+
+- **The rim** where the cut breaks through the surface is drawn in purple, like the lines where forms meet on the Form Combo. With two cuts, the line where their hollows meet inside the form is purple too.
+- **The inside of each hollow** is filled in the cutting form's color, a little darker, so it reads as set into the form. A box's walls keep their three shades by direction.
+- **What was cut away** is dashed: the part of the cutting form outside what's left, and the part of the main form it took away. It shows what did the cutting, the way you'd sketch it before carving.
+- Each cut takes a real bite and breaks through on the side facing you, the form keeps most of its surface and stays in one piece, and the hollow makes up a good part of what you see.
+- **Randomize**, the **timer**, **seeds**, favorites, practice sessions and the shortcuts list work as on every tool.
+- **Display options** (saved in your browser between visits; **Reset to defaults** puts them back):
+  - Cuts: **One cut** (the default) or two cuts (two different forms)
+  - Shading: color (the default), grayscale, or none (lines only)
+  - Line thickness
+  - Perspective (on)
+  - Uniform cylinders and cones (on): every cylinder and cone twice as long as it is wide
+  - Highlight where the cut meets the form (on)
+  - Show what was cut away (on), dashed
+  - Show hidden edges (off)
+  - Show the sphere's sector lines (on)
+  - Show cylinder and cone axes (off)
+  - Show ellipse axes (on): for each flat end still whole, including the floor of a hollow cut by a cylinder or cone
+- **Extra keys**: <kbd>1</kbd> and <kbd>2</kbd> pick one or two cuts. <kbd>M</kbd> turns the highlight on or off, <kbd>H</kbd> the hidden edges, and <kbd>G</kbd> the cut-away part.
+
+As on the Form Combo, the picture for a seed depends on the Cuts and Uniform options too. How the cuts are placed and drawn is covered [below](#how-subtract-works).
 
 <!--
 ### Tool name
@@ -646,6 +678,16 @@ Each form is one of the unit forms the randomizers draw (a sphere of radius 1, a
 
 The drawing is scaled to fill the canvas from where its lines land on screen, so a pose fills it however the forms are spread.
 
+## How Subtract works
+
+Subtract uses the same placed solids as the Form Combo (`src/math/solids.ts`), and shares its fills and outlines through `src/tools/shared/solidDrawing.ts`, so the two tools look alike.
+
+**Carving** (`src/math/carve.ts`): along a ray, the main form is one span, from where the ray goes in to where it comes out. Each cut takes its own span out of that, which can leave nothing, one piece or two. The first piece left is what you see: if it starts where the ray goes into the main form, you see its outside; if it starts where the ray comes out of a cut, you see the inside of that cut's hollow, on the face the ray leaves the cut through (each span now records that face as well as the one it enters by). A point is inside what's left when it is inside the main form and outside every cut.
+
+**Placing the cuts** (`pose.ts`): the seed picks the main form, then the cuts (two cuts are always different forms). Each cut is aimed at a random point on the main form's surface that faces the eye, sized to the main form, and sunk in or standing out by part of its own size. A layout is checked four ways, much as the Form Combo's are: between 15% and 70% of each cut's surface must be inside the main form (a real bite that still breaks through), no cut may take more than a third of the main form's surface (and two no more than 45%), every hollow must make up a good share of a small test render, and a grid over the form must show it still in one piece. A layout that fails is thrown away for the next draws, so a seed always ends at the same layout. The rims are traced with the Form Combo's `meetLine`.
+
+**Drawing** (`drawSubtract.ts`): fills come from the first piece along each pixel's ray. The lines are the main form's outline and each cut's, split three ways at each point: cut away (the main form's lines inside a cut, a cut's lines outside the main form), hidden (the way to the eye passes through what's left), or seen. A cut's lines inside the main form are the edges of its hollow, such as a box's inner corners or a cylinder's floor.
+
 ---
 
 ## Project structure
@@ -663,7 +705,7 @@ src/
   worksheet/              Printable worksheets: the page, its layout in millimetres, and the print styles
   tools/
     registry.ts           The list of tools; drives routes, nav and home-page cards (with live thumbnails)
-    shared/               Shared components and utilities: session controls, the timer's ring and chime, pose history and favorites, the practice session's hook into the timer, the Display options panel, canvas sizing and PNG download, paper and ink colours for dark mode, ellipse axes
+    shared/               Shared components and utilities: session controls, the timer's ring and chime, pose history and favorites, the practice session's hook into the timer, the Display options panel, canvas sizing and PNG download, paper and ink colours for dark mode, ellipse axes, the fills and outlines of placed forms
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
     circle-trio/          Circle Trio 1 component and layout, plus the drawing and options both Circle Trios use
     circle-trio-2/        Circle Trio 2 component and layout
@@ -674,6 +716,7 @@ src/
     value-study/          Value Study component, opening photos, the sample picture, drawing, options
     perspective-grid/     Perspective Grid component, the grid from a seed, drawing, options
     form-combo/           Form Combo component, placing the forms from a seed, drawing, options
+    subtract/             Subtract component, placing the cuts from a seed, drawing, options
   math/                   Reusable math with no UI dependencies
     quat.ts               Vectors, quaternions, Shoemake random rotation
     random.ts             mulberry32 seeded PRNG
@@ -687,6 +730,7 @@ src/
     perspective.ts        Perspective cameras: vanishing points, the horizon, the camera for given points, guide-line fans
     solids.ts             Placed forms: inside or out, where a ray goes through them, their surfaces as patches
     meet.ts               Where two forms' surfaces meet, and how much of one is inside another
+    carve.ts              A form with others cut out of it: what a ray sees, and inside or out
 ```
 
 ## Getting started

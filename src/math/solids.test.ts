@@ -121,5 +121,14 @@ describe('span', () => {
         expect(span(unturned('cone'), [0, 5, 0], down)?.face).toBe(0)
         // A ray past the apex misses the cone, though it meets the cone's mirror image above.
         expect(span(unturned('cone'), [0.5, 2, 5], across)).toBeNull()
+
+        // And which it leaves through.
+        expect(span(unturned('box'), [0, 5, 0], down)?.exit).toBe(1)
+        expect(span(unturned('box'), [0, 0, 5], across)?.exit).toBe(2)
+        expect(span(unturned('cylinder'), [0, 5, 0], down)?.exit).toBe(1)
+        expect(span(unturned('cylinder'), [0, 0, 5], across)?.exit).toBe(0)
+        expect(span(unturned('cone'), [0, 5, 0], down)?.exit).toBe(1)
+        expect(span(unturned('cone'), [0, -5, 0], [0, 1, 0])?.exit).toBe(0)
+        expect(span(unturned('cone'), [0, -0.5, 5], across)?.exit).toBe(0)
     })
 })
