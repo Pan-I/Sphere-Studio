@@ -7,6 +7,7 @@ import { NotFoundPage } from './site/NotFoundPage'
 import { SiteLayout } from './site/SiteLayout'
 import { ToolPage } from './site/ToolPage'
 import { TOOLS } from './tools/registry'
+import { WorksheetPage } from './worksheet/WorksheetPage'
 
 export default function App() {
     return (
@@ -15,6 +16,7 @@ export default function App() {
                 <Route element={<SiteLayout />}>
                     <Route index element={<HomePage />} />
                     <Route path="practice" element={<PracticePage />} />
+                    <Route path="worksheet" element={<WorksheetPage />} />
                     {TOOLS.map((tool) => (
                         <Route
                             key={tool.slug}

@@ -15,6 +15,10 @@ export function HomePage() {
                 <Link to="/practice">Practice session</Link>: line up several tools, like 5 spheres
                 at 60s and then 5 trios at 90s, and draw through them on one timer.
             </p>
+            <p className="home-practice">
+                <Link to="/worksheet">Worksheet</Link>: a page of 6 or 12 poses from one tool, to
+                print and draw from on paper.
+            </p>
             <ul className="tool-list">
                 {TOOLS.map((tool) => (
                     <li key={tool.slug} className="tool-card">

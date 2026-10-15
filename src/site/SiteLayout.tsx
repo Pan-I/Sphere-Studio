@@ -43,6 +43,7 @@ export function SiteLayout() {
                 </Link>
                 <nav ref={navRef} className="site-nav" aria-label="Tools">
                     <PageLink to="/practice">Practice</PageLink>
+                    <PageLink to="/worksheet">Worksheet</PageLink>
                     {TOOLS.map((tool) => (
                         <PageLink key={tool.slug} to={`/${tool.slug}`}>
                             {tool.name}
