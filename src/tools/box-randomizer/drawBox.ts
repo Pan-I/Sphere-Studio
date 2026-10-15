@@ -1,10 +1,9 @@
 import { CORNERS, EDGES, FACES, facesViewer, project } from '../../math/cube'
 import { rotate, type Quat, type Vec3 } from '../../math/quat'
+import { paperFor } from '../shared/paper'
 import type { BoxOptions, Shading } from './displayOptions'
 
 const HIDDEN_ALPHA = 0.2
-const LINE_COLOR = '#222'
-const PAPER_COLOR = '#fff'
 
 /** Distance from the cube's centre to the eye, in units of the cube's corner distance. */
 const CAMERA_DISTANCE = 5
@@ -29,6 +28,7 @@ const mid = (a: Vec3, b: Vec3): Vec3 => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (
  * viewer are filled, their edges drawn solid, and the edges behind drawn faintly.
  */
 export function drawBox(ctx: CanvasRenderingContext2D, size: number, q: Quat, options: BoxOptions) {
+    const paper = paperFor(ctx)
     const camera = options.perspective ? CAMERA_DISTANCE : null
     const c = size / 2
     const r = size * SCALE
@@ -54,10 +54,12 @@ export function drawBox(ctx: CanvasRenderingContext2D, size: number, q: Quat, op
     ctx.clearRect(0, 0, size, size)
 
     // Fills. The faces you see never overlap, so the order doesn't matter. Lines-only mode
-    // still fills them paper white, which keeps the lines visible on any page theme.
+    // fills them with the paper colour.
     for (const f of seen) {
         ctx.fillStyle =
-            options.shading === 'none' ? PAPER_COLOR : FACE_FILLS[options.shading][f.axis]
+            options.shading === 'none'
+                ? paper.paper
+                : paper.fill(FACE_FILLS[options.shading][f.axis])
         ctx.beginPath()
         f.corners.forEach((i, n) => {
             const [x, y] = toScreen(corners[i])
@@ -71,7 +73,7 @@ export function drawBox(ctx: CanvasRenderingContext2D, size: number, q: Quat, op
     ctx.lineWidth = options.lineWidth
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
-    ctx.strokeStyle = LINE_COLOR
+    ctx.strokeStyle = paper.ink
 
     // An edge is in front when either face beside it is seen, and behind when neither is.
     const inFront = ([a, b]: readonly [number, number]) =>

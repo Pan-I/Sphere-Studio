@@ -6,13 +6,12 @@ import { cross, rotate, type Vec3 } from '../../math/quat'
 import { GREAT_CIRCLES, circlePoints } from '../../math/sphere'
 import { roundSize, spanFinder, toWorld, type Solid, type SolidKind } from '../../math/solids'
 import { strokeEllipseAxes } from '../shared/ellipseAxes'
+import { paperFor, parseColor, type Paper } from '../shared/paper'
 import type { FormComboOptions, Shading } from './displayOptions'
 import { CAMERA_DISTANCE, type Combo } from './pose'
 
 const HIDDEN_ALPHA = 0.2
-const LINE_COLOR = '#222'
 const AXIS_COLOR = '#d62828'
-const PAPER = '#ffffff'
 /** Where forms meet, when highlighted: a purple none of the fills or other lines use. */
 const MEET_COLOR = '#7b2cbf'
 
@@ -176,6 +175,7 @@ export function drawFormCombo(
     combo: Combo,
     options: FormComboOptions,
 ) {
+    const paper = paperFor(ctx)
     const camera = options.perspective ? CAMERA_DISTANCE : null
     const { solids } = combo
 
@@ -207,7 +207,7 @@ export function drawFormCombo(
     ctx.globalAlpha = 1
     ctx.setLineDash([])
     ctx.clearRect(0, 0, size, size)
-    fillForms(ctx, size, solids, options.shading, camera, { midX, midY, zoom })
+    fillForms(ctx, size, solids, options.shading, camera, { midX, midY, zoom }, paper)
 
     // Whether a point is hidden: does the way from it to the eye pass through any form?
     const spans = solids.map(spanFinder)
@@ -258,7 +258,7 @@ export function drawFormCombo(
     ctx.lineWidth = options.lineWidth
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
-    const meetColor = options.highlightMeet ? MEET_COLOR : LINE_COLOR
+    const meetColor = options.highlightMeet ? paper.line(MEET_COLOR) : paper.ink
 
     // The flat ends of the cylinders and cones, whose ellipses get their axes drawn. An end
     // counts as seen when its centre is: facing the eye, and not behind or inside another form.
@@ -272,18 +272,18 @@ export function drawFormCombo(
 
     // Hidden lines first and faint, so the front ones stay crisp where they cross.
     if (options.showHiddenEdges) {
-        stroke(paths.outline.hidden, LINE_COLOR, HIDDEN_ALPHA)
+        stroke(paths.outline.hidden, paper.ink, HIDDEN_ALPHA)
         stroke(paths.meet.hidden, meetColor, HIDDEN_ALPHA)
         ctx.globalAlpha = HIDDEN_ALPHA
         ellipseAxes(false)
         ctx.globalAlpha = 1
     }
-    stroke(paths.outline.seen, LINE_COLOR, 1)
+    stroke(paths.outline.seen, paper.ink, 1)
     stroke(paths.meet.seen, meetColor, 1)
 
     // The axes are construction lines, drawn dashed over everything and past both ends.
     if (options.showAxes) {
-        ctx.strokeStyle = AXIS_COLOR
+        ctx.strokeStyle = paper.line(AXIS_COLOR)
         ctx.setLineDash([options.lineWidth * 4, options.lineWidth * 3])
         ctx.beginPath()
         for (const s of solids) {
@@ -324,12 +324,6 @@ function flatEnds(solids: readonly Solid[]): { centre: Vec3; a: Vec3; b: Vec3 }[
 }
 
 /** '#rrggbb' as [r, g, b]. */
-const rgb = (hex: string): [number, number, number] => [
-    parseInt(hex.slice(1, 3), 16),
-    parseInt(hex.slice(3, 5), 16),
-    parseInt(hex.slice(5, 7), 16),
-]
-
 /** How canvas units and projected coordinates line up: the drawing's centre and zoom. */
 interface View {
     midX: number
@@ -349,6 +343,7 @@ function fillForms(
     shading: Shading,
     camera: number | null,
     view: View,
+    paper: Paper,
 ) {
     const { width, height } = ctx.canvas
     const dpr = width / size
@@ -368,14 +363,14 @@ function fillForms(
                 ? s.scale
                 : (camera * s.scale * (1 + Math.hypot(s.centre[0], s.centre[1]) / d)) /
                   (d - s.scale)
-        const fills = shading === 'none' ? [PAPER] : FILLS[shading][s.kind]
+        const fills = shading === 'none' ? [paper.paper] : FILLS[shading][s.kind].map(paper.fill)
         return {
             span: spanFinder(s),
             x: s.centre[0] * grow,
             y: s.centre[1] * grow,
             reach2: reach * reach,
             reach,
-            colors: fills.map(rgb),
+            colors: fills.map((c) => parseColor(c) ?? [255, 255, 255]),
         }
     })
 

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Link, NavLink, Outlet, useLocation, useMatch } from 'react-router'
 import { TOOLS, type Tool } from '../tools/registry'
 import { SITE_NAME } from './config'
+import { ThemeToggle } from './ThemeToggle'
 
 function ToolLink({ tool }: { tool: Tool }) {
     const to = `/${tool.slug}`
@@ -45,6 +46,7 @@ export function SiteLayout() {
                         <ToolLink key={tool.slug} tool={tool} />
                     ))}
                 </nav>
+                <ThemeToggle />
             </header>
             <main className="site-main">
                 <Outlet />

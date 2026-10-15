@@ -1,4 +1,5 @@
 import type { Circle } from '../../math/circles'
+import { paperFor } from '../shared/paper'
 import { outlinesShown, type CircleOptions, type Fill } from './displayOptions'
 
 /** Fill colours for the three circles, in draw order (largest first in both Circle Trios). */
@@ -20,7 +21,7 @@ export function drawCircles(
     circles: readonly Circle[],
     options: CircleOptions,
 ) {
-    const ink = getComputedStyle(ctx.canvas).color
+    const { ink } = paperFor(ctx)
     const half = size / 2
     const toX = (x: number) => half + x * half
     const toY = (y: number) => half - y * half // canvas y points down
@@ -30,7 +31,7 @@ export function drawCircles(
     }
 
     ctx.globalAlpha = 1
-    ctx.clearRect(0, 0, size, size) // transparent, so the page background shows through
+    ctx.clearRect(0, 0, size, size) // transparent, so the paper behind the canvas shows through
 
     // Fills: each one blends over what's already drawn, so overlaps darken on their own.
     if (options.fill !== 'none') {

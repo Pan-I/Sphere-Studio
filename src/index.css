@@ -1,5 +1,8 @@
+/* Every colour on the site comes from these variables. Light is the default; dark replaces them
+   below, either because the device is set to dark (Auto) or because the theme button picked Dark.
+   Drawings read --paper and --ink too (src/tools/shared/paper.ts). */
 :root {
-    color-scheme: light dark;
+    color-scheme: light;
     font-family:
         system-ui,
         -apple-system,
@@ -7,16 +10,55 @@
         Roboto,
         sans-serif;
     line-height: 1.5;
+    --bg: #ffffff;
+    --text: #18181b;
+    /* Dialogs, like the shortcuts list. */
+    --surface: #ffffff;
+    /* Buttons, the ring, the current tool's underline. */
     --accent: #4f46e5;
+    /* Links and stars: the accent, as text. */
+    --accent-text: #4f46e5;
     --line: color-mix(in srgb, currentColor 20%, transparent);
+    /* The drawing's paper and pencil. */
+    --paper: #ffffff;
+    --ink: #222222;
+}
+
+/* Dark: a near-black page and a slightly lighter sheet of paper, so the drawing stands out
+   without glowing. The same values twice, since a media query can't share a rule with a selector:
+   once for Auto on a dark device, once for Dark picked on the button. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+        color-scheme: dark;
+        --bg: #121214;
+        --text: #e4e4e7;
+        --surface: #1c1c21;
+        --accent: #6366f1;
+        --accent-text: #a5b4fc;
+        --paper: #1d1e23;
+        --ink: #dedee3;
+    }
+}
+
+:root[data-theme='dark'] {
+    color-scheme: dark;
+    --bg: #121214;
+    --text: #e4e4e7;
+    --surface: #1c1c21;
+    --accent: #6366f1;
+    --accent-text: #a5b4fc;
+    --paper: #1d1e23;
+    --ink: #dedee3;
 }
 
 body {
     margin: 0;
+    background: var(--bg);
+    color: var(--text);
 }
 
 a {
-    color: var(--accent);
+    color: var(--accent-text);
 }
 
 .site-header {
@@ -36,8 +78,31 @@ a {
 
 .site-nav {
     display: flex;
+    flex: 1;
+    min-width: 0;
     flex-wrap: wrap;
     gap: 1rem;
+}
+
+/* Auto, Light or Dark, at the end of the header. */
+.theme-toggle {
+    flex: none;
+    margin-left: auto;
+    min-height: 2.25rem;
+    padding: 0 0.75rem;
+    white-space: nowrap;
+}
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.theme-toggle svg {
+    width: 1.1em;
+    height: 1.1em;
+    flex: none;
 }
 
 .site-nav a {
@@ -117,6 +182,7 @@ a {
 
 .tool-thumbnail canvas {
     display: block;
+    background: var(--paper);
     width: 100%;
     aspect-ratio: 1;
 }
@@ -194,8 +260,8 @@ select {
     justify-content: center;
     padding: 1rem;
     overflow: auto;
-    background: Canvas;
-    color: CanvasText;
+    background: var(--bg);
+    color: var(--text);
 }
 
 .focus-mode .tool-layout {
@@ -237,6 +303,10 @@ select {
         min-height: 44px;
         padding: 0;
         box-sizing: border-box;
+    }
+
+    .theme-toggle {
+        min-height: 44px;
     }
 }
 
@@ -281,6 +351,10 @@ select {
         white-space: nowrap;
     }
 
+    .theme-toggle {
+        margin: 0 0.75rem 0 0;
+    }
+
     /* Name and buttons share a line when they fit, so the drawing starts higher up. */
     .tool-heading {
         flex-direction: row;
@@ -290,20 +364,23 @@ select {
     }
 }
 
-/* Upright phones: the site name gets its own line above the tool links. */
+/* Upright phones: the site name and the theme button share a line above the tool links. */
 @media (max-width: 47.99rem) and (orientation: portrait) {
     .site-header {
-        flex-direction: column;
-        align-items: stretch;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
         padding: 0.25rem 0 0;
     }
 
     .site-title {
-        align-self: flex-start;
+        justify-self: start;
         margin: 0 1rem;
     }
 
     .site-nav {
+        grid-column: 1 / -1;
+        grid-row: 2;
         padding-left: 1rem;
         scroll-padding-left: 1rem;
     }

@@ -11,6 +11,7 @@ import {
 } from '../../math/light'
 import { dot, type Vec3 } from '../../math/quat'
 import { splitByVisibility } from '../../math/sphere'
+import { paperFor, type Paper } from '../shared/paper'
 import type { LitSphereOptions } from './displayOptions'
 import {
     flatValue,
@@ -23,8 +24,6 @@ import {
 } from './shading'
 
 const HIDDEN_ALPHA = 0.2
-const LINE_COLOR = '#222'
-const PAPER_COLOR = '#fff'
 const SUN_COLOR = '#e8a000'
 
 /** The sphere's radius as a fraction of the canvas, when the shadow leaves room for it. */
@@ -82,6 +81,7 @@ function shadePixels(
     layout: Layout,
     lighting: Lighting,
     options: LitSphereOptions,
+    paper: Paper,
 ) {
     if (options.shading === 'none') return
     const mode = options.shading
@@ -102,7 +102,7 @@ function shadePixels(
                 shade.value = flatValue(shade.zone, lighting)
                 shade.warmth = Math.round(shade.warmth)
             }
-            const [r, g, b] = shadeColor(shade, mode)
+            const [r, g, b] = paper.fillRGB(shadeColor(shade, mode))
             const i = (py * width + px) * 4
             data[i] = r
             data[i + 1] = g
@@ -172,7 +172,13 @@ function labelsFor(lighting: Lighting, layout: Layout): Label[] {
     return labels
 }
 
-function drawLabels(ctx: CanvasRenderingContext2D, size: number, layout: Layout, labels: Label[]) {
+function drawLabels(
+    ctx: CanvasRenderingContext2D,
+    size: number,
+    layout: Layout,
+    labels: Label[],
+    paper: Paper,
+) {
     const font = Math.max(10, Math.round(size * 0.03))
     const gap = font * 0.8
     const lineHeight = font * 1.3
@@ -201,21 +207,21 @@ function drawLabels(ctx: CanvasRenderingContext2D, size: number, layout: Layout,
 
     for (const l of placed) {
         const textEdge = l.right ? l.x : l.x + l.width
-        ctx.strokeStyle = PAPER_COLOR
+        ctx.strokeStyle = paper.paper
         ctx.lineWidth = 3
         ctx.beginPath()
         ctx.moveTo(...l.at)
         ctx.lineTo(textEdge, l.y)
         ctx.stroke()
-        ctx.strokeStyle = LINE_COLOR
+        ctx.strokeStyle = paper.ink
         ctx.lineWidth = 1
         ctx.stroke()
 
-        ctx.fillStyle = LINE_COLOR
+        ctx.fillStyle = paper.ink
         ctx.beginPath()
         ctx.arc(l.at[0], l.at[1], 3, 0, Math.PI * 2)
         ctx.fill()
-        ctx.strokeStyle = PAPER_COLOR
+        ctx.strokeStyle = paper.paper
         ctx.lineWidth = 1.5
         ctx.stroke()
 
@@ -275,6 +281,7 @@ export function drawLitSphere(
     light: Vec3,
     options: LitSphereOptions,
 ) {
+    const paper = paperFor(ctx)
     const layout = layoutFor(light, size)
     const { cx, cy, r } = layout
     const lighting = makeLighting(light)
@@ -295,17 +302,16 @@ export function drawLitSphere(
 
     ctx.clearRect(0, 0, size, size)
     if (linesOnly) {
-        // Paper-white, so the lines show on any page theme.
-        ctx.fillStyle = PAPER_COLOR
+        ctx.fillStyle = paper.paper
         ctx.fillRect(0, 0, size, size)
     } else {
-        shadePixels(ctx, size, layout, lighting, options)
+        shadePixels(ctx, size, layout, lighting, options, paper)
     }
 
     ctx.lineWidth = options.lineWidth
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
-    ctx.strokeStyle = LINE_COLOR
+    ctx.strokeStyle = paper.ink
 
     if (linesOnly || options.showShadowEdges) {
         // The cast shadow's edge, except where the sphere hides it.
@@ -344,5 +350,5 @@ export function drawLitSphere(
     ctx.stroke()
 
     if (options.showLight) drawLight(ctx, layout, light, options.lineWidth)
-    if (options.showLabels) drawLabels(ctx, size, layout, labelsFor(lighting, layout))
+    if (options.showLabels) drawLabels(ctx, size, layout, labelsFor(lighting, layout), paper)
 }

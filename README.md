@@ -294,6 +294,7 @@ Every tool page has these, so your hand can stay on the pencil:
 | <kbd>C</kbd> | Chime on or off (see Timer ring and chime below) |
 | <kbd>D</kbd> | Download the drawing as a PNG (see below) |
 | <kbd>F</kbd> | Full screen on or off (<kbd>Esc</kbd> also leaves) |
+| <kbd>T</kbd> | Theme: Auto, Light or Dark (see Dark mode below; works on the home page too) |
 | <kbd>?</kbd> | Show the list of shortcuts |
 
 Shortcuts are ignored while you're typing in a field, and when Ctrl, Cmd or Alt is held, so browser shortcuts like Ctrl+P still work.
@@ -306,7 +307,19 @@ Shortcuts are ignored while you're typing in a field, and when Ctrl, Cmd or Alt 
 
 **Screen stays on**: while the timer is running, the page asks the browser to keep the screen from dimming and locking (the Screen Wake Lock API, `src/tools/shared/useWakeLock.ts`), so a phone or tablet propped beside your paper doesn't lock partway through a long interval. Pausing lets the screen sleep again. Browsers without it, or that refuse (some do on low battery), just behave as before.
 
-**Download PNG**: the **Download PNG** button under the tool's name (or <kbd>D</kbd>) saves the drawing on screen as a PNG, for reference or printing. It's redrawn at 1600 × 1600 pixels whatever the size on screen (about 13.5 cm or 5.3 in at 300 dpi), with your Display options and the page's background, so it looks like the screen, in light or dark mode. The file is named after the tool and seed, like `box-randomizer-48213.png`, so you can find the pose again later; in Value Study with your own photo open, it's named after the photo instead. <kbd>D</kbd> works in full screen too, and the button stays on phones and tablets.
+**Download PNG**: the **Download PNG** button under the tool's name (or <kbd>D</kbd>) saves the drawing on screen as a PNG, for reference or printing. It's redrawn at 1600 × 1600 pixels whatever the size on screen (about 13.5 cm or 5.3 in at 300 dpi), with your Display options and the paper colour, so it looks like the screen, in light or dark mode (switch to Light first for a print on white). The file is named after the tool and seed, like `box-randomizer-48213.png`, so you can find the pose again later; in Value Study with your own photo open, it's named after the photo instead. <kbd>D</kbd> works in full screen too, and the button stays on phones and tablets.
+
+**Dark mode**: the button at the end of the header (or <kbd>T</kbd>) steps through **Auto**, **Light** and **Dark**. Auto, the default, follows your device's setting and changes with it; Light and Dark stick to that choice on this site whatever the device says. The choice is saved in your browser under `sphere-studio:theme`.
+
+- **The page**: a near-black background with light text, and the accent colour lightened where it's text (links, stars) so it stays readable.
+- **The drawing**: dark paper, slightly lighter than the page so you can see where it ends, and light pencil lines. Fills and shading are dimmed toward the paper, like turning down the lights: every value keeps its place and its spacing (a light face stays lighter than a dark one, a lit side lighter than its shadow), over a narrower, darker range. That includes the Lit Sphere's shading and the Value Study's photo. Coloured construction lines (axes, vanishing points, where forms meet) are lifted toward the pencil colour so they show on dark paper. The thumbnails on the home page follow along.
+- **No flash**: a few lines in `index.html` apply a saved Light or Dark before the page draws, so a dark page never flashes white while it loads.
+
+How it's built, as a CSS variables exercise:
+
+- `src/index.css` defines every colour once as a variable on `:root` (`--bg`, `--text`, `--surface`, `--accent`, `--accent-text`, `--line`, `--paper`, `--ink`), with the light values first. A dark block replaces them, inside `@media (prefers-color-scheme: dark)` for Auto (skipped when `data-theme="light"` is set) and again for `[data-theme='dark']`. It also sets `color-scheme`, so the browser's own form controls and scrollbars match.
+- `src/site/theme.ts` keeps the choice: it saves it, sets or removes `data-theme` on `<html>`, and offers `useThemeChoice` (for the button) and `useTheme` (light or dark as shown, following the device on Auto). `src/site/ThemeToggle.tsx` is the button and the <kbd>T</kbd> shortcut.
+- Canvases can't use CSS colours directly, so `src/tools/shared/paper.ts` reads `--paper` and `--ink` from the canvas's style and gives each drawing a `Paper`: `paper.paper` and `paper.ink` for the background and lines, `paper.fill(color)` (or `fillRGB` for pixel shading) to dim a fill, and `paper.line(color)` to lift a coloured line. On white paper all three return the colour unchanged. In tests, where there's no stylesheet, it's always white paper. `useSquareCanvas` redraws when the theme changes.
 
 **Full screen** shows only the drawing and the timer, for a second screen beside your paper. It uses the browser's Fullscreen API. Where that isn't available (iPhone Safari), the tool fills the browser window instead.
 
@@ -330,8 +343,9 @@ On phones and tablets (touch only, no mouse or trackpad), the **Full screen** an
   ```
 
 - **Layout**: a tool returns `<div className="tool-layout">` holding its canvas (`className="tool-canvas"`) and then one `<div className="tool-controls">` with everything else, as every tool does. That shape is what lets the canvas sit beside the controls on a screen held sideways (`tool.css`); `src/site/mobileLayout.test.tsx` checks every tool has it.
+- **Colours**: start a draw function with `const paper = paperFor(ctx)` and draw with `paper.paper`, `paper.ink`, `paper.fill(...)` and `paper.line(...)` instead of fixed colours, so it works in dark mode. With white paper they give back exactly the colours you wrote.
 - **Full screen**: wrapping is done by the tool page, so a new tool gets it for free. In full screen, only the canvas and the parts of `tool-controls` marked `data-focus="show"` stay visible, and anything inside them marked `data-focus="hide"` is dropped. Mark your canvas with `data-focus="show"`. `SessionControls` already keeps the timer and its ring.
-- **A sharp canvas at any size**: draw with `useSquareCanvas(SIZE, draw)` (in `src/tools/shared/`). It sizes the drawing buffer to the canvas's real size on screen, so it stays crisp in full screen, while `draw` keeps working in the same 0 to `SIZE` units. It also gives Download PNG your `draw` function, through `CanvasExportContext` from the tool page, so a new tool gets downloads for free: `canvasExport.ts` calls `draw` again on a 1600-pixel canvas placed hidden beside yours (so colours read from CSS, like Circle Trio's line colour, come out the same) and fills the page background in behind it. Pass a third argument to name the file after something other than the seed, as Value Study does with your photo's name.
+- **A sharp canvas at any size**: draw with `useSquareCanvas(SIZE, draw)` (in `src/tools/shared/`). It sizes the drawing buffer to the canvas's real size on screen, so it stays crisp in full screen, while `draw` keeps working in the same 0 to `SIZE` units. It also gives Download PNG your `draw` function, through `CanvasExportContext` from the tool page, so a new tool gets downloads for free: `canvasExport.ts` calls `draw` again on a 1600-pixel canvas placed hidden beside yours (so the paper and ink colours it reads from CSS come out the same) and fills the paper colour in behind it. Pass a third argument to name the file after something other than the seed, as Value Study does with your photo's name.
 
 ---
 
@@ -477,7 +491,7 @@ New draws are only ever added at the end, so existing seeds keep their large cir
 
 Each small circle ends up inside about 15% of the time, across the edge 73% and outside 12%. A test pins seed 48213.
 
-Both tools draw with `drawCircles.ts`, which fills a white background, then each circle at the chosen opacity, large ones first. The canvas blends each fill over what's below, so overlaps darken without any extra maths. Outlines and center dots are drawn on top at full strength.
+Both tools draw with `drawCircles.ts`, which leaves the canvas clear so the paper colour behind it shows, then draws each circle at the chosen opacity, large ones first. The canvas blends each fill over what's below, so overlaps darken without any extra maths. Outlines and center dots are drawn on top at full strength.
 
 ---
 
@@ -606,11 +620,11 @@ public/
   favicon.svg             Browser tab icon
 src/
   main.tsx, App.tsx       Entry point and routes (one route per registered tool)
-  site/                   Site shell: layout and nav, home page, tool page (with full screen), 404, site name
+  site/                   Site shell: layout and nav, the theme button, home page, tool page (with full screen), 404, site name
   shortcuts/              Keyboard shortcuts: the registry, useShortcuts, and the ? list
   tools/
     registry.ts           The list of tools; drives routes, nav and home-page cards (with live thumbnails)
-    shared/               Shared components and utilities: session controls, the timer's ring and chime, pose history and favorites, the Display options panel, canvas sizing and PNG download, ellipse axes
+    shared/               Shared components and utilities: session controls, the timer's ring and chime, pose history and favorites, the Display options panel, canvas sizing and PNG download, paper and ink colours for dark mode, ellipse axes
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
     circle-trio/          Circle Trio 1 component and layout, plus the drawing and options both Circle Trios use
     circle-trio-2/        Circle Trio 2 component and layout

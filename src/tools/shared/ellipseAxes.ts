@@ -1,5 +1,6 @@
 import { projectedCircle } from '../../math/ellipse'
 import type { Vec3 } from '../../math/quat'
+import { paperFor } from './paper'
 
 /** The major axis is color-coded red. The minor axis is a dark blue, so the two read apart. */
 export const MAJOR_AXIS_COLOR = '#e63946'
@@ -25,6 +26,7 @@ export function strokeEllipseAxes(
     // Seen edge-on the ellipse is a line, with no axes to show.
     if (e === null) return
     const [x, y] = e.centre
+    const paper = paperFor(ctx)
     ctx.save()
     ctx.lineWidth = Math.max(1, lineWidth * AXIS_WIDTH)
     ctx.setLineDash([])
@@ -32,7 +34,7 @@ export function strokeEllipseAxes(
         [e.minor, MINOR_AXIS_COLOR],
         [e.major, MAJOR_AXIS_COLOR],
     ] as const) {
-        ctx.strokeStyle = color
+        ctx.strokeStyle = paper.line(color)
         ctx.beginPath()
         ctx.moveTo(...toCanvas(x - half[0], y - half[1]))
         ctx.lineTo(...toCanvas(x + half[0], y + half[1]))

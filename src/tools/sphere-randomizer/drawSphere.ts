@@ -6,13 +6,11 @@ import {
     splitByVisibility,
     unprojectOrthographic,
 } from '../../math/sphere'
+import { paperFor } from '../shared/paper'
 import type { DisplayOptions } from './displayOptions'
 import { paletteFor, type RGB } from './palettes'
 
 const FAR_SIDE_ALPHA = 0.2
-const LINE_COLOR = '#222'
-const PAPER_COLOR = '#fff'
-const MARKER_COLOR = '#000'
 
 /** Grows with line thickness so the marker always stands out from the lines it sits on. */
 const markerRadius = (lineWidth: number) => Math.max(6, lineWidth * 1.5)
@@ -59,17 +57,18 @@ export function drawSphere(
     options: DisplayOptions,
     marker: Vec3 | null,
 ) {
+    const paper = paperFor(ctx)
     const c = size / 2
     const r = size * 0.4
 
     ctx.clearRect(0, 0, size, size)
 
-    const palette = paletteFor(options.shading)
+    const palette = paletteFor(options.shading)?.map(paper.fillRGB)
     if (palette) {
         shadeSectors(ctx, size, q, palette)
     } else {
-        // Lines-only mode: a plain paper-white disc keeps the lines visible on any page theme.
-        ctx.fillStyle = PAPER_COLOR
+        // Lines-only mode: a plain disc of paper behind the lines.
+        ctx.fillStyle = paper.paper
         ctx.beginPath()
         ctx.arc(c, c, r, 0, Math.PI * 2)
         ctx.fill()
@@ -78,7 +77,7 @@ export function drawSphere(
     ctx.lineWidth = options.lineWidth
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
-    ctx.strokeStyle = LINE_COLOR
+    ctx.strokeStyle = paper.ink
 
     ctx.beginPath()
     ctx.arc(c, c, r, 0, Math.PI * 2)
@@ -104,7 +103,7 @@ export function drawSphere(
     ctx.globalAlpha = 1
 
     if (options.showMarker && marker) {
-        ctx.fillStyle = MARKER_COLOR
+        ctx.fillStyle = paper.ink
         ctx.beginPath()
         ctx.arc(
             c + marker[0] * r,
