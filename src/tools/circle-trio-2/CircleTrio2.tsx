@@ -34,12 +34,14 @@ export function CircleTrio2() {
                 role="img"
                 aria-label={`A large circle and two small ones on its edge, layout ${seed}`}
             />
-            <SessionControls session={session} />
-            <OptionsPanel
-                fields={CIRCLE_TRIO_2_OPTIONS.fields}
-                options={options}
-                onChange={setOptions}
-            />
+            <div className="tool-controls">
+                <SessionControls session={session} />
+                <OptionsPanel
+                    fields={CIRCLE_TRIO_2_OPTIONS.fields}
+                    options={options}
+                    onChange={setOptions}
+                />
+            </div>
         </div>
     )
 }

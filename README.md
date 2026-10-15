@@ -310,6 +310,14 @@ Shortcuts are ignored while you're typing in a field, and when Ctrl, Cmd or Alt 
 
 On phones and tablets (touch only, no mouse or trackpad), the **Full screen** and **Shortcuts** buttons are hidden (**Download PNG** stays) and <kbd>F</kbd> and <kbd>?</kbd> do nothing. `useTouchOnly` (in `src/site/`) decides this with the `(hover: none) and (pointer: coarse)` media query, so a tablet with a trackpad attached gets them back.
 
+**Phones and tablets**: every page is laid out for the screen it's on, upright or on its side.
+
+- **Tool links**: on phones and tablets, and on any screen too short for a tall header, the tool links sit in one row you swipe sideways, instead of wrapping into a block that pushes the drawing down. The row's edges fade to show there's more, and the tool you're on is scrolled into the middle. On touch screens the links are 44 pixels tall, like the buttons, so they're easy to hit.
+- **Upright** (phones, and tablets held upright): one column, drawing first. On a tablet the drawing grows to fill the width, up to 40rem, while leaving Randomize and the timer in view under it.
+- **On its side** (any screen wider than it is tall and at least 40rem wide, so laptops and desktops too): the drawing on the left, as big as the window's height allows, and the controls in a column beside it. The drawing stays put while the controls scroll. On a small phone the drawing shrinks a little so the controls keep enough room.
+- **Home page**: on phones each card puts its thumbnail beside the text, so the list is half as long, and the whole card opens the tool (the thumbnail still opens it on the pose it shows).
+- On touch screens, the Favorites box says to tap ☆ Favorite instead of naming the <kbd>S</kbd> key.
+
 **For new tools and features:**
 
 - **Adding a shortcut**: call `useShortcuts` from any component. The shortcut works while that component is on screen, is removed when it goes away, and appears in the <kbd>?</kbd> list automatically. If two components use the same key, the one that appeared most recently wins.
@@ -318,7 +326,8 @@ On phones and tablets (touch only, no mouse or trackpad), the **Full screen** an
   useShortcuts([{ key: 'd', description: 'Download PNG', run: downloadPng }])
   ```
 
-- **Full screen**: wrapping is done by the tool page, so a new tool gets it for free. In full screen, only the tool's top-level elements marked `data-focus="show"` stay visible, and anything inside them marked `data-focus="hide"` is dropped. Mark your canvas with `data-focus="show"`. `SessionControls` already keeps the timer and its ring.
+- **Layout**: a tool returns `<div className="tool-layout">` holding its canvas (`className="tool-canvas"`) and then one `<div className="tool-controls">` with everything else, as every tool does. That shape is what lets the canvas sit beside the controls on a screen held sideways (`tool.css`); `src/site/mobileLayout.test.tsx` checks every tool has it.
+- **Full screen**: wrapping is done by the tool page, so a new tool gets it for free. In full screen, only the canvas and the parts of `tool-controls` marked `data-focus="show"` stay visible, and anything inside them marked `data-focus="hide"` is dropped. Mark your canvas with `data-focus="show"`. `SessionControls` already keeps the timer and its ring.
 - **A sharp canvas at any size**: draw with `useSquareCanvas(SIZE, draw)` (in `src/tools/shared/`). It sizes the drawing buffer to the canvas's real size on screen, so it stays crisp in full screen, while `draw` keeps working in the same 0 to `SIZE` units. It also gives Download PNG your `draw` function, through `CanvasExportContext` from the tool page, so a new tool gets downloads for free: `canvasExport.ts` calls `draw` again on a 1600-pixel canvas placed hidden beside yours (so colours read from CSS, like Circle Trio's line colour, come out the same) and fills the page background in behind it. Pass a third argument to name the file after something other than the seed, as Value Study does with your photo's name.
 
 ---

@@ -47,8 +47,10 @@ a {
     border-bottom: 2px solid transparent;
 }
 
-.site-nav a:hover {
-    border-bottom-color: var(--line);
+@media (hover: hover) {
+    .site-nav a:hover {
+        border-bottom-color: var(--line);
+    }
 }
 
 /* React Router adds the "active" class to the link for the current page. */
@@ -72,9 +74,25 @@ a {
 }
 
 .tool-card {
+    position: relative;
     padding: 1rem 1.25rem;
     border: 1px solid var(--line);
     border-radius: 0.5rem;
+}
+
+/* The whole card opens the tool, not just its name: the name's link stretches over the card.
+   The thumbnail sits above it, since it opens the tool on the pose it shows. */
+.tool-card h2 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+}
+
+@media (hover: hover) {
+    .tool-card:hover {
+        border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+    }
 }
 
 .tool-card h2 {
@@ -93,6 +111,8 @@ a {
     max-width: 100%;
     margin: 0 auto 0.75rem;
     color: inherit;
+    position: relative;
+    z-index: 1;
 }
 
 .tool-thumbnail canvas {
@@ -179,17 +199,20 @@ select {
 }
 
 .focus-mode .tool-layout {
+    display: flex;
     max-width: none;
     align-items: center;
 }
 
-.focus-mode .tool-layout > :not([data-focus='show']),
+.focus-mode .tool-layout > :not([data-focus='show'], .tool-controls),
+.focus-mode .tool-controls > :not([data-focus='show']),
 .focus-mode [data-focus='hide'] {
     display: none;
 }
 
 /* As big as fits, leaving room for the timer below. dvw/dvh track the phone's address bar. */
 .focus-mode .tool-canvas {
+    position: static;
     width: min(calc(100dvw - 2rem), calc(100dvh - 6rem));
     max-width: none;
 }
@@ -205,8 +228,136 @@ select {
     right: 0.75rem;
 }
 
+/* Touch screens: links and the site name get the same 44px finger-sized height as buttons. */
+@media (pointer: coarse) {
+    .site-title,
+    .site-nav a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0;
+        box-sizing: border-box;
+    }
+}
+
+/* Phones and tablets, and any screen too short for a tall header (a phone on its side): the tool
+   links scroll sideways in one row instead of wrapping into a block that pushes the drawing down.
+   The edges fade to show there's more. SiteLayout scrolls the current tool into view. */
+@media (max-width: 47.99rem), (max-height: 30rem), (pointer: coarse) {
+    .site-header {
+        flex-wrap: nowrap;
+        gap: 0 0.5rem;
+        padding: 0.25rem 0 0 1.25rem;
+    }
+
+    .site-title {
+        flex: none;
+    }
+
+    .site-nav {
+        flex: 1;
+        flex-wrap: nowrap;
+        min-width: 0;
+        gap: 1.25rem;
+        padding: 0 2rem 0 0.75rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+        overscroll-behavior-x: contain;
+        mask-image: linear-gradient(
+            to right,
+            transparent,
+            #000 0.75rem,
+            #000 calc(100% - 2.5rem),
+            transparent
+        );
+    }
+
+    .site-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .site-nav a {
+        flex: none;
+        white-space: nowrap;
+    }
+
+    /* Name and buttons share a line when they fit, so the drawing starts higher up. */
+    .tool-heading {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+/* Upright phones: the site name gets its own line above the tool links. */
+@media (max-width: 47.99rem) and (orientation: portrait) {
+    .site-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.25rem 0 0;
+    }
+
+    .site-title {
+        align-self: flex-start;
+        margin: 0 1rem;
+    }
+
+    .site-nav {
+        padding-left: 1rem;
+        scroll-padding-left: 1rem;
+    }
+}
+
 @media (max-width: 30rem) {
     .site-main {
         padding: 1rem 0.75rem;
+    }
+
+    .tool-heading h1 {
+        font-size: 1.6rem;
+    }
+
+    /* Home page cards: the thumbnail beside the text, so each card is half the height. */
+    .tool-list {
+        gap: 0.75rem;
+    }
+
+    .tool-card {
+        display: grid;
+        grid-template-columns: 5.5rem 1fr;
+        align-items: center;
+        gap: 0 1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .tool-card .tool-thumbnail {
+        grid-row: span 2;
+        width: 100%;
+        margin: 0;
+    }
+
+    .tool-card h2 {
+        margin-bottom: 0.25rem;
+        font-size: 1.05rem;
+    }
+
+    .tool-card p {
+        font-size: 0.9rem;
+    }
+}
+
+/* A phone on its side: less padding, so more of the short screen is drawing. */
+@media (max-height: 30rem) {
+    .site-main {
+        padding: 0.75rem 1.25rem;
+    }
+
+    .tool-heading {
+        margin-bottom: 0.75rem;
+    }
+
+    .tool-heading h1 {
+        font-size: 1.5rem;
     }
 }

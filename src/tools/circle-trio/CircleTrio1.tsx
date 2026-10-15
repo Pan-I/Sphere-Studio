@@ -34,8 +34,14 @@ export function CircleTrio1() {
                 role="img"
                 aria-label={`Two large circles and a small one, layout ${seed}`}
             />
-            <SessionControls session={session} />
-            <OptionsPanel fields={CIRCLE_OPTIONS.fields} options={options} onChange={setOptions} />
+            <div className="tool-controls">
+                <SessionControls session={session} />
+                <OptionsPanel
+                    fields={CIRCLE_OPTIONS.fields}
+                    options={options}
+                    onChange={setOptions}
+                />
+            </div>
         </div>
     )
 }

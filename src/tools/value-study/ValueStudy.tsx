@@ -80,39 +80,41 @@ export function ValueStudy() {
                 role="img"
                 aria-label={`Value study of ${what}`}
             />
-            <div className="value-photo">
-                <div className="session-actions">
-                    <button className={photo ? undefined : 'primary'} onClick={chooseFile}>
-                        {photo ? 'Open another photo' : 'Open a photo'}
-                    </button>
-                    {photo && <button onClick={clear}>Back to samples</button>}
+            <div className="tool-controls">
+                <div className="value-photo">
+                    <div className="session-actions">
+                        <button className={photo ? undefined : 'primary'} onClick={chooseFile}>
+                            {photo ? 'Open another photo' : 'Open a photo'}
+                        </button>
+                        {photo && <button onClick={clear}>Back to samples</button>}
+                    </div>
+                    <input
+                        ref={fileRef}
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        aria-label="Photo to study"
+                        onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            e.target.value = '' // so choosing the same file again still opens it
+                            if (file) void open(file)
+                        }}
+                    />
+                    <p className="tool-hint" role="status" aria-live="polite">
+                        {error ??
+                            (photo
+                                ? `Studying ${photo.name}.`
+                                : 'Showing a sample. Open a photo, or drop or paste one here. Uploading a photo will wide the randomizer options.')}{' '}
+                        Your photo stays in this tab and is never uploaded.
+                    </p>
                 </div>
-                <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    aria-label="Photo to study"
-                    onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        e.target.value = '' // so choosing the same file again still opens it
-                        if (file) void open(file)
-                    }}
+                {!photo && <SessionControls session={session} />}
+                <OptionsPanel
+                    fields={VALUE_STUDY_OPTIONS.fields}
+                    options={options}
+                    onChange={setOptions}
                 />
-                <p className="tool-hint" role="status" aria-live="polite">
-                    {error ??
-                        (photo
-                            ? `Studying ${photo.name}.`
-                            : 'Showing a sample. Open a photo, or drop or paste one here. Uploading a photo will wide the randomizer options.')}{' '}
-                    Your photo stays in this tab and is never uploaded.
-                </p>
             </div>
-            {!photo && <SessionControls session={session} />}
-            <OptionsPanel
-                fields={VALUE_STUDY_OPTIONS.fields}
-                options={options}
-                onChange={setOptions}
-            />
         </div>
     )
 }

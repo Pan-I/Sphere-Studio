@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useTouchOnly } from '../../site/useTouchOnly'
 import { useShortcuts } from '../../shortcuts/useShortcuts'
 import { playChime, unlockAudio } from './chime'
 import { CountdownRing } from './CountdownRing'
@@ -22,6 +23,7 @@ export function SessionControls({ session }: { session: SeedSession }) {
     const favorites = useFavorites()
     const starred = favorites.isFavorite(seed)
     const chime = useChime()
+    const touchOnly = useTouchOnly()
 
     // Starting is a click or a key press, the moment the browser lets a page turn sound on, so
     // the chime can play later when the time runs out with nobody touching the page.
@@ -177,7 +179,15 @@ export function SessionControls({ session }: { session: SeedSession }) {
                 <legend>Favorites</legend>
                 {favorites.favorites.length === 0 ? (
                     <p className="tool-hint">
-                        Press ☆ Favorite (or <kbd>S</kbd>) to keep a pose here for next time.
+                        {/* No keyboard on a phone or tablet, so no key to mention. */}
+                        {touchOnly ? (
+                            'Tap ☆ Favorite to keep a pose here for next time.'
+                        ) : (
+                            <>
+                                Press ☆ Favorite (or <kbd>S</kbd>) to keep a pose here for next
+                                time.
+                            </>
+                        )}
                     </p>
                 ) : (
                     <ul className="session-favorite-list">

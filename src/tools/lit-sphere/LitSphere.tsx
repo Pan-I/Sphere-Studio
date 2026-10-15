@@ -34,12 +34,14 @@ export function LitSphere() {
                 role="img"
                 aria-label={`Sphere on a floor, lit from ${describeLight(light)}, pose ${seed}`}
             />
-            <SessionControls session={session} />
-            <OptionsPanel
-                fields={LIT_SPHERE_OPTIONS.fields}
-                options={options}
-                onChange={setOptions}
-            />
+            <div className="tool-controls">
+                <SessionControls session={session} />
+                <OptionsPanel
+                    fields={LIT_SPHERE_OPTIONS.fields}
+                    options={options}
+                    onChange={setOptions}
+                />
+            </div>
         </div>
     )
 }

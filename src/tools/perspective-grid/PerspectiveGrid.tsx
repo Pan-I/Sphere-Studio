@@ -58,12 +58,14 @@ export function PerspectiveGrid() {
                 role="img"
                 aria-label={`${pose.points} point perspective grid, pose ${seed}`}
             />
-            <SessionControls session={session} />
-            <OptionsPanel
-                fields={PERSPECTIVE_GRID_OPTIONS.fields}
-                options={options}
-                onChange={changeOptions}
-            />
+            <div className="tool-controls">
+                <SessionControls session={session} />
+                <OptionsPanel
+                    fields={PERSPECTIVE_GRID_OPTIONS.fields}
+                    options={options}
+                    onChange={changeOptions}
+                />
+            </div>
         </div>
     )
 }

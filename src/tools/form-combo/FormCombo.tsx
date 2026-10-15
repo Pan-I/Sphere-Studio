@@ -63,12 +63,14 @@ export function FormCombo() {
                 role="img"
                 aria-label={`${describeForms(combo.solids)} running into each other, pose ${seed}`}
             />
-            <SessionControls session={session} />
-            <OptionsPanel
-                fields={FORM_COMBO_OPTIONS.fields}
-                options={options}
-                onChange={setOptions}
-            />
+            <div className="tool-controls">
+                <SessionControls session={session} />
+                <OptionsPanel
+                    fields={FORM_COMBO_OPTIONS.fields}
+                    options={options}
+                    onChange={setOptions}
+                />
+            </div>
         </div>
     )
 }

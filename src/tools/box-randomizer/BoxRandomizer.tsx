@@ -34,8 +34,10 @@ export function BoxRandomizer() {
                 role="img"
                 aria-label={`Cube in a random orientation, pose ${seed}`}
             />
-            <SessionControls session={session} />
-            <OptionsPanel fields={BOX_OPTIONS.fields} options={options} onChange={setOptions} />
+            <div className="tool-controls">
+                <SessionControls session={session} />
+                <OptionsPanel fields={BOX_OPTIONS.fields} options={options} onChange={setOptions} />
+            </div>
         </div>
     )
 }
