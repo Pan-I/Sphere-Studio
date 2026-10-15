@@ -43,6 +43,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
 - [Deployment](#deployment)
+- [Browser tests](#browser-tests)
 - [Continuous integration](#continuous-integration)
 
 ---
@@ -487,7 +488,7 @@ Tools are driven by one registry, `src/tools/registry.ts`. Adding an entry there
 
    TypeScript checks the fields against the options type: every option needs a field, and a boolean must be a toggle, a number a range, and a string a choice. A field can grey itself out with `disabledWhen(options)`, as Circle Trio 1's opacity does when there is no fill. Stored values are checked field by field when they are loaded, so a missing, renamed or out-of-range value falls back to its default instead of breaking the tool.
 
-4. Add unit tests next to the code (`*.test.ts`). `src/tools/registry.test.ts` already checks that slugs are unique and URL-safe and that every tool has a name and description, and `src/tools/examples.test.ts` checks that every tool's example draws, and draws the same picture for the same seed.
+4. Add unit tests next to the code (`*.test.ts`). `src/tools/registry.test.ts` already checks that slugs are unique and URL-safe and that every tool has a name and description, and `src/tools/examples.test.ts` checks that every tool's example draws, and draws the same picture for the same seed. The [browser tests](#browser-tests) pick the new tool up from the registry by themselves; they read each entry's `slug` and `name`, so keep those as plain single-quoted strings.
 5. Document it in this README: add a row to the [Tools](#tools) table and copy the commented-out template under the Sphere Randomizer section.
 
 The page heading and browser tab title (`<Tool name> · Sphere Studio`) come from the registry entry, so the component only renders the tool itself.
@@ -731,7 +732,9 @@ Subtract uses the same placed solids as the Form Combo (`src/math/solids.ts`), a
 ## Project structure
 
 ```
-.github/workflows/ci.yaml CI: lint, tests and build on every push and pull request
+.github/workflows/ci.yaml CI: lint, tests and build, then the browser tests, on every push and pull request
+e2e/                      Playwright browser tests (see Browser tests)
+playwright.config.ts      Playwright settings: the browsers to test in, and serving the built site
 index.html                HTML shell; Vite's entry point
 public/
   favicon.svg             Browser tab icon
@@ -781,6 +784,7 @@ Requires Node.js and npm.
 npm install
 npm run dev       # start the dev server
 npm test          # run the Vitest suite
+npm run test:e2e  # run the Playwright browser tests (see Browser tests)
 npm run lint      # lint with Oxlint
 npm run format    # format with Prettier
 npm run format:check  # check formatting without writing
@@ -792,8 +796,41 @@ npm run preview   # serve the production build locally
 
 The site is a static single-page app. `vercel.json` rewrites every path to `index.html` so routes such as `/sphere-randomizer?seed=123` work when opened directly.
 
+## Browser tests
+
+The Vitest suite checks the maths and components in a pretend browser (jsdom), which has no real canvas. The Playwright tests in `e2e/` build the site, serve it with `vite preview`, and click through it in a real Chromium, so they check what the unit tests can't: that every tool actually draws, and that a seed link always brings back the same picture.
+
+The first time, download the browser Playwright drives (once per Playwright version):
+
+```bash
+npx playwright install chromium
+```
+
+Then:
+
+```bash
+npm run test:e2e                 # every browser test, on a desktop screen and an emulated phone
+npm run test:e2e -- tools.spec   # just one file
+npm run test:e2e -- -g "Subtract"   # just the tests whose names match
+npm run test:e2e:ui              # Playwright's window: pick tests, watch them run step by step
+npx playwright show-report       # the last run's report, with a recording of any failure
+```
+
+If `npm run preview` is already running (port 4173), the tests use it instead of building their own, so run `npm run build` first to test your latest changes. Otherwise they build and serve the site themselves, which takes a few seconds.
+
+What they cover:
+
+- `tools.spec.ts`: for **every tool in the registry**, a `?seed=` link draws the same picture each time it's opened and a different seed draws a different one; Randomize, Back and Forward move between poses and keep the address bar in step; Load seed works; Download PNG saves `<tool>-<seed>.png`. A new tool is covered as soon as it's in `registry.ts`.
+- `home.spec.ts`: the home page lists every tool with a drawn example, an example opens its tool on the same seed, the header links, old addresses redirect, and the not-found page.
+- `shortcuts.spec.ts`: Space, ←, S (and favorites surviving a reload), ?, T (and the theme being remembered), F and full screen.
+- `value-study.spec.ts`: opening a photo (made on the fly in the browser) and going back to samples, and a file that isn't really a photo.
+- `pages.spec.ts`: a 12-pose worksheet from a chosen seed, and a practice session stepping through.
+- `phone.spec.ts` (on an emulated phone): pages fit the screen without sideways scrolling, the keyboard-only buttons are hidden, and swiping the drawing changes the pose.
+
+Every test also fails if the page throws or logs an error. `e2e/fixtures.ts` has the shared pieces: the tool list (read from `registry.ts`), comparing canvas pictures, and waiting for a canvas to be drawn. Each test starts with an empty browser profile, so saved options and favorites from one test never reach another.
+
 ## Continuous integration
 
-GitHub Actions runs lint, tests and the build on every push to `master` and on every pull request (`.github/workflows/ci.yaml`). The badge at the top of this README shows the latest result on `master`, and each pull request shows its own check, with the full log under **Details**.
+GitHub Actions runs lint, tests and the build on every push to `master` and on every pull request (`.github/workflows/ci.yaml`). The browser tests run alongside, as a second job; if one fails, its report (with a recording of each failed test) is attached to the run under **Artifacts** as `playwright-report`. The badge at the top of this README shows the latest result on `master`, and each pull request shows its own check, with the full log under **Details**.
 
-Vercel deploys separately and doesn't wait for CI, so a red check is a warning rather than a block. Run the same checks locally before pushing with `npm run lint`, `npm test -- --run` and `npm run build`.
+Vercel deploys separately and doesn't wait for CI, so a red check is a warning rather than a block. Run the same checks locally before pushing with `npm run lint`, `npm test -- --run`, `npm run build` and `npm run test:e2e`.
