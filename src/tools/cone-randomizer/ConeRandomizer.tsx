@@ -34,8 +34,14 @@ export function ConeRandomizer() {
                 role="img"
                 aria-label={`Cone in a random orientation, pose ${seed}`}
             />
-            <SessionControls session={session} />
-            <OptionsPanel fields={CONE_OPTIONS.fields} options={options} onChange={setOptions} />
+            <div className="tool-controls">
+                <SessionControls session={session} />
+                <OptionsPanel
+                    fields={CONE_OPTIONS.fields}
+                    options={options}
+                    onChange={setOptions}
+                />
+            </div>
         </div>
     )
 }

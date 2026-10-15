@@ -38,8 +38,14 @@ export function SphereRandomizer() {
                 role="img"
                 aria-label={`Sphere divided into eight sectors, pose ${seed}`}
             />
-            <SessionControls session={session} />
-            <OptionsPanel fields={SPHERE_OPTIONS.fields} options={options} onChange={setOptions} />
+            <div className="tool-controls">
+                <SessionControls session={session} />
+                <OptionsPanel
+                    fields={SPHERE_OPTIONS.fields}
+                    options={options}
+                    onChange={setOptions}
+                />
+            </div>
         </div>
     )
 }

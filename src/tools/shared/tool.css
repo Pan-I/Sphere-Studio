@@ -1,4 +1,5 @@
-/* One column on every screen size: canvas first, then controls in the order you reach for them. */
+/* Canvas first, then controls in the order you reach for them. One column on phones and on
+   tablets held upright; side by side once the screen is wider than it is tall (see below). */
 .tool-layout {
     display: flex;
     flex-direction: column;
@@ -6,14 +7,56 @@
     max-width: 30rem;
 }
 
+.tool-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
 /* Scales down to fit narrow screens. aspect-ratio keeps it square, and also reserves the space
    before the first draw so the page doesn't jump. */
 .tool-canvas {
     display: block;
     width: 100%;
-    max-width: 480px;
     height: auto;
     aspect-ratio: 1;
+    /* Sideways swipes and double-taps on the drawing are ours (see canvasGestures.ts), so the
+       browser only scrolls the page up and down (or pinch-zooms) from here, and a double-tap
+       doesn't zoom. */
+    touch-action: pan-y pinch-zoom;
+}
+
+/* Tablets held upright: a bigger drawing, still leaving the Randomize and timer rows in view
+   under it. dvh follows the browser's toolbars as they slide in and out. */
+@media (min-width: 40rem) and (orientation: portrait) {
+    .tool-layout {
+        max-width: 40rem;
+    }
+
+    .tool-canvas {
+        max-width: max(30rem, calc(100dvh - 36rem));
+    }
+}
+
+/* Landscape (phones on their side, tablets, laptops): drawing on the left, as big as the window's
+   height allows, and the controls in a column beside it. The drawing stays put while the
+   controls scroll. */
+@media (min-width: 40rem) and (orientation: landscape) {
+    .tool-layout {
+        --canvas-size: min(36rem, calc(100dvh - 2rem));
+        display: grid;
+        /* The drawing gets its size first; on a small phone it shrinks so the controls keep 18rem. */
+        grid-template-columns: minmax(0, var(--canvas-size)) minmax(18rem, 1fr);
+        align-items: start;
+        gap: 1.5rem;
+        max-width: calc(var(--canvas-size) + 1.5rem + 26rem);
+    }
+
+    .tool-canvas {
+        position: sticky;
+        top: 1rem;
+    }
 }
 
 .session-actions {
@@ -28,11 +71,14 @@
 .session-history {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
+/* nowrap and slimmer padding keep "← Back" and "Forward →" on one line in a narrow column. */
 .session-history button {
     flex: 1;
+    padding: 0 0.6rem;
+    white-space: nowrap;
 }
 
 .session-history-position {
@@ -265,4 +311,37 @@
     display: inline;
     font-size: 2.5rem;
     color: var(--accent);
+}
+
+/* The star that pops up where you double-tapped the drawing, then fades. */
+.session-star-flash {
+    position: fixed;
+    z-index: 60;
+    font-size: 4rem;
+    line-height: 1;
+    color: var(--accent);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    animation: star-flash 0.7s ease-out forwards;
+}
+
+@keyframes star-flash {
+    from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.6);
+    }
+    40% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.15);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .session-star-flash {
+        animation: none;
+    }
 }
