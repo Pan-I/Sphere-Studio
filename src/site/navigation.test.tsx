@@ -96,9 +96,45 @@ describe('navigation with seeded poses', () => {
         expect(container.querySelectorAll('.tool-card canvas')).toHaveLength(TOOLS.length)
     })
 
+    it('lists the tools on the home page under group headings', async () => {
+        await mount('/')
+        const groups = [...container.querySelectorAll('.tool-group')].map((section) => [
+            section.querySelector('h2')?.textContent,
+            [...section.querySelectorAll('.tool-card h3')].map((h) => h.textContent),
+        ])
+        expect(groups).toEqual([
+            [
+                'Forms',
+                [
+                    'Sphere Randomizer',
+                    'Box Randomizer',
+                    'Cylinder Randomizer',
+                    'Cone Randomizer',
+                    'Form Combo',
+                ],
+            ],
+            ['Value', ['Lit Sphere', 'Value Study']],
+            ['Perspective', ['Perspective Grid']],
+            ['Shapes', ['Circle Trio 1', 'Circle Trio 2']],
+        ])
+    })
+
+    it('groups the header links the same way, after Practice and Worksheet', async () => {
+        await mount('/')
+        const nav = container.querySelector('.site-nav')!
+        expect([...nav.children].map((c) => c.getAttribute('aria-label') ?? c.textContent)).toEqual(
+            ['Practice', 'Worksheet', 'Forms', 'Value', 'Perspective', 'Shapes'],
+        )
+        const shapes = nav.querySelector('[aria-label="Shapes"]')!
+        expect([...shapes.querySelectorAll('a')].map((a) => a.textContent)).toEqual([
+            'Circle Trio 1',
+            'Circle Trio 2',
+        ])
+    })
+
     it('opens the tool on the same pose when you click its example', async () => {
         await mount('/')
-        const card = byText('.tool-card h2', 'Sphere Randomizer')!.closest('.tool-card')!
+        const card = byText('.tool-card h3', 'Sphere Randomizer')!.closest('.tool-card')!
         const thumbnail = card.querySelector('a.tool-thumbnail')!
         const seed = new URL(thumbnail.getAttribute('href')!, 'http://x').searchParams.get('seed')
         expect(seed).toMatch(/^\d+$/)

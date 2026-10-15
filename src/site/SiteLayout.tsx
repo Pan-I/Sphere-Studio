@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation, useMatch } from 'react-router'
-import { TOOLS } from '../tools/registry'
+import { toolSections } from '../tools/registry'
 import { SITE_NAME } from './config'
 import { ThemeToggle } from './ThemeToggle'
 
@@ -44,10 +44,24 @@ export function SiteLayout() {
                 <nav ref={navRef} className="site-nav" aria-label="Tools">
                     <PageLink to="/practice">Practice</PageLink>
                     <PageLink to="/worksheet">Worksheet</PageLink>
-                    {TOOLS.map((tool) => (
-                        <PageLink key={tool.slug} to={`/${tool.slug}`}>
-                            {tool.name}
-                        </PageLink>
+                    {toolSections().map(({ group, tools }) => (
+                        <div
+                            key={group?.id ?? 'other'}
+                            className="nav-group"
+                            role="group"
+                            aria-label={group?.name}
+                        >
+                            {group && (
+                                <span className="nav-group-label" aria-hidden="true">
+                                    {group.name}
+                                </span>
+                            )}
+                            {tools.map((tool) => (
+                                <PageLink key={tool.slug} to={`/${tool.slug}`}>
+                                    {tool.name}
+                                </PageLink>
+                            ))}
+                        </div>
                     ))}
                 </nav>
                 <ThemeToggle />
