@@ -2,14 +2,24 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useTouchOnly } from '../../site/useTouchOnly'
 import { useShortcuts } from '../../shortcuts/useShortcuts'
 import { playChime, unlockAudio } from './chime'
+import { useCanvasGestures } from './canvasGestures'
 import { CountdownRing } from './CountdownRing'
 import { MAX_SECONDS, MIN_SECONDS } from './countdown'
 import { MAX_SEED, buildShareUrl, parseSeed } from './seed'
 import { useChime } from './useChime'
 import { useFavorites } from './useFavorites'
+import { useWakeLock } from './useWakeLock'
 import type { SeedSession } from './useSeedSession'
 
 type CopyState = 'idle' | 'copied' | 'failed'
+
+/** The ★ or ☆ that flashes where you double-tapped. `key` restarts its animation each time. */
+interface StarFlash {
+    key: number
+    x: number
+    y: number
+    starred: boolean
+}
 
 /**
  * Randomize, pose history, the timer with its ring and chime, the seed rows and favorites,
@@ -24,6 +34,8 @@ export function SessionControls({ session }: { session: SeedSession }) {
     const starred = favorites.isFavorite(seed)
     const chime = useChime()
     const touchOnly = useTouchOnly()
+    const anchorRef = useRef<HTMLDivElement>(null)
+    const [flash, setFlash] = useState<StarFlash | null>(null)
 
     // Starting is a click or a key press, the moment the browser lets a page turn sound on, so
     // the chime can play later when the time runs out with nobody touching the page.
@@ -45,6 +57,20 @@ export function SessionControls({ session }: { session: SeedSession }) {
         { key: 's', description: 'Star or unstar this pose', run: () => favorites.toggle(seed) },
         { key: 'c', description: 'Chime on or off', run: chime.toggle },
     ])
+    // The same moves on a touch screen, on the drawing itself: swipe for the next or last pose,
+    // double-tap to star. Swiping on from the newest pose brings a new one, like Space.
+    useCanvasGestures(anchorRef, {
+        swipeLeft: () => (session.canGoForward ? session.forward() : session.randomize()),
+        swipeRight: session.back,
+        doubleTap: (x, y) => {
+            setFlash({ key: Date.now(), x, y, starred: !starred })
+            favorites.toggle(seed)
+        },
+    })
+
+    // A phone would otherwise dim and lock partway through a long interval.
+    useWakeLock(running)
+
     const seedInvalid = seedText.trim() !== '' && parsedSeed === null
 
     // Chime when the timer runs out and brings a new pose. Only the tick that fires has `fired`
@@ -56,6 +82,13 @@ export function SessionControls({ session }: { session: SeedSession }) {
     useEffect(() => {
         if (countdown?.fired && chimeOn.current) playChime()
     }, [countdown])
+
+    // The star flash fades out by itself (see tool.css); this removes it afterwards.
+    useEffect(() => {
+        if (!flash) return
+        const id = window.setTimeout(() => setFlash(null), 700)
+        return () => window.clearTimeout(id)
+    }, [flash])
 
     // Clear the "Copied!" message after a moment.
     useEffect(() => {
@@ -85,7 +118,7 @@ export function SessionControls({ session }: { session: SeedSession }) {
 
     return (
         <>
-            <div className="session-actions">
+            <div className="session-actions" ref={anchorRef}>
                 <button className="primary" onClick={session.randomize}>
                     Randomize
                 </button>
@@ -104,6 +137,23 @@ export function SessionControls({ session }: { session: SeedSession }) {
                     Forward →
                 </button>
             </div>
+            {touchOnly && (
+                <p className="tool-hint">
+                    Swipe the drawing for the next or last pose, or double-tap it to star it.
+                </p>
+            )}
+            {/* Stays visible in full screen, where the gestures still work. */}
+            {flash && (
+                <span
+                    key={flash.key}
+                    className="session-star-flash"
+                    data-focus="show"
+                    aria-hidden="true"
+                    style={{ left: flash.x, top: flash.y }}
+                >
+                    {flash.starred ? '★' : '☆'}
+                </span>
+            )}
             {/* The timer and its ring stay in view in full screen; the interval and chime don't. */}
             <div className="session-timer-row" data-focus="show">
                 <div className="session-timer-settings" data-focus="hide">

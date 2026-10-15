@@ -21,6 +21,10 @@
     width: 100%;
     height: auto;
     aspect-ratio: 1;
+    /* Sideways swipes and double-taps on the drawing are ours (see canvasGestures.ts), so the
+       browser only scrolls the page up and down (or pinch-zooms) from here, and a double-tap
+       doesn't zoom. */
+    touch-action: pan-y pinch-zoom;
 }
 
 /* Tablets held upright: a bigger drawing, still leaving the Randomize and timer rows in view
@@ -307,4 +311,37 @@
     display: inline;
     font-size: 2.5rem;
     color: var(--accent);
+}
+
+/* The star that pops up where you double-tapped the drawing, then fades. */
+.session-star-flash {
+    position: fixed;
+    z-index: 60;
+    font-size: 4rem;
+    line-height: 1;
+    color: var(--accent);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    animation: star-flash 0.7s ease-out forwards;
+}
+
+@keyframes star-flash {
+    from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.6);
+    }
+    40% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.15);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .session-star-flash {
+        animation: none;
+    }
 }
