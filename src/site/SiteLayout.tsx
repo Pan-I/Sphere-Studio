@@ -1,21 +1,21 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation, useMatch } from 'react-router'
-import { TOOLS, type Tool } from '../tools/registry'
+import { TOOLS } from '../tools/registry'
 import { SITE_NAME } from './config'
 import { ThemeToggle } from './ThemeToggle'
 
-function ToolLink({ tool }: { tool: Tool }) {
-    const to = `/${tool.slug}`
+function PageLink({ to, children }: { to: string; children: ReactNode }) {
     const isCurrent = useMatch(to) !== null
     return (
         <NavLink
             to={to}
-            // Clicking the page you're already on would only strip ?seed= from the address bar.
+            // Clicking the page you're already on would only strip ?seed= from the address bar (or,
+            // on Practice, do nothing).
             onClick={(e) => {
                 if (isCurrent) e.preventDefault()
             }}
         >
-            {tool.name}
+            {children}
         </NavLink>
     )
 }
@@ -42,8 +42,11 @@ export function SiteLayout() {
                     {SITE_NAME}
                 </Link>
                 <nav ref={navRef} className="site-nav" aria-label="Tools">
+                    <PageLink to="/practice">Practice</PageLink>
                     {TOOLS.map((tool) => (
-                        <ToolLink key={tool.slug} tool={tool} />
+                        <PageLink key={tool.slug} to={`/${tool.slug}`}>
+                            {tool.name}
+                        </PageLink>
                     ))}
                 </nav>
                 <ThemeToggle />

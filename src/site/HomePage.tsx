@@ -11,6 +11,10 @@ export function HomePage() {
             <h1>{SITE_NAME}</h1>
             <p>Simple, browser-based drawing tools for art practice. Initial tools (Sphere Randomizer, Circle Trio 1 & 2) were inspired by exercises in the 'Loomis Method' for drawing characters.
                 These tools run completely on the front-end; no data is saved after a session is closed. Seeds can be copied for loading later or sharing. </p>
+            <p className="home-practice">
+                <Link to="/practice">Practice session</Link>: line up several tools, like 5 spheres
+                at 60s and then 5 trios at 90s, and draw through them on one timer.
+            </p>
             <ul className="tool-list">
                 {TOOLS.map((tool) => (
                     <li key={tool.slug} className="tool-card">

@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, type ReactNode } from 'react'
 import { useOpenShortcutHelp, useShortcuts } from '../shortcuts/useShortcuts'
 import type { Shortcut } from '../shortcuts/shortcuts'
 import type { Tool } from '../tools/registry'
@@ -16,7 +16,17 @@ import { useDocumentTitle } from './useDocumentTitle'
 import { useFullscreen } from './useFullscreen'
 import { useTouchOnly } from './useTouchOnly'
 
-export function ToolPage({ tool }: { tool: Tool }) {
+interface ToolPageProps {
+    tool: Tool
+    /** Shown above the tool, in full screen too. A practice session's progress goes here. */
+    banner?: ReactNode
+    /** A new value starts the tool afresh, without leaving full screen. */
+    toolKey?: string | number
+    /** The pose on screen, for the PNG's name. By default it's the address bar's ?seed=. */
+    currentSeed?: () => number | null
+}
+
+export function ToolPage({ tool, banner, toolKey, currentSeed }: ToolPageProps) {
     useDocumentTitle(`${tool.name} · ${SITE_NAME}`)
     const ToolComponent = tool.component
     const frameRef = useRef<HTMLDivElement>(null)
@@ -30,7 +40,7 @@ export function ToolPage({ tool }: { tool: Tool }) {
     const downloadPng = () => {
         const source = exportRef.current
         if (!source) return
-        const seed = readSeedFromUrl(window.location.search)
+        const seed = currentSeed ? currentSeed() : readSeedFromUrl(window.location.search)
         downloadCanvas(renderForExport(source), exportFileName(tool.slug, seed, source.name))
     }
 
@@ -69,9 +79,10 @@ export function ToolPage({ tool }: { tool: Tool }) {
             >
                 {/* Lets shared controls save per tool, e.g. each tool's favorites, and lets the
                     tool's canvas offer itself to Download PNG. */}
+                {banner}
                 <ToolSlugContext value={tool.slug}>
                     <CanvasExportContext value={exportRef}>
-                        <ToolComponent />
+                        <ToolComponent key={toolKey} />
                     </CanvasExportContext>
                 </ToolSlugContext>
                 {fullscreen.active && (

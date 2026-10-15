@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router'
+import { PracticePage } from './practice/PracticePage'
 import { Redirect } from './site/Redirect'
 import { ShortcutsProvider } from './shortcuts/ShortcutsProvider'
 import { HomePage } from './site/HomePage'
@@ -13,6 +14,7 @@ export default function App() {
             <Routes>
                 <Route element={<SiteLayout />}>
                     <Route index element={<HomePage />} />
+                    <Route path="practice" element={<PracticePage />} />
                     {TOOLS.map((tool) => (
                         <Route
                             key={tool.slug}

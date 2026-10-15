@@ -19,6 +19,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [Value Study](#value-study)
   - [Perspective Grid](#perspective-grid)
   - [Form Combo](#form-combo)
+  - [Practice sessions](#practice-sessions)
   - [Keyboard shortcuts and full screen](#keyboard-shortcuts-and-full-screen)
   - [Adding a tool](#adding-a-tool)
 - [How the Sphere Randomizer works](#how-the-sphere-randomizer-works)
@@ -56,6 +57,8 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
 | [Perspective Grid](#perspective-grid) | `/perspective-grid` | Generate a 1, 2 or 3 point perspective grid with the horizon and vanishing points marked, to practice boxes in a scene. |
 | [Form Combo](#form-combo) | `/form-combo` | Generate a sphere, box and cylinder pushed into each other, with the lines where they meet marked, to practice forms that intersect. |
 <!-- Add one row per new tool. -->
+
+[Practice sessions](#practice-sessions), at `/practice`, run several of these one after another on the timer.
 
 ---
 ### Sphere Randomizer
@@ -281,6 +284,21 @@ further down and link to it from here.
 
 ---
 
+### Practice sessions
+
+**Route:** `/practice` · **Source:** `src/practice/`
+
+A playlist across tools, like "5 spheres at 60s, then 5 trios at 90s", so the site works as a practice routine rather than a set of separate tools. **Practice** is the first link in the header, and the home page links to it too.
+
+- **Putting one together**: each step is a tool, a number of poses (1 to 50) and the seconds for each pose (1 to 3600), up to 12 steps. Change the order with ↑ and ↓, remove a step with ×, or add one with **+ Add a step**. **Start from** loads a ready-made session: **Warm-up** (the example above), **Quick sketches** (10 spheres and 10 boxes at 30s) or **Forms** (boxes, cylinders and cones at 90s, then two Form Combos at 3 minutes). The total poses and time show beside **Start session**. Value Study isn't offered, since it works on your own photo. The list is saved in your browser under `sphere-studio:practice`, half-typed numbers and all.
+- **Running it**: **Start session** opens the first step's tool with its timer already running at that step's interval. A bar above the drawing says which step and pose you're on and what comes next, with a thin line along its bottom for the whole session. When a pose's time runs out you get a new one, with the chime if it's on; after the step's last pose the next tool takes over on its own, in full screen too. Everything on the tool page works as usual: Pause (or <kbd>P</kbd>) holds the session, Randomize (or <kbd>Space</kbd>) skips a pose you don't like without counting it, and you can star poses, download them, and change the Display options. Only the interval is locked, since the session sets it. **Next step** (or <kbd>N</kbd>) moves on early, and **End session** stops.
+- **At the end**: every pose whose time ran out, step by step, as small drawings with their seeds. Click one to open that pose on its tool's page, to look at it again or star it. **Go again** runs the same session, and **Change the session** goes back to the list.
+- **The address bar** stays on `/practice` during a session, since the poses come one after another. **Copy link** still links to the pose on its tool's own page.
+
+How it works: `PracticePage` switches between the list (`PracticeSetup`), the running session (`PracticeRunner`) and the summary (`PracticeSummary`), and `playlist.ts` has the steps, presets and saving. `PracticeRunner` shows the step's tool on an ordinary tool page (`ToolPage`, with the bar passed in as its `banner`), inside a `PracticeContext` (`src/tools/shared/practice.ts`). `useSeedSession` reads that context: it starts the timer by itself at the step's interval, ends the run on the step's last pose (the `last` flag on the timer's tick), and reports each pose whose time ran out back to the runner, which moves to the next step. The runner keeps one tool page for the whole session and only swaps the tool inside it, which is why full screen carries on from step to step.
+
+---
+
 ### Keyboard shortcuts and full screen
 
 Every tool page has these, so your hand can stay on the pencil:
@@ -295,6 +313,7 @@ Every tool page has these, so your hand can stay on the pencil:
 | <kbd>D</kbd> | Download the drawing as a PNG (see below) |
 | <kbd>F</kbd> | Full screen on or off (<kbd>Esc</kbd> also leaves) |
 | <kbd>T</kbd> | Theme: Auto, Light or Dark (see Dark mode below; works on the home page too) |
+| <kbd>N</kbd> | Next step, during a [practice session](#practice-sessions) |
 | <kbd>?</kbd> | Show the list of shortcuts |
 
 Shortcuts are ignored while you're typing in a field, and when Ctrl, Cmd or Alt is held, so browser shortcuts like Ctrl+P still work.
@@ -369,6 +388,8 @@ Tools are driven by one registry, `src/tools/registry.ts`. Adding an entry there
    `drawExample(ctx, size, seed)` draws the picture for a seed on a square canvas `size` units wide, using the tool's default options. The home page calls it for a small live example on the tool's card, and clicking that example opens the tool on the same seed. It gets nothing from the tool's page, which makes it a quick check that the drawing code stands on its own. Put it in `src/tools/<slug>/example.ts`; the Sphere Randomizer's is only a few lines.
 
    To rename a tool's address later, keep the old one in `formerSlugs: ['old-slug']`. It then redirects to the new address, keeping `?seed=`, so shared links still open.
+
+   A seeded tool that uses `useSeedSession` and `SessionControls` can be a step in a [practice session](#practice-sessions) with nothing more to do. Add `practice: false` to leave it out, as Value Study does.
 
 3. Describe its display options in `src/tools/<slug>/displayOptions.ts` and the tool gets the **Display** panel, its defaults, and saving between visits for free. List one field per option with `defineOptions`; the panel shows them in that order. The shared presets keep common options identical across tools: `colorModeField` (color, grayscale or none), `lineWidthField` (1 to 8 px) and `toggleField` (a checkbox). A one-off option is a plain object, like Circle Trio 1's opacity:
 
@@ -622,9 +643,10 @@ src/
   main.tsx, App.tsx       Entry point and routes (one route per registered tool)
   site/                   Site shell: layout and nav, the theme button, home page, tool page (with full screen), 404, site name
   shortcuts/              Keyboard shortcuts: the registry, useShortcuts, and the ? list
+  practice/               Practice sessions: the list of steps and presets, running them, and the summary
   tools/
     registry.ts           The list of tools; drives routes, nav and home-page cards (with live thumbnails)
-    shared/               Shared components and utilities: session controls, the timer's ring and chime, pose history and favorites, the Display options panel, canvas sizing and PNG download, paper and ink colours for dark mode, ellipse axes
+    shared/               Shared components and utilities: session controls, the timer's ring and chime, pose history and favorites, the practice session's hook into the timer, the Display options panel, canvas sizing and PNG download, paper and ink colours for dark mode, ellipse axes
     sphere-randomizer/    Sphere Randomizer component, drawing, seeds, palettes, options, timer
     circle-trio/          Circle Trio 1 component and layout, plus the drawing and options both Circle Trios use
     circle-trio-2/        Circle Trio 2 component and layout

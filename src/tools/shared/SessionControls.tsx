@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useContext, useEffect, useRef, useState, type FormEvent } from 'react'
 import { useTouchOnly } from '../../site/useTouchOnly'
 import { useShortcuts } from '../../shortcuts/useShortcuts'
 import { playChime, unlockAudio } from './chime'
 import { useCanvasGestures } from './canvasGestures'
 import { CountdownRing } from './CountdownRing'
 import { MAX_SECONDS, MIN_SECONDS } from './countdown'
+import { PracticeContext } from './practice'
 import { MAX_SEED, buildShareUrl, parseSeed } from './seed'
 import { useChime } from './useChime'
 import { useFavorites } from './useFavorites'
@@ -36,6 +37,7 @@ export function SessionControls({ session }: { session: SeedSession }) {
     const touchOnly = useTouchOnly()
     const anchorRef = useRef<HTMLDivElement>(null)
     const [flash, setFlash] = useState<StarFlash | null>(null)
+    const practice = useContext(PracticeContext)
 
     // Starting is a click or a key press, the moment the browser lets a page turn sound on, so
     // the chime can play later when the time runs out with nobody touching the page.
@@ -106,7 +108,11 @@ export function SessionControls({ session }: { session: SeedSession }) {
 
     const copyLink = async () => {
         try {
-            await navigator.clipboard.writeText(buildShareUrl(window.location.href, seed))
+            // In a practice session the address bar is the session's page, so link to the tool's.
+            const page = practice
+                ? new URL(`/${practice.slug}`, window.location.href).href
+                : window.location.href
+            await navigator.clipboard.writeText(buildShareUrl(page, seed))
             setCopyState('copied')
         } catch {
             setCopyState('failed')
@@ -165,7 +171,7 @@ export function SessionControls({ session }: { session: SeedSession }) {
                             max={MAX_SECONDS}
                             step={1}
                             value={intervalText}
-                            disabled={running}
+                            disabled={running || session.intervalLocked}
                             onChange={(e) => session.changeInterval(e.target.value)}
                         />
                     </label>
@@ -187,6 +193,11 @@ export function SessionControls({ session }: { session: SeedSession }) {
                     </span>
                 </div>
             </div>
+            {session.intervalLocked && (
+                <p className="tool-hint" data-focus="hide">
+                    The practice session sets the time for each pose.
+                </p>
+            )}
             {seconds === null && (
                 <p className="tool-hint">
                     Enter a whole number of seconds from {MIN_SECONDS} to {MAX_SECONDS}.
