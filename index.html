@@ -5,6 +5,16 @@
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Sphere Studio</title>
+        <!-- Applies a saved Light or Dark theme before the page draws, so it never flashes the
+             wrong colours. Same key and values as src/site/theme.ts. -->
+        <script>
+            try {
+                var theme = localStorage.getItem('sphere-studio:theme')
+                if (theme === 'light' || theme === 'dark') {
+                    document.documentElement.dataset.theme = theme
+                }
+            } catch (e) {}
+        </script>
     </head>
     <body>
         <div id="root"></div>

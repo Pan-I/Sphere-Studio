@@ -8,11 +8,10 @@ import {
     type Point,
 } from '../../math/perspective'
 import { dot, type Vec3 } from '../../math/quat'
+import { paperFor, type Paper } from '../shared/paper'
 import type { PerspectiveGridOptions } from './displayOptions'
 import type { GridPose } from './pose'
 
-const LINE_COLOR = '#222'
-const PAPER_COLOR = '#fff'
 const GRID_GRAY = '#8a8a8a'
 const GRID_ALPHA = 0.55
 const HIDDEN_ALPHA = 0.25
@@ -73,14 +72,15 @@ export function drawPerspectiveGrid(
     pose: GridPose,
     options: PerspectiveGridOptions,
 ) {
+    const paper = paperFor(ctx)
     const unit = size / 480 // marks and text keep their proportions on the small home-page cards
     const px = ([x, y]: Point): [number, number] => [x * size, y * size]
     const points = vanishingPoints(pose)
     const horizon = horizonY(pose.camera)
-    const colorOf = (v: Vanishing) => (options.colors === 'color' ? v.color : GRID_GRAY)
+    const colorOf = (v: Vanishing) => paper.line(options.colors === 'color' ? v.color : GRID_GRAY)
 
     ctx.globalAlpha = 1
-    ctx.fillStyle = PAPER_COLOR
+    ctx.fillStyle = paper.paper
     ctx.fillRect(0, 0, size, size)
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
@@ -111,7 +111,7 @@ export function drawPerspectiveGrid(
     ctx.globalAlpha = 1
 
     if (options.showHorizon) {
-        ctx.strokeStyle = LINE_COLOR
+        ctx.strokeStyle = paper.ink
         ctx.lineWidth = options.lineWidth * unit
         ctx.beginPath()
         ctx.moveTo(0, horizon * size)
@@ -119,27 +119,33 @@ export function drawPerspectiveGrid(
         ctx.stroke()
     }
 
-    if (options.showBox) drawBox(ctx, size, pose, points, options)
+    if (options.showBox) drawBox(ctx, size, pose, points, options, paper)
 
     const font = Math.max(10, Math.round(size * 0.03))
     ctx.font = `600 ${font}px system-ui, sans-serif`
     ctx.textBaseline = 'middle'
     for (const v of points) {
-        if (onCanvas(v.at)) drawPoint(ctx, px(v.at), colorOf(v), unit)
-        else drawArrow(ctx, size, v, horizon, colorOf(v), unit)
+        if (onCanvas(v.at)) drawPoint(ctx, px(v.at), colorOf(v), unit, paper)
+        else drawArrow(ctx, size, v, horizon, colorOf(v), unit, paper)
     }
     if (options.showLabels) {
-        for (const v of points) drawPointLabel(ctx, size, v, horizon, font)
+        for (const v of points) drawPointLabel(ctx, size, v, horizon, font, paper)
         if (options.showHorizon && horizon > 0 && horizon < 1) {
-            label(ctx, 'Horizon', [6 * unit, horizon * size + font * 1.1], 'left')
+            label(ctx, 'Horizon', [6 * unit, horizon * size + font * 1.1], 'left', paper)
         }
     }
 }
 
-/** A dot with a paper-white ring, so it shows over the grid lines. */
-function drawPoint(ctx: CanvasRenderingContext2D, [x, y]: Point, color: string, unit: number) {
+/** A dot with a ring of paper, so it shows over the grid lines. */
+function drawPoint(
+    ctx: CanvasRenderingContext2D,
+    [x, y]: Point,
+    color: string,
+    unit: number,
+    paper: Paper,
+) {
     ctx.fillStyle = color
-    ctx.strokeStyle = PAPER_COLOR
+    ctx.strokeStyle = paper.paper
     ctx.lineWidth = 2 * unit
     ctx.beginPath()
     ctx.arc(x, y, 6 * unit, 0, Math.PI * 2)
@@ -161,6 +167,7 @@ function drawArrow(
     horizon: number,
     color: string,
     unit: number,
+    paper: Paper,
 ) {
     const [x, y] = arrowAt(v, horizon)
     const angle = Math.atan2(v.at[1] - y, v.at[0] - x)
@@ -169,7 +176,7 @@ function drawArrow(
     ctx.translate(x * size, y * size)
     ctx.rotate(angle)
     ctx.fillStyle = color
-    ctx.strokeStyle = PAPER_COLOR
+    ctx.strokeStyle = paper.paper
     ctx.lineWidth = 2 * unit
     ctx.beginPath()
     ctx.moveTo(r, 0)
@@ -191,6 +198,7 @@ function drawPointLabel(
     v: Vanishing,
     horizon: number,
     font: number,
+    paper: Paper,
 ) {
     const inside = onCanvas(v.at)
     const [x, y] = inside ? v.at : arrowAt(v, horizon)
@@ -200,15 +208,21 @@ function drawPointLabel(
     const dx = align === 'right' ? -gap * 0.6 : gap * 0.6
     const dy = v.onHorizon ? -gap : inside ? 0 : y < 0.5 ? gap : -gap
     const ty = Math.min(size - font, Math.max(font, y * size + dy))
-    label(ctx, text, [x * size + (v.onHorizon || !inside ? dx : dx * 1.4), ty], align)
+    label(ctx, text, [x * size + (v.onHorizon || !inside ? dx : dx * 1.4), ty], align, paper)
 }
 
-/** Dark text with a paper-white halo, so it reads over the grid lines. */
-function label(ctx: CanvasRenderingContext2D, text: string, [x, y]: Point, align: CanvasTextAlign) {
+/** Text in ink with a halo of paper, so it reads over the grid lines. */
+function label(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    [x, y]: Point,
+    align: CanvasTextAlign,
+    paper: Paper,
+) {
     ctx.textAlign = align
     ctx.lineWidth = 4
-    ctx.strokeStyle = PAPER_COLOR
-    ctx.fillStyle = LINE_COLOR
+    ctx.strokeStyle = paper.paper
+    ctx.fillStyle = paper.ink
     ctx.strokeText(text, x, y)
     ctx.fillText(text, x, y)
 }
@@ -223,6 +237,7 @@ function drawBox(
     pose: GridPose,
     points: Vanishing[],
     options: PerspectiveGridOptions,
+    paper: Paper,
 ) {
     const { center, half } = pose.box
     const world = CORNERS.map(
@@ -240,7 +255,7 @@ function drawBox(
     })
 
     for (const f of seen) {
-        ctx.fillStyle = BOX_FILLS[f.axis]
+        ctx.fillStyle = paper.fill(BOX_FILLS[f.axis])
         ctx.beginPath()
         f.corners.forEach((i, n) => (n === 0 ? ctx.moveTo : ctx.lineTo).call(ctx, ...screen[i]))
         ctx.closePath()
@@ -248,8 +263,10 @@ function drawBox(
     }
 
     const axisOf = ([a, b]: readonly [number, number]) => Math.log2(a ^ b)
-    const colorFor = (axis: number) =>
-        (options.colors === 'color' && points.find((v) => v.axis === axis)?.color) || LINE_COLOR
+    const colorFor = (axis: number) => {
+        const color = options.colors === 'color' && points.find((v) => v.axis === axis)?.color
+        return color ? paper.line(color) : paper.ink
+    }
     const inFront = ([a, b]: readonly [number, number]) =>
         seen.some((f) => f.corners.includes(a) && f.corners.includes(b))
 

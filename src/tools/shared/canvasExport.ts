@@ -37,18 +37,18 @@ export function exportFileName(slug: string, seed: number | null, name?: string)
 }
 
 /**
- * Redraws the tool's canvas at EXPORT_PIXELS on a fresh canvas, over the page's background so
- * the PNG looks like the screen rather than having a transparent background.
+ * Redraws the tool's canvas at EXPORT_PIXELS on a fresh canvas, over the paper colour so the PNG
+ * looks like the screen, in the theme it's showing, rather than having a transparent background.
  */
 export function renderForExport(source: CanvasSource, pixels = EXPORT_PIXELS): HTMLCanvasElement {
     const out = document.createElement('canvas')
     out.width = pixels
     out.height = pixels
-    // Drawn hidden next to the real canvas, so styles it reads (like Circle Trio's line colour
-    // from `color`) and the page background resolve the same way, light or dark.
+    // Drawn hidden next to the real canvas, so the paper and ink colours it reads from the CSS
+    // (see paper.ts) resolve the same way, light or dark.
     out.className = source.canvas.className
     out.hidden = true
-    out.style.background = 'Canvas'
+    out.style.background = 'var(--paper)'
     source.canvas.after(out)
     try {
         const ctx = out.getContext('2d')

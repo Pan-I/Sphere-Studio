@@ -21,6 +21,8 @@
     width: 100%;
     height: auto;
     aspect-ratio: 1;
+    /* The paper the tool draws on. Tools that leave parts of the canvas clear show it there. */
+    background: var(--paper);
     /* Sideways swipes and double-taps on the drawing are ours (see canvasGestures.ts), so the
        browser only scrolls the page up and down (or pinch-zooms) from here, and a double-tap
        doesn't zoom. */
@@ -310,7 +312,7 @@
 .focus-mode .session-starred {
     display: inline;
     font-size: 2.5rem;
-    color: var(--accent);
+    color: var(--accent-text);
 }
 
 /* The star that pops up where you double-tapped the drawing, then fades. */
@@ -319,7 +321,7 @@
     z-index: 60;
     font-size: 4rem;
     line-height: 1;
-    color: var(--accent);
+    color: var(--accent-text);
     pointer-events: none;
     transform: translate(-50%, -50%);
     animation: star-flash 0.7s ease-out forwards;

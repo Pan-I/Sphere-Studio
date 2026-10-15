@@ -3,12 +3,11 @@ import { facesViewer, project } from '../../math/cube'
 import { capDiameters, rimPoint, UNIFORM_PROPORTION } from '../../math/cylinder'
 import type { Quat, Vec3 } from '../../math/quat'
 import { rimCircle, strokeEllipseAxes } from '../shared/ellipseAxes'
+import { paperFor } from '../shared/paper'
 import type { ConeOptions, Shading } from './displayOptions'
 
 const HIDDEN_ALPHA = 0.2
-const LINE_COLOR = '#222'
 const AXIS_COLOR = '#d62828'
-const PAPER_COLOR = '#fff'
 
 /** Distance from the cone's centre to the eye, the same as the Box and Cylinder Randomizers'. */
 const CAMERA_DISTANCE = 5
@@ -50,6 +49,7 @@ export function drawCone(
     proportion: number,
     options: ConeOptions,
 ) {
+    const paper = paperFor(ctx)
     const camera = options.perspective ? CAMERA_DISTANCE : null
     const c = size / 2
     const r = size * SCALE
@@ -91,12 +91,14 @@ export function drawCone(
     ctx.clearRect(0, 0, size, size)
 
     // Fills. The side is the apex joined to the front of the rim, and the base goes on top of
-    // it when it faces you. Lines-only mode fills them paper white, which keeps the lines
-    // visible on any page theme.
+    // it when it faces you. Lines-only mode fills them with the paper colour.
     const fills =
         options.shading === 'none'
-            ? { side: PAPER_COLOR, base: PAPER_COLOR }
-            : FILLS[options.shading]
+            ? { side: paper.paper, base: paper.paper }
+            : {
+                  side: paper.fill(FILLS[options.shading].side),
+                  base: paper.fill(FILLS[options.shading].base),
+              }
     if (sideShows) {
         ctx.fillStyle = fills.side
         ctx.beginPath()
@@ -116,7 +118,7 @@ export function drawCone(
     ctx.lineWidth = options.lineWidth
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
-    ctx.strokeStyle = LINE_COLOR
+    ctx.strokeStyle = paper.ink
 
     // A cross on the base through its true centre, along the diameters that become the
     // ellipse's axes in a flat view.
@@ -160,7 +162,7 @@ export function drawCone(
     // The axis is a construction line, drawn dashed over the shape and past both ends.
     if (options.showAxis) {
         const reach = Math.min(cone.halfLength + AXIS_OVERHANG * cone.radius, AXIS_MAX_REACH)
-        ctx.strokeStyle = AXIS_COLOR
+        ctx.strokeStyle = paper.line(AXIS_COLOR)
         ctx.setLineDash([options.lineWidth * 4, options.lineWidth * 3])
         ctx.beginPath()
         line(along([0, 0, 0], cone.axis, -reach), along([0, 0, 0], cone.axis, reach))

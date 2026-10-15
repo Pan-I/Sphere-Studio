@@ -8,10 +8,9 @@ import {
     valueScale,
 } from '../../math/values'
 import type { ValueStudyOptions } from './displayOptions'
+import { paperFor, type Paper } from '../shared/paper'
 import type { Picture } from './picture'
 
-const LINE_COLOR = '#222'
-const PAPER_COLOR = '#fff'
 /** Outlines in a cyan that shows on black, white, every gray, and the warm colors most photos have. */
 const OUTLINE_RGB = [0, 176, 255] as const
 /** Outline width in canvas units. */
@@ -57,6 +56,7 @@ export function drawValueStudy(
     picture: Picture,
     options: ValueStudyOptions,
 ) {
+    const paper = paperFor(ctx)
     const count = Number(options.valueCount)
     const frame = frameFor(picture.aspect, size, options.showScale)
 
@@ -87,6 +87,7 @@ export function drawValueStudy(
             out[o + 1] = v
             out[o + 2] = v
         }
+        out.set(paper.fillRGB([out[o], out[o + 1], out[o + 2]]), o)
         out[o + 3] = 255
     }
     if (options.outlineShapes) {
@@ -97,18 +98,18 @@ export function drawValueStudy(
     }
 
     ctx.clearRect(0, 0, size, size)
-    ctx.fillStyle = PAPER_COLOR
+    ctx.fillStyle = paper.paper
     ctx.fillRect(0, 0, size, size)
     ctx.putImageData(image, px, py) // ignores the canvas transform, hence physical pixels
 
-    ctx.strokeStyle = LINE_COLOR
+    ctx.strokeStyle = paper.ink
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.rect(frame.x, frame.y, frame.width, frame.height)
     ctx.stroke()
 
     if (options.showScale) {
-        drawScale(ctx, size, frame.y + frame.height, levels, coverage(steps, count))
+        drawScale(ctx, size, frame.y + frame.height, levels, coverage(steps, count), paper)
     }
 }
 
@@ -119,6 +120,7 @@ function drawScale(
     below: number,
     levels: readonly number[],
     shares: readonly number[],
+    paper: Paper,
 ) {
     const band = size * SCALE_BAND
     const pad = size * 0.02
@@ -133,12 +135,13 @@ function drawScale(
 
     levels.forEach((gray, k) => {
         const x = pad + k * width
-        ctx.fillStyle = `rgb(${gray}, ${gray}, ${gray})`
+        const [shown] = paper.fillRGB([gray, gray, gray])
+        ctx.fillStyle = `rgb(${shown}, ${shown}, ${shown})`
         ctx.fillRect(x, top, width, height)
-        ctx.fillStyle = gray > 118 ? LINE_COLOR : PAPER_COLOR // middle gray is 119
+        ctx.fillStyle = shown > 118 ? '#222' : '#fff' // middle gray is 119
         ctx.fillText(percentLabel(shares[k]), x + width / 2, top + height / 2)
     })
-    ctx.strokeStyle = LINE_COLOR
+    ctx.strokeStyle = paper.ink
     ctx.beginPath()
     ctx.rect(pad, top, size - pad * 2, height)
     for (let k = 1; k < levels.length; k++) {
