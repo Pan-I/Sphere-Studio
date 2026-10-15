@@ -111,6 +111,7 @@ describe('navigation with seeded poses', () => {
                     'Cylinder Randomizer',
                     'Cone Randomizer',
                     'Form Combo',
+                    'Subtract',
                 ],
             ],
             ['Value', ['Lit Sphere', 'Value Study']],
