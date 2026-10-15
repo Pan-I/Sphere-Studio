@@ -20,6 +20,7 @@ Sphere Studio is a small React + TypeScript site built with Vite. Each tool live
   - [Perspective Grid](#perspective-grid)
   - [Form Combo](#form-combo)
   - [Practice sessions](#practice-sessions)
+  - [Printable worksheets](#printable-worksheets)
   - [Keyboard shortcuts and full screen](#keyboard-shortcuts-and-full-screen)
   - [Adding a tool](#adding-a-tool)
 - [How the Sphere Randomizer works](#how-the-sphere-randomizer-works)
@@ -299,13 +300,28 @@ How it works: `PracticePage` switches between the list (`PracticeSetup`), the ru
 
 ---
 
+### Printable worksheets
+
+**Route:** `/worksheet` · **Source:** `src/worksheet/`
+
+A page of 6 or 12 poses from one tool, from consecutive seeds, to print and draw from on paper. **Worksheet** is next to Practice in the header, and the home page links to it too.
+
+- **Choosing**: the tool (any tool a practice session can use, so not Value Study), 6 or 12 poses, and **Room to draw beside each pose**, which frames each pose in a box with space to its right for your drawing. Without it the poses are as big as the page allows. Your choices are saved in your browser under `sphere-studio:worksheet`.
+- **Seeds**: each sheet starts at a random seed and counts up, e.g. 48213 to 48218, and each pose is labelled with its seed so you can open it on its tool's page later. **New sheet** (or <kbd>Space</kbd>) picks a new first seed, and **First seed** loads one you type.
+- **The address bar** holds the whole sheet, e.g. `/worksheet?tool=box-randomizer&seed=48213&poses=6&room=1`, so a link or a reload brings back the same sheet.
+- **Printing**: **Print** (or your browser's <kbd>Ctrl</kbd>+<kbd>P</kbd>) prints only the sheet, on one page of A4 or US Letter, on white paper even in dark mode. The poses use each tool's default Display options.
+
+How it works: the sheet is laid out in millimetres (186 × 250 mm, which fits inside A4 and Letter with 12 mm margins). `worksheet.ts` works out the grid and the size of each pose, and on screen `worksheet.css` scales the same layout to a preview, using a container query unit as its millimetre. Each pose is drawn with its tool's `drawExample`, the same function as the home-page cards, on a canvas sized for 300 dpi on paper. The sheet sets `--paper` and `--ink` to white and pencil for everything inside it, so the drawings (which read those, see `paper.ts`) come out as on white paper whatever the theme. A print style sheet hides everything else.
+
+---
+
 ### Keyboard shortcuts and full screen
 
 Every tool page has these, so your hand can stay on the pencil:
 
 | Key | What it does |
 | --- | --- |
-| <kbd>Space</kbd> | New pose |
+| <kbd>Space</kbd> | New pose (a new sheet on the [worksheet](#printable-worksheets) page) |
 | <kbd>P</kbd> | Start or pause the timer |
 | <kbd>←</kbd> / <kbd>→</kbd> | Back and forward through this session's poses |
 | <kbd>S</kbd> | Star or unstar this pose (see Favorites below) |
@@ -644,6 +660,7 @@ src/
   site/                   Site shell: layout and nav, the theme button, home page, tool page (with full screen), 404, site name
   shortcuts/              Keyboard shortcuts: the registry, useShortcuts, and the ? list
   practice/               Practice sessions: the list of steps and presets, running them, and the summary
+  worksheet/              Printable worksheets: the page, its layout in millimetres, and the print styles
   tools/
     registry.ts           The list of tools; drives routes, nav and home-page cards (with live thumbnails)
     shared/               Shared components and utilities: session controls, the timer's ring and chime, pose history and favorites, the practice session's hook into the timer, the Display options panel, canvas sizing and PNG download, paper and ink colours for dark mode, ellipse axes

@@ -1,0 +1,190 @@
+.worksheet-intro {
+    max-width: 40rem;
+}
+
+.worksheet-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.worksheet-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.worksheet-poses {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 44px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.worksheet-poses legend {
+    float: left;
+    margin-right: 0.25rem;
+    padding: 0;
+}
+
+.worksheet-poses label,
+.worksheet-room {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 44px;
+}
+
+.worksheet-seed-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.worksheet-seed-form input {
+    width: 12rem;
+}
+
+/*
+ * The sheet is laid out in millimetres, as it prints: 186 × 250 mm inside 12 mm margins, which
+ * fits A4 and US Letter. On screen the same layout is scaled to the width of a paper-like preview,
+ * with --mm standing in for a millimetre. Sizes from worksheet.ts arrive as --columns, --rows and
+ * --pose (the pose's square, in mm), set on the sheet by WorksheetPage.
+ */
+.worksheet-paper {
+    container-type: inline-size;
+    box-sizing: border-box;
+    max-width: 44rem;
+    margin: 1rem 0 0;
+    /* 12 mm of a 210 mm page, as a share of the width. */
+    padding: calc(12 / 210 * 100%);
+    background: #ffffff;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 12px rgb(0 0 0 / 0.15);
+}
+
+/*
+ * Always white paper and a dark pencil, whatever the theme: the canvases read --paper and --ink
+ * from here (see src/tools/shared/paper.ts), so a sheet printed from dark mode doesn't come out
+ * black.
+ */
+.worksheet-sheet {
+    --mm: calc(100cqw / 186);
+    /* The 6-pose layout. WorksheetPage replaces these with the layout from worksheet.ts. */
+    --columns: 2;
+    --rows: 3;
+    --pose: 69;
+    --paper: #ffffff;
+    --ink: #222222;
+    color-scheme: light;
+    display: flex;
+    flex-direction: column;
+    width: calc(186 * var(--mm));
+    height: calc(250 * var(--mm));
+    color: #222222;
+    font-size: calc(3.2 * var(--mm));
+    line-height: 1.2;
+}
+
+.worksheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    height: calc(10 * var(--mm));
+    margin-bottom: calc(6 * var(--mm));
+    border-bottom: calc(0.3 * var(--mm)) solid #999999;
+}
+
+.worksheet-title {
+    font-size: calc(5 * var(--mm));
+    font-weight: 600;
+}
+
+.worksheet-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(var(--columns), 1fr);
+    grid-template-rows: repeat(var(--rows), 1fr);
+    gap: calc(6 * var(--mm));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.worksheet-cell {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 0;
+}
+
+/* With room to draw, each pose sits at the left of a framed box, and the rest is for drawing. */
+.with-room .worksheet-cell {
+    justify-content: flex-start;
+    box-sizing: border-box;
+    padding: calc(2 * var(--mm));
+    border: calc(0.3 * var(--mm)) solid #999999;
+    border-radius: calc(1 * var(--mm));
+}
+
+.worksheet-pose {
+    margin: 0;
+}
+
+.worksheet-pose canvas {
+    display: block;
+    box-sizing: border-box;
+    width: calc(var(--pose) * var(--mm));
+    height: calc(var(--pose) * var(--mm));
+    background: var(--paper);
+    border: calc(0.25 * var(--mm)) solid #cccccc;
+}
+
+.worksheet-pose figcaption {
+    height: calc(5 * var(--mm));
+    padding-top: calc(1 * var(--mm));
+    box-sizing: border-box;
+    color: #555555;
+    font-variant-numeric: tabular-nums;
+}
+
+@page {
+    margin: 12mm;
+}
+
+/* Only the sheet prints, at its real size, on white. */
+@media print {
+    body:has(.worksheet-sheet) {
+        background: #ffffff;
+    }
+
+    body:has(.worksheet-sheet) .site-header,
+    .worksheet-screen-only {
+        display: none;
+    }
+
+    body:has(.worksheet-sheet) .site-main {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .worksheet-paper {
+        container-type: normal;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+    }
+
+    .worksheet-sheet {
+        --mm: 1mm;
+        break-inside: avoid;
+    }
+}
