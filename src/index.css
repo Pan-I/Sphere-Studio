@@ -81,7 +81,25 @@ a {
     flex: 1;
     min-width: 0;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.25rem 1rem;
+}
+
+/* Each group of tool links, after a small label naming the group, set off by a line. */
+.nav-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding-left: 1rem;
+    border-left: 1px solid var(--line);
+}
+
+.nav-group-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.7;
 }
 
 /* Auto, Light or Dark, at the end of the header. */
@@ -130,6 +148,20 @@ a {
     padding: 1.5rem 1.25rem;
 }
 
+.tool-group-heading {
+    margin: 2rem 0 0.75rem;
+    padding-bottom: 0.35rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--accent);
+}
+
+.tool-group .tool-list {
+    margin-top: 0;
+}
+
 .tool-list {
     list-style: none;
     padding: 0;
@@ -147,7 +179,7 @@ a {
 
 /* The whole card opens the tool, not just its name: the name's link stretches over the card.
    The thumbnail sits above it, since it opens the tool on the pose it shows. */
-.tool-card h2 a::after {
+.tool-card h3 a::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -160,7 +192,7 @@ a {
     }
 }
 
-.tool-card h2 {
+.tool-card h3 {
     margin: 0 0 0.5rem;
     font-size: 1.15rem;
 }
@@ -342,6 +374,17 @@ select {
         );
     }
 
+    .nav-group {
+        flex: none;
+        flex-wrap: nowrap;
+        gap: 1.25rem;
+        padding-left: 1.25rem;
+    }
+
+    .nav-group-label {
+        white-space: nowrap;
+    }
+
     .site-nav::-webkit-scrollbar {
         display: none;
     }
@@ -414,7 +457,7 @@ select {
         margin: 0;
     }
 
-    .tool-card h2 {
+    .tool-card h3 {
         margin-bottom: 0.25rem;
         font-size: 1.05rem;
     }

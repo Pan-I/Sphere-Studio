@@ -22,6 +22,19 @@ import { drawCircleExample } from './circle-trio/example'
 import { CircleTrio2 } from './circle-trio-2/CircleTrio2'
 import { drawCircleTrio2Example } from './circle-trio-2/example'
 
+/**
+ * The headed groups the home page and the header list tools under, in this order. A group with no
+ * tools yet isn't shown, so a group can be listed here before its first tool exists.
+ */
+export const TOOL_GROUPS = [
+    { id: 'forms', name: 'Forms' },
+    { id: 'value', name: 'Value' },
+    { id: 'perspective', name: 'Perspective' },
+    { id: 'shapes', name: 'Shapes' },
+] as const
+
+export type ToolGroupId = (typeof TOOL_GROUPS)[number]['id']
+
 export interface Tool {
     /** URL segment, e.g. "sphere-randomizer" is served at /sphere-randomizer. */
     slug: string
@@ -35,14 +48,17 @@ export interface Tool {
     drawExample: (ctx: CanvasRenderingContext2D, size: number, seed: number) => void
     /** Earlier slugs, which redirect here (keeping `?seed=`) so old links still work. */
     formerSlugs?: readonly string[]
+    /** The group the tool is listed under. A tool without one is listed after the groups. */
+    group?: ToolGroupId
     /** False leaves the tool out of practice sessions, e.g. one that works on your own photo. */
     practice?: boolean
 }
 
-/** Every tool on the site. Adding an entry here adds its route, nav link, and home-page card. */
+/** Every tool on the site. Adding an entry here adds its route, nav link, and home-page card, under its group. */
 export const TOOLS: readonly Tool[] = [
     {
         slug: 'sphere-randomizer',
+        group: 'forms',
         name: 'Sphere Randomizer',
         description:
             'A randomly rotated sphere split into eight sectors, with a timer and shareable poses, to practice drawing a face for a random direction.',
@@ -51,6 +67,7 @@ export const TOOLS: readonly Tool[] = [
     },
     {
         slug: 'box-randomizer',
+        group: 'forms',
         name: 'Box Randomizer',
         description:
             'A cube in a random orientation, with the faces that point at you shaded and the hidden edges shown faintly, for practicing boxes.',
@@ -59,6 +76,7 @@ export const TOOLS: readonly Tool[] = [
     },
     {
         slug: 'cylinder-randomizer',
+        group: 'forms',
         name: 'Cylinder Randomizer',
         description:
             'A cylinder in a random orientation and proportion, with its axis marked, for practicing ellipses and lining up their minor axis.',
@@ -67,6 +85,7 @@ export const TOOLS: readonly Tool[] = [
     },
     {
         slug: 'cone-randomizer',
+        group: 'forms',
         name: 'Cone Randomizer',
         description:
             'A cone in a random orientation and proportion, with its axis marked, for practicing the base ellipse and the side lines that meet it.',
@@ -74,7 +93,26 @@ export const TOOLS: readonly Tool[] = [
         drawExample: drawConeExample,
     },
     {
+        slug: 'form-combo',
+        group: 'forms',
+        name: 'Form Combo',
+        description:
+            'A sphere, box and cylinder in random orientations, pushed into each other, with the lines where they meet marked, for practicing forms that intersect.',
+        component: FormCombo,
+        drawExample: drawFormComboExample,
+    },
+    {
+        slug: 'subtract',
+        group: 'forms',
+        name: 'Subtract',
+        description:
+            'A sphere, box, cylinder or cone with another form cut out of it, with the rim of the hollow marked and the cut-away part dashed, for practicing carved forms.',
+        component: Subtract,
+        drawExample: drawSubtractExample,
+    },
+    {
         slug: 'lit-sphere',
+        group: 'value',
         name: 'Lit Sphere',
         description:
             'A sphere on a floor with the light coming from a random direction, showing the light side, core shadow, reflected light and cast shadow, for practicing light and shadow.',
@@ -83,6 +121,7 @@ export const TOOLS: readonly Tool[] = [
     },
     {
         slug: 'value-study',
+        group: 'value',
         name: 'Value Study',
         description:
             'Load a photo and see it in grayscale and grouped into 3, 5 or 7 flat values, for planning the big light and dark shapes. The photo never leaves your browser.',
@@ -92,6 +131,7 @@ export const TOOLS: readonly Tool[] = [
     },
     {
         slug: 'perspective-grid',
+        group: 'perspective',
         name: 'Perspective Grid',
         description:
             'A random 1, 2 or 3 point perspective grid with the horizon and vanishing points marked, for practicing boxes in a scene.',
@@ -99,23 +139,8 @@ export const TOOLS: readonly Tool[] = [
         drawExample: drawPerspectiveGridExample,
     },
     {
-        slug: 'form-combo',
-        name: 'Form Combo',
-        description:
-            'A sphere, box and cylinder in random orientations, pushed into each other, with the lines where they meet marked, for practicing forms that intersect.',
-        component: FormCombo,
-        drawExample: drawFormComboExample,
-    },
-    {
-        slug: 'subtract',
-        name: 'Subtract',
-        description:
-            'A sphere, box, cylinder or cone with another form cut out of it, with the rim of the hollow marked and the cut-away part dashed, for practicing carved forms.',
-        component: Subtract,
-        drawExample: drawSubtractExample,
-    },
-    {
         slug: 'circle-trio-1',
+        group: 'shapes',
         name: 'Circle Trio 1',
         description:
             'Two large translucent circles and a smaller one near the line between them, in a new arrangement each time, for practicing drawing faces with a random shape/form.',
@@ -125,6 +150,7 @@ export const TOOLS: readonly Tool[] = [
     },
     {
         slug: 'circle-trio-2',
+        group: 'shapes',
         name: 'Circle Trio 2',
         description:
             'One large translucent circle and two smaller ones close together on its edge, inside, across or outside it, for practicing drawing faces with a random shape/form.',
@@ -132,6 +158,25 @@ export const TOOLS: readonly Tool[] = [
         drawExample: drawCircleTrio2Example,
     },
 ]
+
+export interface ToolSection {
+    /** Undefined for the tools that have no group. */
+    group?: (typeof TOOL_GROUPS)[number]
+    tools: readonly Tool[]
+}
+
+/**
+ * `tools` split into one section per group that has any, in TOOL_GROUPS order, then the tools with
+ * no group. Within a section the tools keep their order in `tools`.
+ */
+export function toolSections(tools: readonly Tool[] = TOOLS): ToolSection[] {
+    const sections: ToolSection[] = TOOL_GROUPS.map((group) => ({
+        group,
+        tools: tools.filter((tool) => tool.group === group.id),
+    }))
+    sections.push({ tools: tools.filter((tool) => tool.group === undefined) })
+    return sections.filter((section) => section.tools.length > 0)
+}
 
 /** The tools a practice session can use, in the site's order. */
 export const PRACTICE_TOOLS: readonly Tool[] = TOOLS.filter((tool) => tool.practice !== false)
